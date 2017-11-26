@@ -3,7 +3,7 @@
 <img src="https://github.com/GiovanniTrovato.png" width="180">
 
 ## Background
-@francesconori @danielepucci @traversaro have analized and simulated the Momentum Control of an Underactuated Flying Humanoid Robot in order to study the flight dynamics of Icub robot in orizzontal and vertical motions.
+@francesconori @danielepucci @traversaro have analized and simulated the Momentum Control of an Underactuated Flying Humanoid Robot in order to study the flight dynamics of iCub robot in orizzontal and vertical motions.
 In those analysis are neglected the aerodynamics forces acting on the Icub robot. In order to decide if these forces are currently neglected compared to other forces it will be useful to study, in the first analysis, the aerodynamics forces acting on a simple geometry. 
 After the meeting with Richard Browning in IIT is been chosen a cube as simple geometry.  
 
@@ -21,7 +21,7 @@ The objective is to implement aerodynamics coefficients in GAZEBO software in or
 Depending on the results obtained from these first analizies/simulations it will be possible to estimate the “weight” of the aerodynamics forces compared to the dynamics forces in the cube's matter. It will be a first good answer in order to carry on the CFD analysis on the Flying Icub.
 
 ### To use CFD simulations on the Flying Icub
-The Icub is made by more components. The next step is to estimate the lift and drag coefficients on any components of ICUB, as made with the cube on this element. 
+The iCub is made by more components. The next step is to estimate the lift and drag coefficients on any components of iCub, as made with the cube on this element. 
 
 ## Tasks
 To achieve the above objectives, I have to accomplish the following tasks
@@ -37,5 +37,5 @@ After finding out more about the chosen software, the next step is to estimate a
 
 ### Simulate with GAZEBO.
 Once we have the coefficients we will be able to include the aerodynamics forces in GAZEBO software. The simulations, seen with Gazebo, will give us some important results to understand the current scale of values between dynamics forces and aerodynamics forces. 
-### Implement on ICUB’s components.
-If the simulations give us informations about a not negligible of aerodynamics forces we can carry on to find the aerodynamics coefficients on any components of ICUB. This topic and these informations will be dealt with at the end of this element.
+### Implement on iCub’s components.
+If the simulations give us informations about a not negligible of aerodynamics forces we can carry on to find the aerodynamics coefficients on any components of iCub. This topic and these informations will be dealt with at the end of this element.
