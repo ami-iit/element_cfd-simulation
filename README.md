@@ -18,7 +18,7 @@ The objective is to implement aerodynamics coefficients in GAZEBO software in or
 ## Outcomes
 
 ### To neglect aerodynamics forces
-Depending on the results obtained from these first analizies/simulations it will be possible to estimate the “weight” of the aerodynamics forces compared to the dynamics forces in the cube's matter. It will be a first good answer in order to carry on the CFD analysis on the Flying Icub.
+Depending on the results obtained from these first analizies/simulations it will be possible to estimate the “weight” of the aerodynamics forces compared to the dynamics forces in the cube's matter. It will be a first good answer in order to carry on the CFD analysis on the Flying iCub.
 
 ### To use CFD simulations on the Flying Icub
 The iCub is made by more components. The next step is to estimate the lift and drag coefficients on any components of iCub, as made with the cube on this element. 
