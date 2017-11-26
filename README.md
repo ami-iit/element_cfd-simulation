@@ -4,7 +4,7 @@
 
 ## Background
 @francesconori @danielepucci @traversaro have analized and simulated the Momentum Control of an Underactuated Flying Humanoid Robot in order to study the flight dynamics of iCub robot in orizzontal and vertical motions.
-In those analysis are neglected the aerodynamics forces acting on the Icub robot. In order to decide if these forces are currently neglected compared to other forces it will be useful to study, in the first analysis, the aerodynamics forces acting on a simple geometry. 
+In those analysis are neglected the aerodynamics forces acting on the iCub robot. In order to decide if these forces are currently neglected compared to other forces it will be useful to study, in the first analysis, the aerodynamics forces acting on a simple geometry. 
 After the meeting with Richard Browning in IIT is been chosen a cube as simple geometry.  
 
 ## Objectives 
