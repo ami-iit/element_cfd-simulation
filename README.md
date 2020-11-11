@@ -1,5 +1,8 @@
 # element_cfd-simulation
-## Responsible: TBD
+
+## Responsible 
+
+TBD
 
 ## Background
 Francesco Nori, Daniele Pucci and Silvio Traversaro have analized and simulated the Momentum Control of an Underactuated Flying Humanoid Robot in order to study the flight dynamics of iCub robot in orizzontal and vertical motions.
