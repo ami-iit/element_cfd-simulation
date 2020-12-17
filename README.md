@@ -21,7 +21,7 @@ With CFD analysis it will be possible to estimate lift and drag coefficients rel
 The same as before can be done on the complete iCub robot estimating the aerodynamic forces acting on it.
 
 ### To simulate the dynamics and aerodynamic forces together.
-The objective is to implement aerodynamic coefficients in Gazebo software in order to obtain the best real simulation and valuate the effects of aerodynamic forces on the iCub.
+The objective is to implement aerodynamic coefficients in Gazebo software in order to obtain the best real simulation and evaluate the effects of aerodynamic forces on the iCub.
 
 ## Outcomes
 
@@ -29,13 +29,16 @@ The objective is to implement aerodynamic coefficients in Gazebo software in ord
 Depending on the results obtained from these first analysis/simulations it will be possible to estimate the “weight” of the aerodynamic forces on single iCub parts compared to the dynamic forces. It will be a first good answer in order to carry on the CFD analysis on the Flying iCub.
 
 ### To use CFD simulations on the Flying iCub
-The next step is to estimate the lift and drag coefficients on the complete iCub, verifying if it matches the sum of the single parts aerodynamic forces allowing the use of the superposition method or not.
+The next step is to calculate the lift and drag coefficients on the complete iCub, comparing the results to similar objects and verifying if it matches the sum of the single parts aerodynamic forces allowing the use of the superposition method or not.
 
 ## Tasks
 To achieve the above objectives, I have to accomplish the following tasks.
 
+### Collect data from literature
+Before starting with the analysis, a deep research in CFD aerodynamic simulations or wind tunnel tests already done on objects similar to the iCub robot (or its parts) will give optimal reference values and indications on the numerical methods and discretizations of the flow domain which are more suitable for this kind of study.
+
 ### Perform the first simulations.
-The first step is to estimate all the aerodynamic coefficients on the iCub parts. We want to find the values of lift and drag coefficients depending on the angle of attack and the sideslip angle for different values of freestream speed. To have more precise results we will start on simple 3D shapes similar to the different parts.
+The first step is to estimate all the aerodynamic coefficients on the iCub parts. We want to find the values of lift and drag coefficients depending on the angle of attack and the sideslip angle for different values of freestream speed. To have more precise results we will start on simple 3D shapes similar to the different parts and quickly set up the input of the analysis.
 
 ### Simulate the flow on the whole robot.
 In this second phase we will do as before but using the complete robot. So we will extract all the aerodynamic forces and moments coefficients acting on the robot and we will evaluate if it is possible to use the superposition method, even if it is only possible for particular configurations with minimal wake interaction between the different parts of the robot.
