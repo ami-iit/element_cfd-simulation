@@ -25,7 +25,7 @@ The objective is to implement aerodynamic coefficients in Gazebo software in ord
 
 ## Outcomes
 
-### To neglect aerodynamic forces
+### To estimate aerodynamic forces
 Depending on the results obtained from these first analysis/simulations it will be possible to estimate the “weight” of the aerodynamic forces on single iCub parts compared to the dynamic forces. It will be a first good answer in order to carry on the CFD analysis on the Flying iCub.
 
 ### To use CFD simulations on the Flying iCub
