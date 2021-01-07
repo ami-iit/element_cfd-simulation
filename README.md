@@ -43,7 +43,7 @@ This milestone will require different steps from the creation of the simplified 
 The last challenge will be the integration of the iCub geometry in the CFD solver to do the simulations and extract all the aerodynamic forces and moments coefficients as functions of the main angles to build an aerodynamic database.
 
 ### Simulate with Gazebo.
-This milestones will be a further step to integrate the aerodynamic model in the flight simlations to make the robot stable and controllable during all the phases of the mission.
+This milestone will be a further step to integrate the aerodynamic model in the flight simlations to make the robot stable and controllable during all the phases of the mission.
 
 # Remarks
 ## CAD models
