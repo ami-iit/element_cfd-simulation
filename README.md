@@ -33,17 +33,17 @@ The next step is to calculate the lift and drag coefficients on the complete iCu
 
 ## Milestones
 
+### Validate the numerical model
+The first milestone involves the validation of the numerical method and the turbulence model on a simple 3D object such as a sphere, to compare results between numrical simulations and experiments in order to calibrate the simulation parameters to match the different outcomes. In this phase a strong correlation between literature and analysis should be found.
+
 ### Perform the first simulations on iCub parts.
-The first milestone is to estimate the aerodynamic coefficients on the iCub parts. We want to find the values of lift and drag coefficients depending on the angle of attack and the sideslip angle for different values of freestream speed. This will be achieved starting from simple 3D shapes similar to the different parts to quickly set up the input of the analysis.
+This milestone is to estimate the aerodynamic coefficients on the iCub parts. We want to find the values of lift and drag coefficients depending on the angle of attack and the sideslip angle for different values of freestream speed. This will be achieved starting from simple 3D shapes similar to the different parts to quickly set up the input of the analysis.
 
 ### Simulate the flow on a simplified model of the complete iCub robot.
 This milestone will require different steps from the creation of the simplified model of the complete robot (using spheres, cilinders and simple shapes for the parts) to the CFD simulations. The results at this point will give a better estimate of the forces and moments acting on the iCub. 
 
 ### Simulate the flow on the whole robot.
 The last challenge will be the integration of the iCub geometry in the CFD solver to do the simulations and extract all the aerodynamic forces and moments coefficients as functions of the main angles to build an aerodynamic database.
-
-### Simulate with Gazebo.
-This milestone will be a further step to integrate the aerodynamic model in the flight simlations to make the robot stable and controllable during all the phases of the mission.
 
 # Remarks
 ## CAD models
