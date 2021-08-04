@@ -33,13 +33,13 @@ The next step is to calculate the aerodynamic forces on the complete iRonCub, co
 
 ## Milestones
 
-### Validate the numerical model
+### [Validate the numerical model](https://github.com/dic-iit/element_cfd-simulation/issues/71)
 The first milestone involves the validation of the numerical method and the turbulence model on a simple 3D object such as a sphere, to compare results between numrical simulations and experiments in order to calibrate the simulation parameters to match the different outcomes. In this phase a strong correlation between literature and analysis should be found.
 
-### Perform the first simulations on iCub parts.
+### [Perform the first simulations on iCub parts](https://github.com/dic-iit/element_cfd-simulation/issues/67)
 This milestone is to estimate the aerodynamic coefficients on the iCub parts. We want to find the values of lift and drag coefficients, but the most important outcomes of this analysis will be the investigations on the flow field characteristics in order to decide which numerical model best represents the physical behavior of the flow around the different parts. In particular a main focus is on the influence of interaction between transition and separation on the aerodynamic forces values.
 
-### Simulate the flow on a simplified model of iRonCub.
+### [Simulate the flow on a simplified model of iRonCub](https://github.com/dic-iit/element_cfd-simulation/issues/83)
 This milestone will provide a first acceptable qualitative result on the real aerodynamic forces acting on iRonCub during flight: it will account for the interaction between different parts and the geometry will be close to the real one (considering that the external surfaces will be very close to the real ones and only the internal parts and the link geometries will be neglected for this analysis). The main effort for this step will be the generation of a proper mesh for the turbulence model selected. 
 
 ### Simulate the flow on the iRonCub.
