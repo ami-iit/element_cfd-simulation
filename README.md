@@ -35,11 +35,12 @@ Next step is to calculate the aerodynamic forces on the complete iRonCub verifyi
 
 ## Milestones
 
-### [Simulate the flow on a simplified model of iRonCub](https://github.com/dic-iit/element_cfd-simulation/issues/83)
-Using a simplified model of iRonCub simulations will be performed to evaluate the aerodynamics force and moment coefficients and the best setup to perform these simulations.
-
 ### [Collect data for the wind tunnel test](https://github.com/dic-iit/element_cfd-simulation/issues/97)
-Analyses about the iRonCub aerodynamics outcome of the CFD simulations and influence of different parameters need to be performed in order to properly design the validation tests for the wind tunnel experiments. 
+Analyses about the iRonCub aerodynamics outcome of the CFD simulations and influence of different parameters need to be performed in order to properly design the validation tests for the wind tunnel experiments, moreover the aerodynamic interferences of the wind tunnel walls and the presence of the pole need to be investigated. 
+
+### [Analyse data from wind tunnel test](https://github.com/ami-iit/element_cfd-simulation/issues/105)
+After the wind tunnel tests it will be necessary to perform a post-processing analysis to evaluate the experiment results (in terms of forces and moments and pressure distribution) and their consistency with the CFD simulations results.
+
 # Remarks
 ## CAD models
 The CAD models in this repository have been designed using [PTC Creo](https://www.ptc.com/en/products/cad/creo). Refer to [this guide](https://github.com/loc2/loc2-commons/wiki/Setup-PTC-Creo) to configure the shared libraries (e.g. for commercial components).
