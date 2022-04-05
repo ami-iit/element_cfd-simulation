@@ -1,0 +1,152 @@
+<?xml version='1.0' standalone='yes' ?>
+<LVData xmlns="http://www.ni.com/LVData">
+<Version>12.0</Version>
+<Cluster>
+<Name>parametri correzioni galleria
+(modello, NON FS)</Name>
+<NumElts>8</NumElts>
+<Cluster>
+<Name>parametri
+corr galleggiamento</Name>
+<NumElts>4</NumElts>
+<DBL>
+<Name>w3f (fusoliera)</Name>
+<Val>5.00000000000000</Val>
+</DBL>
+<DBL>
+<Name> tf (spessore massimo fusoliera) [m]</Name>
+<Val>0.20700000000000</Val>
+</DBL>
+<DBL>
+<Name> tn (spessore massimo nacelle) [m]</Name>
+<Val>0.23000000000000</Val>
+</DBL>
+<DBL>
+<Name>w3n (nacelle)</Name>
+<Val>2.00000000000000</Val>
+</DBL>
+</Cluster>
+<Cluster>
+<Name>parametri
+corr bloccaggio solido ala</Name>
+<NumElts>3</NumElts>
+<DBL>
+<Name>K_W</Name>
+<Val>1.07000000000000</Val>
+</DBL>
+<DBL>
+<Name>t_W</Name>
+<Val>0.83000000000000</Val>
+</DBL>
+<DBL>
+<Name>Q_W  [m^3]</Name>
+<Val>6.60000000000000E-3</Val>
+</DBL>
+</Cluster>
+<Cluster>
+<Name>parametri
+corr bloccaggio solido fusoliera</Name>
+<NumElts>2</NumElts>
+<DBL>
+<Name>K_F</Name>
+<Val>0.93000000000000</Val>
+</DBL>
+<DBL>
+<Name>Q_F [m^3]</Name>
+<Val>3.08000000000000E-2</Val>
+</DBL>
+</Cluster>
+<Cluster>
+<Name>parametri
+corr bloccaggio solido nacelle</Name>
+<NumElts>2</NumElts>
+<DBL>
+<Name>K_N</Name>
+<Val>0.96000000000000</Val>
+</DBL>
+<DBL>
+<Name>Q_F [m^3]</Name>
+<Val>7.20000000000000E-3</Val>
+</DBL>
+</Cluster>
+<Cluster>
+<Name>parametri
+corr bloccaggio solido piano orizzontale</Name>
+<NumElts>3</NumElts>
+<DBL>
+<Name>K_H</Name>
+<Val>1.02000000000000</Val>
+</DBL>
+<DBL>
+<Name>t_H</Name>
+<Val>0.81000000000000</Val>
+</DBL>
+<DBL>
+<Name>Q_H  [m^3]</Name>
+<Val>7.80000000000000E-4</Val>
+</DBL>
+</Cluster>
+<Cluster>
+<Name>parametri
+corr bloccaggio solido piano verticale</Name>
+<NumElts>3</NumElts>
+<DBL>
+<Name>K_V</Name>
+<Val>1.02000000000000</Val>
+</DBL>
+<DBL>
+<Name>t_V</Name>
+<Val>0.81000000000000</Val>
+</DBL>
+<DBL>
+<Name>Q_V  [m^3]</Name>
+<Val>9.00000000000000E-4</Val>
+</DBL>
+</Cluster>
+<Cluster>
+<Name>parametri
+corr bloccaggio solido coda a V</Name>
+<NumElts>4</NumElts>
+<DBL>
+<Name>K_VT</Name>
+<Val>1.02000000000000</Val>
+</DBL>
+<DBL>
+<Name>t_VTV</Name>
+<Val>0.81000000000000</Val>
+</DBL>
+<DBL>
+<Name>Q_V  [m^3]</Name>
+<Val>1.66000000000000E-2</Val>
+</DBL>
+<DBL>
+<Name>t_VTH</Name>
+<Val>0.81000000000000</Val>
+</DBL>
+</Cluster>
+<Cluster>
+<Name>configurazione </Name>
+<NumElts>5</NumElts>
+<Boolean>
+<Name>Ala</Name>
+<Val>0</Val>
+</Boolean>
+<Boolean>
+<Name>piano H</Name>
+<Val>0</Val>
+</Boolean>
+<Boolean>
+<Name>piano V</Name>
+<Val>0</Val>
+</Boolean>
+<Boolean>
+<Name>V_tail</Name>
+<Val>0</Val>
+</Boolean>
+<Boolean>
+<Name>Nacelles</Name>
+<Val>0</Val>
+</Boolean>
+</Cluster>
+</Cluster>
+</LVData>
