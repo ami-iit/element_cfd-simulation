@@ -8,6 +8,9 @@ experiment = 'exp_21_03_22';        % Name of the experiment data folder
 folderPath = ['../',experiment,'/data_GVPM'];
 testFileList = dir([folderPath,'/*.GVP']);  % List of the test files
 
+%% Initialize progress message
+disp('progress: [0%] completed');
+
 %% Operations for each test
 for testIndex = 1 : length(testFileList)
 
@@ -77,7 +80,16 @@ for testIndex = 1 : length(testFileList)
         save(['../',experiment,'/data_Matlab/',num2str(testName),'/pressureSensorsData/',pointFileName,'.mat'],'pressureSensors')
 
     end
+    
+    %% 
+    status = testIndex/length(testFileList) * 100;
+    clc;
+    disp(['progress: [',num2str(round(status)),'%] completed']);
 end
+
+%% Complete conversion message
+clc;
+disp('conversion completed');
 
 %% Remove local path
 rmpath(genpath('../'));
