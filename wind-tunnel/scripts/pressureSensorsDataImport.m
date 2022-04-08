@@ -1,3 +1,16 @@
+<<<<<<< Updated upstream
+=======
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This script automatically imports the GVPM wind tunnel experiments data 
+% from the pressure sensors measurements into matlab workspace files (.mat 
+% format)
+%
+% Author: Antonello Paolino
+%
+% April 2022
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+>>>>>>> Stashed changes
 close all;
 clear all;
 clc;

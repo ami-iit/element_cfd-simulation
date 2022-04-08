@@ -1,3 +1,16 @@
+<<<<<<< Updated upstream
+=======
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This script automatically imports the GVPM wind tunnel experiments data 
+% from the scale forces measurements into matlab workspace files (.mat 
+% format)
+%
+% Author: Antonello Paolino
+%
+% April 2022
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+>>>>>>> Stashed changes
 close all;
 clear all; 
 clc;
@@ -29,8 +42,13 @@ for testIndex = 1:length(testList(:,1))
     xyzForcesNames = {'xForce', 'yForce', 'zForce', 'xTorque', 'yTorque', 'zTorque'}; % [N; N; N; Nm; Nm; Nm]
     xyzCoeffNames  = {'xForceCoeff', 'yForceCoeff', 'zForceCoeff', 'xTorqueCoeff', 'yTorqueCoeff', 'zTorqueCoeff'};
     forcesSTDNames = {'xForceSTD', 'yForceSTD', 'zForceSTD', 'xTorqueSTD', 'yTorqueSTD', 'zTorqueSTD'};
+<<<<<<< Updated upstream
     aeroForceNames = {'drag', 'sideForce', 'lift', 'rollTorque', 'pitchTorque', 'yawTorque'}; % [N; N; N; Nm; Nm; Nm]
     aeroCoeffNames = {'dragCoeff', 'sideForceCoeff', 'liftCoeff', 'rollTorqueCoeff', 'pitchTorqueCoeff', 'yawTorqueCoeff'};
+=======
+    aeroForceNames = {'dragForce', 'sideForce', 'liftForce', 'rollTorque', 'pitchTorque', 'yawTorque'}; % [N; N; N; Nm; Nm; Nm]
+    aeroCoeffNames = {'dragForceCoeff', 'sideForceCoeff', 'liftForceCoeff', 'rollTorqueCoeff', 'pitchTorqueCoeff', 'yawTorqueCoeff'};
+>>>>>>> Stashed changes
 
     %% Assign data to the struct variables
     for i = 1:length(stateAngles)
