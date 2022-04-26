@@ -33,13 +33,13 @@ Depending on the results obtained from the simulations it will be possible to un
 ### Use CFD simulations on iRonCub to build an aerodynamic model
 Next step is to calculate the aerodynamic forces on the complete iRonCub verifying if it matches the sum of the single parts aerodynamic forces allowing the use of the superposition method or not (given the strong wake interations between the different parts we expect the superposition to be useless for this kind of problem). This will be cross-validated through wind tunnel experiments.
 
-## Milestones
-
-### [Collect data for the wind tunnel test](https://github.com/dic-iit/element_cfd-simulation/issues/97)
-Analyses about the iRonCub aerodynamics outcome of the CFD simulations and influence of different parameters need to be performed in order to properly design the validation tests for the wind tunnel experiments, moreover the aerodynamic interferences of the wind tunnel walls and the presence of the pole need to be investigated. 
+## Milestones 
 
 ### [Analyse data from wind tunnel test](https://github.com/ami-iit/element_cfd-simulation/issues/105)
-After the wind tunnel tests it will be necessary to perform a post-processing analysis to evaluate the experiment results (in terms of forces and moments and pressure distribution) and their consistency with the CFD simulations results.
+After the wind tunnel tests performed @ Polimi it is necessary to perform a post-processing analysis to evaluate the experiment results (in terms of forces and moments and pressure distribution) and their consistency with the CFD simulations results.
+
+### [Reduce the gap between CFD and wind tunnel tests results](https://github.com/ami-iit/element_cfd-simulation/issues/113)
+After comparing the data between CFD and wind tunnel experiment, it will be possible to act on the simulations numerical models and parameters to reduce the gap between their results.
 
 # Remarks
 ## CAD models
