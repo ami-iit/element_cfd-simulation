@@ -57,6 +57,15 @@ for testIndex = 1:length(testList(:,1))
         windAxesAero.(aeroCoeffNames{i}) = data(:,50+i);
     end
 
+    %% Modify body torques reference frame to the robot leg pitch axis
+
+    delta_x = 0.497;    % [m] distance along x between the reference frames
+    delta_z = -0.021;   % [m] distance along z between the reference frames
+    
+    bodyAero.(xyzForcesNames{4}) = scaleAero.(xyzForcesNames{4}) + scaleAero.(xyzForcesNames{2}) * delta_z;
+    bodyAero.(xyzForcesNames{5}) = scaleAero.(xyzForcesNames{5}) - scaleAero.(xyzForcesNames{1}) * delta_z + scaleAero.(xyzForcesNames{3}) * delta_x;
+    bodyAero.(xyzForcesNames{6}) = scaleAero.(xyzForcesNames{6}) - scaleAero.(xyzForcesNames{2}) * delta_x;
+
     %% Save imported struct data in workspace
 
     if (~exist(['../',experiment,'/data_Matlab'],'dir'))
