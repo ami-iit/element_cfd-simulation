@@ -59,12 +59,12 @@ for testIndex = 1:length(testList(:,1))
 
     %% Modify body torques reference frame to the robot leg pitch axis
 
-    delta_x = 0.497;    % [m] distance along x between the reference frames
-    delta_z = -0.021;   % [m] distance along z between the reference frames
+    r_x = -0.497;    % [m] distance along x between the reference frames
+    r_z =  0.021;   % [m] distance along z between the reference frames
     
-    bodyAero.xTorque = scaleAero.xTorque + scaleAero.yForce * delta_z;
-    bodyAero.yTorque = scaleAero.yTorque - scaleAero.xForce * delta_z + scaleAero.zForce * delta_x;
-    bodyAero.zTorque = scaleAero.zTorque - scaleAero.yForce * delta_x;
+    bodyAero.xTorque = scaleAero.xTorque - scaleAero.yForce * r_z;
+    bodyAero.yTorque = scaleAero.yTorque + scaleAero.xForce * r_z - scaleAero.zForce * r_x;
+    bodyAero.zTorque = scaleAero.zTorque + scaleAero.yForce * r_x;
 
     % Non-dimensional torques evaluation (accounting only for dynamic
     % pressure because of unitary nominal surface, length and chord
