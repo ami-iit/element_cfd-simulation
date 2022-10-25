@@ -5,8 +5,8 @@ clc;
 %% Initialization
 
 % Test and point to be analyzed
-jointConfig = 'hovering'; % | hovering | flight30 | flight50 | flight60 |
-testID = 'TID_0002';
+jointConfig = 'flight50'; % | hovering | flight30 | flight50 | flight60 |
+testID = 'TID_0014';
 
 %% Import filename list and add local path
 addpath(genpath('../'));            % Adding the main folder path
@@ -149,7 +149,7 @@ for iii = 1 : (length(testpointList(:,1)) - 1)
     %% robot visualization [debug]
     iDynTreeWrappers.prepareVisualization(KinDynModel, meshFilePrefix, 'color', [0.96,0.96,0.96], ...
         'material', 'dull', ... 'style', 'wireframe','wireframe_rendering',0.8, ...
-        'transparency', 0.3, 'debug', true, 'view', [-45 20]);
+        'transparency', 0.3, 'debug', true, 'view', [-45 5]);
 
     %% Pressure map plot
     fig1 = figure(1);
@@ -204,7 +204,7 @@ for iii = 1 : (length(testpointList(:,1)) - 1)
     % % saving
     % saveas(fig1,['.\',saveFolderName,'\',coverName,'-',testID,'-',testPointID,'.svg']);
 
-    saveFolderName = 'hovering-pressure';
+    saveFolderName = 'pressure-fig';
     if (~exist(['./',saveFolderName],'dir'))
 
         mkdir(['./',saveFolderName]);
