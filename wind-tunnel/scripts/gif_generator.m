@@ -1,8 +1,8 @@
 close all; clear all; clc;
 
 %% Test
-filename = 'flight30.gif';
-testID = 'TID_0013';
+filename = 'hovering.gif';
+testID = 'TID_0002';
 
 %% Import filename list and add local path
 addpath(genpath('../'));            % Adding the main folder path
@@ -21,7 +21,7 @@ for n = 1 : (length(testpointList(:,1)) - 1)
     set(h, 'Position', [0 0 2304 1296]);
 
 %     axis tight manual % this ensures that getframe() returns a consistent size
-    axis([-0.5 1 -1 1 -1 1])
+%     axis([-0.5 1 -1 1 -1 1])
     
     % Capture the plot as an image
     frame      = getframe(h);
