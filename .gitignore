@@ -1,0 +1,7 @@
+# Matlab figures
+*.fig
+!flight-controllers/controlAndDataGui/*.fig
+!flight-controllers/wind-tunnel-control/src/static-gui/*.fig
+
+# GIFs
+*.gif
