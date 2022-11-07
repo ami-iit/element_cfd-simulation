@@ -1,9 +1,9 @@
 close all; clear all; clc;
 
 %% Test
-experiment = 'exp_03_11_22'; % Name of the experiment data folder
-testID     = 'TID_0002';
-filename   = [testID,'.gif'];
+experiment = 'exp_21_03_22'; % Name of the experiment data folder
+testID     = 'TID_0006';
+filename   = [experiment,'-',testID,'.gif'];
 
 %% Import filename list and add local path
 addpath(genpath('../'));            % Adding the main folder path
@@ -36,6 +36,8 @@ for n = 1 : (length(testpointList(:,1)) - 1)
     end
     close(h)
 end
+
+rmpath(genpath('../'));            % Removing the main folder path
 
 
 

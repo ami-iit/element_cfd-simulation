@@ -1,34 +1,59 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This script generates and saves matlab figures (.fig) of the pressure
+% distribution on iRonCub covers from the data retrievd in the wind tunnel 
+% experimental campaigns performed at GVPM
+%
+% Author: Antonello Paolino
+%
+% November 2022
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 close all;
 clear all;
 clc;
 
 %% Initialization
 
-% Test and point to be analyzed
-experiment  = 'exp_03_11_22'; % Name of the experiment data folder
-testID      = 'TID_0002';
-jointConfig = 'hovering'; % | hovering | flight30 | flight50 | flight60 |
+% Experiment and test to be mapped
+experiment  = 'exp_21_03_22';   % 'exp_21_03_22' | 'exp_03_11_22'
+testID      = 'TID_0006';       
 
-%% Import filename list and add local path
-addpath(genpath('../'));            % Adding the main folder path
+%% Import data
+
+% adding the main folder path
+addpath(genpath('../'));            
 GVPM_folderPath = ['../',experiment,'/data_GVPM'];
 testpointList   = dir([GVPM_folderPath,'/',testID,'*.pth']);
 
+% Import robot joint positions
+testConfig = readcell(['./srcPressureAnalysis/localConfigurations/',experiment,'-test-config.csv']);
+configSet  = (testConfig{matches(testConfig(:),testID),2});
+configName = (testConfig{matches(testConfig(:),testID),3});
+
+% Assign the joints configuration relative to the test
+jointPosData = importdata(['./srcPressureAnalysis/localConfigurations/',experiment,'-',configSet,'-config.csv']);
+jointPos     = jointPosData.data(matches(jointPosData.textdata(:),configName),:) * pi/180;
+
 %% Find test total pressure range
+
+% Initialize min and max values
 testMaxPress = -1e4;
 testMinPress = 1e4;
+
 for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
+    % loading the workspaces for each test point
     [~,testPointID,~]       = fileparts(testpointList(testPointIndex,:).name(10:15));
     wsFolderPath            = ['../',experiment,'/data_Matlab/'];
     testPoint.(testPointID) = load([wsFolderPath,testID,'/pressureSensorsData/',testPointID,'.mat']);  % test point data loading
-    
+    % assigning the max and min values
     pressArray    = struct2array(testPoint.(testPointID).pressureSensors.meanValues);
     maxPointPress = max(pressArray);
     minPointPress = min(pressArray);
-
+    % update test max and min pressures
     if maxPointPress > testMaxPress, testMaxPress = maxPointPress; end 
     if minPointPress < testMinPress, testMinPress = minPointPress; end
 end
+
 %% Start point cycle
 
 for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
@@ -36,7 +61,7 @@ for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
     % close scopes and clear previous test point data
     close all;
     clearvars -except testPointIndex jointConfig testID testpointList ...
-        experiment testMaxPress testMinPress
+        experiment testMaxPress testMinPress configSet configName jointPos
 
     [~,testPointID,~] = fileparts(testpointList(testPointIndex,:).name(10:15));
 
@@ -55,19 +80,11 @@ for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
         'r_upper_leg','r_upper_leg','l_upper_leg','l_upper_leg', ...
         'r_lower_leg','r_lower_leg','l_lower_leg','l_lower_leg'};
 
-    % Initialize robot position
-    if matches(jointConfig,'hovering')
+    % Initialize support angle
+    if matches(configSet,'hovering')
         offsetAngle = 90;   % [deg]
-        jointPos    = [0,0,0,-10,25,40,15,-10,25,40,15,0,10,7,0,0,0,0,10,7,0,0,0]* pi/180;
-    elseif matches(jointConfig,'flight30')
+    elseif matches(configSet,'flight')
         offsetAngle = 45;   % [deg]
-        jointPos    = [0,0,0,-40.7,11.3,26.5,58.3,-40.7,11.3,26.5,58.3,0,10,7,0,0,0,0,10,7,0,0,0]* pi/180;
-    elseif matches(jointConfig,'flight50')
-        offsetAngle = 45;   % [deg]
-        jointPos    = [0,0,0,-31.3,19,26.3,45.3,-31.3,19,26.3,45.3,0,10,7,0,0,0,0,10,7,0,0,0]* pi/180;
-    elseif matches(jointConfig,'flight60')
-        offsetAngle = 45;   % [deg]
-        jointPos    = [0,0,0,-25,24,30,35,-25,24,30,35,0,10,7,0,0,0,0,10,7,0,0,0]* pi/180;
     end
 
     % robot attitude angles in wind tunnel
@@ -177,10 +194,10 @@ for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
 
     axis([-0.5 1 -1 1 -1 1])
     set(fig1, 'Position', [0 0 2304 1296]);
-    if matches(jointConfig,'hovering')
-        title(['Pressure map, ',jointConfig,', $\beta=',num2str(yawAngle,'%.0f'),'^\circ$'],'FontSize',22,'Interpreter','latex');
+    if matches(configSet,'hovering')
+        title(['Pressure map, ',configSet,'-',configName,', $\beta=',num2str(yawAngle,'%.0f'),'^\circ$'],'FontSize',22,'Interpreter','latex');
     else
-        title(['Pressure map, ',jointConfig,', $\alpha=',num2str(pitchAngle,'%.0f'),'^\circ$'],'FontSize',22,'Interpreter','latex');
+        title(['Pressure map, ',configSet,'-',configName,', $\alpha=',num2str(pitchAngle,'%.0f'),'^\circ$'],'FontSize',22,'Interpreter','latex');
     end
 
     ax = gca;
@@ -219,7 +236,7 @@ for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
     c.Label.Position    = [0.5 1.08 0]; % to change its position
     
     %% Forces plots
-    if matches(jointConfig,'hovering')
+    if matches(configSet,'hovering')
         xPlotVariable = test.(testID).state.betaMeas;
         xPlotLabel    = '$\beta$';
         xMarkerAngle  = yawAngle;
