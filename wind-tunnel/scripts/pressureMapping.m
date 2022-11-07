@@ -5,10 +5,9 @@ clc;
 %% Initialization
 
 % Test and point to be analyzed
-experiment    = 'exp_21_03_22';        % Name of the experiment data folder
-testID = 'TID_0002';
+experiment  = 'exp_03_11_22'; % Name of the experiment data folder
+testID      = 'TID_0002';
 jointConfig = 'hovering'; % | hovering | flight30 | flight50 | flight60 |
-
 
 %% Import filename list and add local path
 addpath(genpath('../'));            % Adding the main folder path
@@ -105,9 +104,9 @@ for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
 
         %% Load geometric data
         coverName = coverNames{j};
-        coverData.(coverName).geom = stlread(['./srcPressureAnalysis/',coverName,'.stl']);
-        opts = detectImportOptions('./srcPressureAnalysis/chest_sensors.txt');
-        pressureSensors = table2struct(readtable(['./srcPressureAnalysis/',coverName,'_sensors.txt'],opts),"ToScalar",true);
+        coverData.(coverName).geom = stlread(['./srcPressureAnalysis/covers/',coverName,'.stl']);
+        opts = detectImportOptions('./srcPressureAnalysis/sensorsMapping/chest_sensors.txt');
+        pressureSensors = table2struct(readtable(['./srcPressureAnalysis/sensorsMapping/',coverName,'_sensors.txt'],opts),"ToScalar",true);
         coverData.(coverName).sensorsNames = pressureSensors.Var1;
         coverData.(coverName).x_sensors    = pressureSensors.Var2;
         coverData.(coverName).y_sensors    = pressureSensors.Var3;
@@ -264,7 +263,7 @@ for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
     %% saving
     % saveas(fig1,['.\',saveFolderName,'\',coverName,'-',testID,'-',testPointID,'.svg']);
 
-    saveFolderName = 'pressure-fig';
+    saveFolderName = ['pressure-fig_',experiment];
     if (~exist(['./',saveFolderName],'dir'))
 
         mkdir(['./',saveFolderName]);

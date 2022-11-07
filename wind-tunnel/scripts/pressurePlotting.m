@@ -5,8 +5,8 @@ clc;
 %% Initialization
 
 % Test and point to be analyzed
-experiment    = 'exp_21_03_22'; % Experiment data {exp_21_03_22, exp_28_10_22}
-testID = 'TID_0002';
+experiment  = 'exp_03_11_22'; % Experiment data {exp_21_03_22, exp_28_10_22}
+testID      = 'TID_0036';
 testPointID = 'PT0001';
 jointConfig = 'hovering'; % | hovering | flight30 | flight50 | flight60 |
 
@@ -39,8 +39,8 @@ for j = 1:length(coverNames)
 
     %% Load cover data
     coverName = coverNames{j};
-    opts = detectImportOptions('./srcPressureAnalysis/chest_sensors.txt');
-    pressureSensors = table2struct(readtable(['./srcPressureAnalysis/',coverName,'_sensors_plotting.txt'],opts),"ToScalar",true);
+    opts = detectImportOptions('./srcPressureAnalysis/sensorsPlotting/chest_sensors_plotting.txt');
+    pressureSensors = table2struct(readtable(['./srcPressureAnalysis/sensorsPlotting/',coverName,'_sensors_plotting.txt'],opts),"ToScalar",true);
     coverData.(coverName).sensorsNames = pressureSensors.Var1;
     coverData.(coverName).x_sensors    = pressureSensors.Var2;
     coverData.(coverName).y_sensors    = pressureSensors.Var3;

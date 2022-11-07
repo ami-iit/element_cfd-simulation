@@ -1,12 +1,12 @@
 close all; clear all; clc;
 
 %% Test
-filename = 'hovering.gif';
-testID = 'TID_0002';
+experiment = 'exp_03_11_22'; % Name of the experiment data folder
+testID     = 'TID_0002';
+filename   = [testID,'.gif'];
 
 %% Import filename list and add local path
 addpath(genpath('../'));            % Adding the main folder path
-experiment    = 'exp_21_03_22';        % Name of the experiment data folder
 folderPath    = ['../',experiment,'/data_GVPM'];
 testpointList = dir([folderPath,'/',testID,'*.pth']);
 
@@ -15,7 +15,7 @@ for n = 1 : (length(testpointList(:,1)) - 1)
 
     [~,testPoint,~] = fileparts(testpointList(n,:).name(12:15));
     
-    h = openfig(['.\pressure-fig\',testID,'-PT',testPoint,'.fig']);
+    h = openfig(['.\pressure-fig_',experiment,'\',testID,'-PT',testPoint,'.fig']);
 
     % Set the frame dimensions
     set(h, 'Position', [0 0 2304 1296]);
