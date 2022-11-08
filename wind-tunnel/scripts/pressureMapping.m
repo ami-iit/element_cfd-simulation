@@ -280,7 +280,7 @@ for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
     %% saving
     % saveas(fig1,['.\',saveFolderName,'\',coverName,'-',testID,'-',testPointID,'.svg']);
 
-    saveFolderName = ['pressure-fig_',experiment];
+    saveFolderName = ['pressure_fig-',experiment];
     if (~exist(['./',saveFolderName],'dir'))
 
         mkdir(['./',saveFolderName]);
