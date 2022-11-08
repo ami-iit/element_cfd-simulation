@@ -10,6 +10,14 @@ addpath(genpath('../'));            % Adding the main folder path
 folderPath    = ['../',experiment,'/data_GVPM'];
 testpointList = dir([folderPath,'/',testID,'*.pth']);
 
+%% Create the folder to store the GIF file
+    saveFolderName = ['pressure_gif-',experiment];
+    if (~exist(['./',saveFolderName],'dir'))
+
+        mkdir(['./',saveFolderName]);
+    end
+
+%% Save each matlab .fig as a frame of the GIF file
 
 for n = 1 : (length(testpointList(:,1)) - 1)
 
@@ -30,12 +38,13 @@ for n = 1 : (length(testpointList(:,1)) - 1)
     
     % Write to the GIF File
     if n == 1
-        imwrite(imind,cm,filename,'gif', 'Loopcount',inf);
+        imwrite(imind,cm,['.\',saveFolderName,'\',filename],'gif', 'Loopcount',inf);
     else
-        imwrite(imind,cm,filename,'gif','WriteMode','append', 'DelayTime', 0.5);
+        imwrite(imind,cm,['.\',saveFolderName,'\',filename],'gif','WriteMode','append', 'DelayTime', 0.5);
     end
     close(h)
 end
+
 
 rmpath(genpath('../'));            % Removing the main folder path
 
