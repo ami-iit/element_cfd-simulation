@@ -1,14 +1,16 @@
-close all; clear all; clc;
+close all; 
+clear all; 
+clc;
 
 %% Test
 experiment = 'exp_21_03_22'; % Name of the experiment data folder
-testID     = 'TID_0006';
+testID     = 'TID_8025';
 filename   = [experiment,'-',testID,'.gif'];
 
 %% Import filename list and add local path
 addpath(genpath('../'));            % Adding the main folder path
-folderPath    = ['../',experiment,'/data_GVPM'];
-testpointList = dir([folderPath,'/',testID,'*.pth']);
+GVPM_folderPath = ['../',experiment,'/data_GVPM'];
+testpointList   = dir([GVPM_folderPath,'/',testID,'*.pth']);
 
 %% Create the folder to store the GIF file
     saveFolderName = ['pressure_gif-',experiment];
@@ -23,7 +25,7 @@ for n = 1 : (length(testpointList(:,1)) - 1)
 
     [~,testPoint,~] = fileparts(testpointList(n,:).name(12:15));
     
-    h = openfig(['.\pressure-fig_',experiment,'\',testID,'-PT',testPoint,'.fig']);
+    h = openfig(['.\pressure_fig-',experiment,'\',testID,'-PT',testPoint,'.fig']);
 
     % Set the frame dimensions
     set(h, 'Position', [0 0 2304 1296]);
