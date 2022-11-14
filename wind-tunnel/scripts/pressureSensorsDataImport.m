@@ -14,7 +14,7 @@ clc;
 
 %% Import filename list and add local path
 % addpath(genpath('../'));            % Adding the main folder path
-experiment = 'exp_03_11_22';        % Name of the experiment data folder
+experiment = 'exp_21_03_22';        % Name of the experiment data folder
 addpath(genpath(['../',experiment,'/']));            % Adding the main folder path
 folderPath = ['../',experiment,'/data_GVPM'];
 testFileList = dir([folderPath,'/*.GVP']);  % List of the test files
@@ -35,7 +35,7 @@ for testIndex = 1 : length(testFileList)
     pressureSensors = struct();
 
     % Load pressure sensors names
-    pressNames = readtable('Pressure_Sensors_Map.csv','Range','B:B');
+    pressNames = readtable([folderPath,'/Pressure_Sensors_Map.csv'],'Range','B:B');
     pressNames = table2array(pressNames);
 
     %% Loop for each test point
@@ -45,17 +45,17 @@ for testIndex = 1 : length(testFileList)
         pressFileName     = pressFileList(testPointIndex).name;
         meanPressFileName = meanPressFileList(testPointIndex).name;
 
-        pressValues = readmatrix(pressFileName,'FileType','text','Range','E1');
+        pressValues = readmatrix([folderPath,'/',pressFileName],'FileType','text','Range','E1');
         pressValues = pressValues(2:end,:);
 
-        pressTimeStamp = readcell(pressFileName,'FileType','text');
+        pressTimeStamp = readcell([folderPath,'/',pressFileName],'FileType','text');
         pressTimeStamp = datetime(vertcat(pressTimeStamp{2:end,1}), ...
                         'InputFormat','HH:mm:ss.SSSSSS dd/MM/yyyy', ...
                         'Format','ss.SSSSSS');
         pressTimeStamp = pressTimeStamp - pressTimeStamp(1);
         pressTimeStamp = seconds(pressTimeStamp);
 
-        pressMeanValues = readmatrix(meanPressFileName,'FileType','text','Range','B:B');
+        pressMeanValues = readmatrix([folderPath,'/',meanPressFileName],'FileType','text','Range','B:B');
 
 
         % Assign data to the struct variables

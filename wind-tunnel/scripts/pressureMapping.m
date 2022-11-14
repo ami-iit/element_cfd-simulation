@@ -16,7 +16,7 @@ clc;
 
 % Experiment and test to be mapped
 experiment  = 'exp_21_03_22';   % 'exp_21_03_22' | 'exp_03_11_22'
-testID      = 'TID_0006';       
+testID      = 'TID_0012';       
 
 %% Import data
 
@@ -195,9 +195,9 @@ for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
     axis([-0.5 1 -1 1 -1 1])
     set(fig1, 'Position', [0 0 2304 1296]);
     if matches(configSet,'hovering')
-        title(['Pressure map, ',configSet,'-',configName,', $\beta=',num2str(yawAngle,'%.0f'),'^\circ$'],'FontSize',22,'Interpreter','latex');
+        title(['Pressure map, ',configSet,'-',configName,', $\beta=',num2str(round(yawAngle),'%.0f'),'^\circ$'],'FontSize',22,'Interpreter','latex');
     else
-        title(['Pressure map, ',configSet,'-',configName,', $\alpha=',num2str(pitchAngle,'%.0f'),'^\circ$'],'FontSize',22,'Interpreter','latex');
+        title(['Pressure map, ',configSet,'-',configName,', $\alpha=',num2str(round(pitchAngle),'%.0f'),'^\circ$'],'FontSize',22,'Interpreter','latex');
     end
 
     ax = gca;
