@@ -2,9 +2,9 @@
 
 ## Responsible 
 
-Antonello Paolino     |
+[Antonello Paolino](https://github.com/antonellopaolino)     |
 :-------------------------:|
-<img src="https://user-images.githubusercontent.com/75119799/102009876-b3456880-3d3a-11eb-9504-b17b59327a81.jpg" width="180"> |  
+<img src="https://github.com/antonellopaolino.png" width="180"> |  
 
 ## Background
 Francesco Nori, Daniele Pucci and Silvio Traversaro have analized and simulated the Momentum Control of an Underactuated Flying Humanoid Robot in order to study the flight dynamics of iCub robot in horizontal and vertical motions.
