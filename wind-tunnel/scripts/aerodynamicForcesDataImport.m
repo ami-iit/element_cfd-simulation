@@ -24,7 +24,7 @@ for testIndex = 1:length(testList(:,1))
     %% Import data from file
     fileName = testList(testIndex).name;
 
-    data = readmatrix(fileName,'FileType','text');  % importing the data from the file
+    data = readmatrix([folderPath,'/',fileName],'FileType','text');  % importing the data from the file
     data = data(1:(end-1),:);   % remove the final zeros line
 
     %% Initialize data structures
