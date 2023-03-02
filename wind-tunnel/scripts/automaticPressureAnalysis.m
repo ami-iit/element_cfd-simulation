@@ -15,7 +15,7 @@ addpath(genpath('../'));
 GVPM_folderPath = ['../',experiment,'/data_GVPM'];
 testList = dir([GVPM_folderPath,'/*.GVP']);  % List of the test files
 
-for testIndex = 48%:length(testList(:,1))
+for testIndex = 1:length(testList(:,1))
 
     testID = testList(testIndex).name(1:end-4);
 
@@ -56,35 +56,19 @@ for testIndex = 48%:length(testList(:,1))
 
     %% Start point cycle
 
-    N_interp_points = 5;
-    N_total_points  = (N_interp_points - 1 ) * (length(testpointList(:,1)) - 1) + 1;
-
-    for testPointIndex = 1 : N_total_points
+    for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
 
         % close scopes and clear previous test point data
         close all;
         clearvars -except testPointIndex jointConfig testID testpointList ...
-            experiment testMaxPress testMinPress configSet configName jointPos ...
-            testList N_interp_points N_total_points
-        
-        % Interpolated indices
-        lowerIndex = floor((testPointIndex-1)/N_interp_points + 1);
-        upperIndex = ceil((testPointIndex-1)/N_interp_points + 1);
+            experiment testMaxPress testMinPress configSet configName jointPos testList
 
-        if lowerIndex == upperIndex && testPointIndex<N_total_points
-            upperIndex = upperIndex + 1;
-        elseif lowerIndex == upperIndex && testPointIndex==N_total_points
-            lowerIndex = lowerIndex - 1;
-        end
-        
-        [~,lowerTestPointID,~] = fileparts(testpointList(lowerIndex,:).name(10:15));
-        [~,upperTestPointID,~] = fileparts(testpointList(upperIndex,:).name(10:15));
+        [~,testPointID,~] = fileparts(testpointList(testPointIndex,:).name(10:15));
 
         % Load data from matlab workspaces
         wsFolderPath            = ['../',experiment,'/data_Matlab/'];
         test.(testID)           = load([wsFolderPath,testID,'/aerodynamicForces.mat']);                                 % test data loading
-        testPoint.(lowerTestPointID) = load([wsFolderPath,testID,'/pressureSensorsData/',lowerTestPointID,'.mat']);  % lower test point data loading
-        testPoint.(upperTestPointID) = load([wsFolderPath,testID,'/pressureSensorsData/',upperTestPointID,'.mat']);  % upper test point data loading
+        testPoint.(testPointID) = load([wsFolderPath,testID,'/pressureSensorsData/',testPointID,'.mat']);  % test point data loading
 
         % Names of the covers and relative frames
         coverNames = {'face_front','face_back','chest','backpack','pelvis','lt_pelvis_wing','rt_pelvis_wing',...
@@ -102,16 +86,16 @@ for testIndex = 48%:length(testList(:,1))
         elseif matches(configSet,'flight')
             offsetAngle = 45;   % [deg]
         end
-        
+
         % robot attitude angles in wind tunnel
-        yawAngle   = interp1([lowerIndex upperIndex],test.(testID).state.betaMeas([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
-        pitchAngle = interp1([lowerIndex upperIndex],test.(testID).state.alphaMeas([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1) + offsetAngle;
+        yawAngle   = test.(testID).state.betaMeas(testPointIndex);  % [deg]
+        pitchAngle = test.(testID).state.alphaMeas(testPointIndex) + offsetAngle;  % [deg]
 
         % set base Pose according to yaw and pitch angles
         R_yaw     = rotz(yawAngle);
         R_pitch   = roty(pitchAngle - 90);
-        basePose  = [R_yaw * R_pitch, [10; 0; 0];
-                          zeros(1,3),         1];
+        basePose  = [R_yaw * R_pitch, [0.3; 0; 0];
+                          zeros(1,3),          1];
 
         % data for using iDynTreeWrappers functions
         modelPath  = 'C:\Users\apaolino\code\component_ironcub\models\iRonCub-Mk1\iRonCub\robots\iRonCub-Mk1_Gazebo\';
@@ -128,6 +112,10 @@ for testIndex = 48%:length(testList(:,1))
         KinDynModel = iDynTreeWrappers.loadReducedModel(jointNames, 'root_link', modelPath, fileName, false);
         iDynTreeWrappers.setRobotState(KinDynModel, basePose, jointPos, baseVel, jointVel, gravAcc);
 
+        % Initizalizing global values
+        globalMinPress = 1e4;
+        globalMaxPress = -1e4;
+
 
         for j = 1:length(coverNames)
 
@@ -143,14 +131,21 @@ for testIndex = 48%:length(testList(:,1))
 
             % assign cover pressure values data
             for i = 1:length(coverData.(coverName).sensorsNames)
-                lowerMeanPress = testPoint.(lowerTestPointID).pressureSensors.meanValues.(coverData.(coverName).sensorsNames{i});
-                upperMeanPress = testPoint.(upperTestPointID).pressureSensors.meanValues.(coverData.(coverName).sensorsNames{i});
-                coverData.(coverName).meanPressValues(i,1) = interp1([lowerIndex upperIndex]*ones(1,length(testPoint.(lowerTestPointID).pressureSensors.meanValues.(coverData.(coverName).sensorsNames{i}))), ...
-                                                              [testPoint.(lowerTestPointID).pressureSensors.meanValues.(coverData.(coverName).sensorsNames{i}) ...
-                                                              testPoint.(upperTestPointID).pressureSensors.meanValues.(coverData.(coverName).sensorsNames{i})], ...
-                                                              (testPointIndex-1)/N_interp_points + 1 );
-                %coverData.(coverName).pressValues(i,:)   = testPoint.(testPointID).pressureSensors.values.(coverData.(coverName).sensorsNames{i});
+                coverData.(coverName).meanPressValues(i,1) = testPoint.(testPointID).pressureSensors.meanValues.(coverData.(coverName).sensorsNames{i});
+                coverData.(coverName).pressValues(i,:)   = testPoint.(testPointID).pressureSensors.values.(coverData.(coverName).sensorsNames{i});
             end
+
+            localMinPress = min(coverData.(coverName).meanPressValues);
+            localMaxPress = max(coverData.(coverName).meanPressValues);
+            %         fprintf([coverName,' pressure range: ',num2str(localMinPress,3),' [Pa] \x2264 \x394p \x2264 ',num2str(localMaxPress,3),' [Pa] \n']);
+
+            if localMinPress < globalMinPress
+                globalMinPress = localMinPress;
+            end
+            if localMaxPress > globalMaxPress
+                globalMaxPress = localMaxPress;
+            end
+
 
             %% Pressure map initialization
 
@@ -167,8 +162,8 @@ for testIndex = 48%:length(testList(:,1))
             end
 
             % Move geometry vertices from cover to global coordinates
-            coverData.(coverName).patchPoints        = coverData.(coverName).geom.Points/1000;
-            coverData.(coverName).patchFaces         = coverData.(coverName).geom.ConnectivityList;
+            coverData.(coverName).patchPoints = coverData.(coverName).geom.Points/1000;
+            coverData.(coverName).patchFaces  = coverData.(coverName).geom.ConnectivityList;
             for i = 1:length(coverData.(coverName).patchPoints(:,1))
                 v_link  = [transpose(coverData.(coverName).patchPoints(i,:)); 1];
                 v_world = w_H_l*v_link;
@@ -197,30 +192,7 @@ for testIndex = 48%:length(testList(:,1))
                 'FaceVertexCData',coverData.(coverNames{j}).interpPressValues,'FaceColor','interp','EdgeColor','none'); hold on;
         end
 
-        % Set arrow sizes
-        cylPosition   = 9;
-        cylRadius     = 0.01;
-        cylLength     = 0.25;
-        arrowRatio    = 0.2;
-
-        % Draw wind velocity vector
-        [Xc,Yc,Zc] = cylinder(cylRadius);
-        Zc         = Zc * cylLength;
-        surf(Zc + cylPosition,Yc,Xc,'FaceColor',[0, 0.4470, 0.7410],'EdgeColor','none');
-        patch(Zc(1,:) + cylPosition,Yc(1,:),Xc(1,:),[0, 0.4470, 0.7410]);
-        Yh(1,:) = Yc(1,:)*2;
-        Yh(2,:) = Yc(2,:)*0;
-        Xh(1,:) = Xc(1,:)*2;
-        Xh(2,:) = Xc(2,:)*0;
-        Zh      = Zc * arrowRatio;
-        surf(Zh + cylPosition + cylLength,Yh,Xh,'FaceColor',[0, 0.4470, 0.7410],'EdgeColor','none');
-        patch(Zh(1,:) + cylPosition + cylLength,Yh(1,:),Xh(1,:),[0, 0.4470, 0.7410]);
-
-        % Assign wind velocity vector name
-        text(0.35*cylLength + cylPosition,0,0.05,'$V_w$','Interpreter','latex','FontSize',24);
-
-
-        axis([9 11 -1 1 -1 1])
+        axis([-0.5 1 -1 1 -1 1])
         set(fig1, 'Position', [0 0 2304 1296]);
 
         title(['Pressure map, ',configSet,'-',configName,', $\alpha=',num2str(round(pitchAngle),'%.0f'),'^\circ$, $\beta=',num2str(round(yawAngle),'%.0f'),'^\circ$'],'FontSize',22,'Interpreter','latex');
@@ -235,6 +207,7 @@ for testIndex = 48%:length(testList(:,1))
         c                   = colorbar('FontSize', 16, 'Location', 'east');
         if round(testMinPress) ~= c.Ticks(1)
             c.Ticks = [round(testMinPress) c.Ticks];
+        end
         if round(testMaxPress) ~= c.Ticks(end)
             c.Ticks = [c.Ticks round(testMaxPress)];
         end
@@ -252,26 +225,18 @@ for testIndex = 48%:length(testList(:,1))
             xPlotVariable = test.(testID).state.betaMeas;
             xPlotLabel    = '$\beta$';
             xMarkerAngle  = yawAngle;
-            dragValue  = interp1([lowerIndex upperIndex],test.(testID).windAxesAero.dragForceCoeff([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
-            liftValue  = interp1([lowerIndex upperIndex],test.(testID).windAxesAero.liftForceCoeff([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
-            sideValue  = interp1([lowerIndex upperIndex],test.(testID).windAxesAero.sideForceCoeff([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
         else
             xPlotVariable = test.(testID).state.alphaMeas + offsetAngle;
             xPlotLabel    = '$\alpha$';
             xMarkerAngle  = pitchAngle;
-            dragValue  = interp1([lowerIndex upperIndex],test.(testID).windAxesAero.dragForceCoeff([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
-            liftValue  = interp1([lowerIndex upperIndex],test.(testID).windAxesAero.liftForceCoeff([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
-            sideValue  = interp1([lowerIndex upperIndex],test.(testID).windAxesAero.sideForceCoeff([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
         end
-
-        
 
         % Drag area plot
         axes('Position',[.03 .6 .22 .25])
         box on
         plot(xPlotVariable, test.(testID).windAxesAero.dragForceCoeff, 'Color', 'k', ...
             'LineStyle', '-', 'linewidth', 1.5, 'DisplayName','$C_D A$'); hold on;
-        scatter(xMarkerAngle, dragValue, ...
+        scatter(xMarkerAngle, test.(testID).windAxesAero.dragForceCoeff(testPointIndex), ...
             30, 'red', 'filled', 'HandleVisibility', 'off'); hold on;
         grid on;
         xlim([min(xPlotVariable) max(xPlotVariable)])
@@ -286,9 +251,9 @@ for testIndex = 48%:length(testList(:,1))
             'LineStyle', '-', 'linewidth', 1.5, 'DisplayName','$C_L A$'); hold on;
         plot(xPlotVariable, test.(testID).windAxesAero.sideForceCoeff, 'Color', 'y', ...
             'LineStyle', '-', 'linewidth', 1.5, 'DisplayName','$C_S A$'); hold on;
-        scatter(xMarkerAngle, liftValue, ...
+        scatter(xMarkerAngle, test.(testID).windAxesAero.liftForceCoeff(testPointIndex), ...
             30, 'red', 'filled', 'HandleVisibility', 'off'); hold on;
-        scatter(xMarkerAngle, sideValue, ...
+        scatter(xMarkerAngle, test.(testID).windAxesAero.sideForceCoeff(testPointIndex), ...
             30, 'red', 'filled', 'HandleVisibility', 'off'); hold on;
         grid on;
         xlim([min(xPlotVariable) max(xPlotVariable)])
@@ -300,12 +265,12 @@ for testIndex = 48%:length(testList(:,1))
         %% saving
         % saveas(fig1,['.\',saveFolderName,'\',coverName,'-',testID,'-',testPointID,'.svg']);
 
-        saveFolderName = ['pressure_interp_fig-',experiment];
+        saveFolderName = ['pressure_fig-',experiment];
         if (~exist(['./',saveFolderName],'dir'))
 
             mkdir(['./',saveFolderName]);
         end
-        saveas(fig1,['.\',saveFolderName,'\',testID,'-',num2str(testPointIndex,'%04.f'),'.fig']);
+        saveas(fig1,['.\',saveFolderName,'\',testID,'-',testPointID,'.fig']);
 
 
         %% Report additional data

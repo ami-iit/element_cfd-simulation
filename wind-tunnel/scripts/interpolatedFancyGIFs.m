@@ -7,16 +7,16 @@ clc;
 experiment = 'exp_03_11_22'; % Name of the experiment data folder
 
 addpath(genpath('../'));            % Adding the main folder path
-figFolderName = ['pressure_interp_fig-',experiment];
+figFolderName = ['pressure_fancy_fig-',experiment];
 testList = dir([figFolderName,'/*-0001.fig']);  % List of the test files
 
 %% Create the folder to store the GIF file
-saveFolderName = ['pressure_interp_gif-',experiment];
+saveFolderName = ['pressure_fancy_gif-',experiment];
 if (~exist(['./',saveFolderName],'dir'))
     mkdir(['./',saveFolderName]);
 end
 
-for testIndex = 2:length(testList(:,1))
+for testIndex = 1:length(testList(:,1))
 testID     = testList(testIndex).name(1:end-9);
 filename   = [experiment,'-',testID,'.gif'];
 testpointList = dir([figFolderName,'/',testID,'*.fig']);
@@ -31,10 +31,7 @@ for n = 1 : (length(testpointList(:,1)) - 1)
     h = openfig([figFolderName,'/',testID,'-',testPoint,'.fig']);
 
     % Set the frame dimensions
-    set(h, 'Position', [0 0 2304 1296]);
-
-%     axis tight manual % this ensures that getframe() returns a consistent size
-%     axis([-0.5 1 -1 1 -1 1])
+    set(h, 'Position', [0 0 1620 1080]);
     
     % Capture the plot as an image
     frame      = getframe(h);

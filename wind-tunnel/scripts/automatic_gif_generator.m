@@ -7,28 +7,29 @@ clc;
 experiment = 'exp_03_11_22'; % Name of the experiment data folder
 
 addpath(genpath('../'));            % Adding the main folder path
-figFolderName = ['pressure_interp_fig-',experiment];
-testList = dir([figFolderName,'/*-0001.fig']);  % List of the test files
+GVPM_folderPath    = ['../',experiment,'/data_GVPM'];
+testList = dir([GVPM_folderPath,'/*.GVP']);  % List of the test files
 
 %% Create the folder to store the GIF file
-saveFolderName = ['pressure_interp_gif-',experiment];
-if (~exist(['./',saveFolderName],'dir'))
-    mkdir(['./',saveFolderName]);
-end
+    saveFolderName = ['pressure_gif-',experiment];
+    if (~exist(['./',saveFolderName],'dir'))
 
-for testIndex = 2:length(testList(:,1))
-testID     = testList(testIndex).name(1:end-9);
+        mkdir(['./',saveFolderName]);
+    end
+
+for testIndex = 1:length(testList(:,1))
+testID     = testList(testIndex).name(1:end-4);
 filename   = [experiment,'-',testID,'.gif'];
-testpointList = dir([figFolderName,'/',testID,'*.fig']);
+testpointList = dir([GVPM_folderPath,'/',testID,'*.pth']);
 
 
 %% Save each matlab .fig as a frame of the GIF file
 
 for n = 1 : (length(testpointList(:,1)) - 1)
 
-    [~,testPoint,~] = fileparts(testpointList(n,:).name(10:end-4));
+    [~,testPoint,~] = fileparts(testpointList(n,:).name(12:15));
     
-    h = openfig([figFolderName,'/',testID,'-',testPoint,'.fig']);
+    h = openfig(['.\pressure_fig-',experiment,'\',testID,'-PT',testPoint,'.fig']);
 
     % Set the frame dimensions
     set(h, 'Position', [0 0 2304 1296]);
@@ -45,7 +46,7 @@ for n = 1 : (length(testpointList(:,1)) - 1)
     if n == 1
         imwrite(imind,cm,['.\',saveFolderName,'\',filename],'gif', 'Loopcount',inf);
     else
-        imwrite(imind,cm,['.\',saveFolderName,'\',filename],'gif','WriteMode','append', 'DelayTime', 0.05);
+        imwrite(imind,cm,['.\',saveFolderName,'\',filename],'gif','WriteMode','append', 'DelayTime', 0.5);
     end
     close(h)
 end

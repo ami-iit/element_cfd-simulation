@@ -5,9 +5,9 @@ clc;
 %% Initialization
 
 % Test and point to be analyzed
-experiment  = 'exp_03_11_22'; % Experiment data {exp_21_03_22, exp_28_10_22}
-testID      = 'TID_0036';
-testPointID = 'PT0001';
+experiment  = 'exp_21_03_22'; % Experiment data {exp_21_03_22, exp_28_10_22}
+testID      = 'TID_0002';
+testPointID = 'PT0010';
 jointConfig = 'hovering'; % | hovering | flight30 | flight50 | flight60 |
 
 

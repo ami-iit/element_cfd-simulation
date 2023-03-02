@@ -11,11 +11,11 @@ clc;
 
 % Experiment and test to be mapped
 experiment  = 'exp_03_11_22';   % 'exp_21_03_22' | 'exp_03_11_22'
-addpath(genpath('../'));    
+% addpath(genpath('../'));    
 GVPM_folderPath = ['../',experiment,'/data_GVPM'];
 testList = dir([GVPM_folderPath,'/*.GVP']);  % List of the test files
 
-for testIndex = 48%:length(testList(:,1))
+for testIndex = 51%:length(testList(:,1))
 
     testID = testList(testIndex).name(1:end-4);
 
@@ -23,7 +23,9 @@ for testIndex = 48%:length(testList(:,1))
 
     % adding the main folder path
     GVPM_folderPath = ['../',experiment,'/data_GVPM'];
+    ws_FolderPath = ['../',experiment,'/data_Matlab/'];
     testpointList   = dir([GVPM_folderPath,'/',testID,'*.pth']);
+    test.(testID) = load([ws_FolderPath,testID,'/aerodynamicForces.mat']);  % test data loading
 
     % Import robot joint positions
     testConfig = readcell(['./srcPressureAnalysis/localConfigurations/',experiment,'-test-config.csv']);
@@ -39,12 +41,11 @@ for testIndex = 48%:length(testList(:,1))
     % Initialize min and max values
     testMaxPress = -1e4;
     testMinPress = 1e4;
-
+    
     for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
         % loading the workspaces for each test point
         [~,testPointID,~]       = fileparts(testpointList(testPointIndex,:).name(10:15));
-        wsFolderPath            = ['../',experiment,'/data_Matlab/'];
-        testPoint.(testPointID) = load([wsFolderPath,testID,'/pressureSensorsData/',testPointID,'.mat']);  % test point data loading
+        testPoint.(testPointID) = load([ws_FolderPath,testID,'/pressureSensorsData/',testPointID,'.mat']);  % test point data loading
         % assigning the max and min values
         pressArray    = struct2array(testPoint.(testPointID).pressureSensors.meanValues);
         maxPointPress = max(pressArray);
@@ -54,18 +55,28 @@ for testIndex = 48%:length(testList(:,1))
         if minPointPress < testMinPress, testMinPress = minPointPress; end
     end
 
+    %% Interpolation variables
+    
+    deltaAngleInterp = 1; % [deg]
+
+    if matches(configSet,'hovering')
+        deltaAngleTest = abs(test.(testID).state.betaDes(2) - test.(testID).state.betaDes(1));
+    else
+        deltaAngleTest = abs(test.(testID).state.alphaDes(2) - test.(testID).state.alphaDes(1));
+    end
+    N_interp_points  = round(deltaAngleTest/deltaAngleInterp);
+    N_testPoints     = length(fieldnames(testPoint));
+    N_total_points   = N_interp_points * (N_testPoints - 1) + 1;
+    
+
     %% Start point cycle
-
-    N_interp_points = 5;
-    N_total_points  = (N_interp_points - 1 ) * (length(testpointList(:,1)) - 1) + 1;
-
     for testPointIndex = 1 : N_total_points
 
         % close scopes and clear previous test point data
         close all;
         clearvars -except testPointIndex jointConfig testID testpointList ...
             experiment testMaxPress testMinPress configSet configName jointPos ...
-            testList N_interp_points N_total_points
+            testList N_interp_points N_total_points test deltaAngleInterp
         
         % Interpolated indices
         lowerIndex = floor((testPointIndex-1)/N_interp_points + 1);
@@ -81,10 +92,9 @@ for testIndex = 48%:length(testList(:,1))
         [~,upperTestPointID,~] = fileparts(testpointList(upperIndex,:).name(10:15));
 
         % Load data from matlab workspaces
-        wsFolderPath            = ['../',experiment,'/data_Matlab/'];
-        test.(testID)           = load([wsFolderPath,testID,'/aerodynamicForces.mat']);                                 % test data loading
-        testPoint.(lowerTestPointID) = load([wsFolderPath,testID,'/pressureSensorsData/',lowerTestPointID,'.mat']);  % lower test point data loading
-        testPoint.(upperTestPointID) = load([wsFolderPath,testID,'/pressureSensorsData/',upperTestPointID,'.mat']);  % upper test point data loading
+        ws_FolderPath            = ['../',experiment,'/data_Matlab/'];
+        testPoint.(lowerTestPointID) = load([ws_FolderPath,testID,'/pressureSensorsData/',lowerTestPointID,'.mat']);  % lower test point data loading
+        testPoint.(upperTestPointID) = load([ws_FolderPath,testID,'/pressureSensorsData/',upperTestPointID,'.mat']);  % upper test point data loading
 
         % Names of the covers and relative frames
         coverNames = {'face_front','face_back','chest','backpack','pelvis','lt_pelvis_wing','rt_pelvis_wing',...
@@ -104,8 +114,8 @@ for testIndex = 48%:length(testList(:,1))
         end
         
         % robot attitude angles in wind tunnel
-        yawAngle   = interp1([lowerIndex upperIndex],test.(testID).state.betaMeas([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
-        pitchAngle = interp1([lowerIndex upperIndex],test.(testID).state.alphaMeas([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1) + offsetAngle;
+        yawAngle   = interp1([lowerIndex upperIndex],test.(testID).state.betaDes([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
+        pitchAngle = interp1([lowerIndex upperIndex],test.(testID).state.alphaDes([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1) + offsetAngle;
 
         % set base Pose according to yaw and pitch angles
         R_yaw     = rotz(yawAngle);
@@ -152,6 +162,7 @@ for testIndex = 48%:length(testList(:,1))
                 %coverData.(coverName).pressValues(i,:)   = testPoint.(testPointID).pressureSensors.values.(coverData.(coverName).sensorsNames{i});
             end
 
+
             %% Pressure map initialization
 
             % Move pressure sensors locations from cover to global coordinates
@@ -180,8 +191,23 @@ for testIndex = 48%:length(testList(:,1))
 
         end % end of cover iteration
 
-
+        
         %% PLOTTING
+        if matches(configSet,'hovering')
+            xPlotVariable = test.(testID).state.betaDes;
+            interpXPlotVariable = (test.(testID).state.betaDes(1):deltaAngleInterp:test.(testID).state.betaDes(end))';
+            xPlotLabel    = '$\beta$';
+        else
+            xPlotVariable = test.(testID).state.alphaDes + offsetAngle;
+            interpXPlotVariable = (test.(testID).state.alphaDes(1):deltaAngleInterp:test.(testID).state.alphaDes(end))' + offsetAngle;
+            xPlotLabel    = '$\alpha$';
+        end
+        
+        interpolatedDragForceCoeff = interp1(xPlotVariable,test.(testID).windAxesAero.dragForceCoeff,interpXPlotVariable,'pchip');
+        interpolatedLiftForceCoeff = interp1(xPlotVariable,test.(testID).windAxesAero.liftForceCoeff,interpXPlotVariable,'pchip');
+        interpolatedSideForceCoeff = interp1(xPlotVariable,test.(testID).windAxesAero.sideForceCoeff,interpXPlotVariable,'pchip');
+
+        
 
         %% robot visualization
         iDynTreeWrappers.prepareVisualization(KinDynModel, meshFilePrefix, 'color', [0.96,0.96,0.96], ...
@@ -197,110 +223,134 @@ for testIndex = 48%:length(testList(:,1))
                 'FaceVertexCData',coverData.(coverNames{j}).interpPressValues,'FaceColor','interp','EdgeColor','none'); hold on;
         end
 
-        % Set arrow sizes
-        cylPosition   = 9;
-        cylRadius     = 0.01;
-        cylLength     = 0.25;
-        arrowRatio    = 0.2;
+        % Set wind vector properties
+        windVector.Position   = [8.9 0 0];
+        windVector.Components = [0.3 0 0];
+        windVector.Color      = [0 0.75 1];        
 
         % Draw wind velocity vector
-        [Xc,Yc,Zc] = cylinder(cylRadius);
-        Zc         = Zc * cylLength;
-        surf(Zc + cylPosition,Yc,Xc,'FaceColor',[0, 0.4470, 0.7410],'EdgeColor','none');
-        patch(Zc(1,:) + cylPosition,Yc(1,:),Xc(1,:),[0, 0.4470, 0.7410]);
-        Yh(1,:) = Yc(1,:)*2;
-        Yh(2,:) = Yc(2,:)*0;
-        Xh(1,:) = Xc(1,:)*2;
-        Xh(2,:) = Xc(2,:)*0;
-        Zh      = Zc * arrowRatio;
-        surf(Zh + cylPosition + cylLength,Yh,Xh,'FaceColor',[0, 0.4470, 0.7410],'EdgeColor','none');
-        patch(Zh(1,:) + cylPosition + cylLength,Yh(1,:),Xh(1,:),[0, 0.4470, 0.7410]);
+        arrow3d(windVector.Position, windVector.Components, windVector.Color);
 
-        % Assign wind velocity vector name
-        text(0.35*cylLength + cylPosition,0,0.05,'$V_w$','Interpreter','latex','FontSize',24);
+        % Display wind velocity vector name
+        text(0.35*windVector.Components(1) + windVector.Position(1),0,0.07,'$V_w$','Interpreter','latex','FontSize',48,'Color',windVector.Color);
+
+        % Draw aerodynamic force
+%         arrow3d(basePose(1:3,4), 4*[interpolatedDragForceCoeff(testPointIndex) interpolatedLiftForceCoeff(testPointIndex) interpolatedSideForceCoeff(testPointIndex)], [1 1 0], 0.006);
 
 
-        axis([9 11 -1 1 -1 1])
-        set(fig1, 'Position', [0 0 2304 1296]);
-
+        axis([8.5 11 -1 1 -0.7 0.7])
+        set(fig1, 'Position', [0 0 3840 2160]);
+        grid off;
         title(['Pressure map, ',configSet,'-',configName,', $\alpha=',num2str(round(pitchAngle),'%.0f'),'^\circ$, $\beta=',num2str(round(yawAngle),'%.0f'),'^\circ$'],'FontSize',22,'Interpreter','latex');
+        
+        % Set colors
+        fig1.Color = [0,0,0];
+        set(gcf, 'InvertHardCopy', 'off'); 
 
         ax = gca;
-        ax.Position(1) = ax.Position(1) + 0.05;
+        ax.Position = [0.05,-0.2,1,1.4]; % [-0.2,-0.2,1.2,1.4]
 
+        ax.XTick = [];
+        ax.YTick = [];
+        ax.ZTick = [];
+
+        ax.XTickLabel = [];
+        ax.YTickLabel = [];
+        ax.ZTickLabel = [];
+        
+        ax.Color  = [0,0,0];
+        ax.XColor = [0,0,0];
+        ax.YColor = [0,0,0];
+        ax.ZColor = [0,0,0];
+        
+
+        %%  set colormap and colorbar 
         cmap = colormap("jet");
 
-        %%  set colorbar
-        caxis([round(testMinPress) round(testMaxPress)])
-        c                   = colorbar('FontSize', 16, 'Location', 'east');
-        if round(testMinPress) ~= c.Ticks(1)
-            c.Ticks = [round(testMinPress) c.Ticks];
-        if round(testMaxPress) ~= c.Ticks(end)
-            c.Ticks = [c.Ticks round(testMaxPress)];
-        end
-        c.Position          = [0.9 0.135 0.025 0.68];
+        %caxis([round(testMinPress) round(testMaxPress)])
+        caxis([-203 173])
+        c = colorbar('FontSize', 16, 'Location', 'east');
+        c.Position          = [0.9 0.135 0.02 0.68];
         c.AxisLocation      = 'in';
+        c.Color             = [1,1,1];
+        c.FontSize          = 32;
         c.Label.String      = '$\Delta p$ [Pa]';
-        c.Label.FontSize    = 22;
+        c.Label.FontSize    = 48;
         c.Label.Interpreter = 'latex';
         c.Label.Rotation    = 0;
         c.Label.Units       = 'normalized';
         c.Label.Position    = [0.5 1.08 0]; % to change its position
 
         %% Forces plots
-        if matches(configSet,'hovering')
-            xPlotVariable = test.(testID).state.betaMeas;
-            xPlotLabel    = '$\beta$';
-            xMarkerAngle  = yawAngle;
-            dragValue  = interp1([lowerIndex upperIndex],test.(testID).windAxesAero.dragForceCoeff([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
-            liftValue  = interp1([lowerIndex upperIndex],test.(testID).windAxesAero.liftForceCoeff([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
-            sideValue  = interp1([lowerIndex upperIndex],test.(testID).windAxesAero.sideForceCoeff([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
-        else
-            xPlotVariable = test.(testID).state.alphaMeas + offsetAngle;
-            xPlotLabel    = '$\alpha$';
-            xMarkerAngle  = pitchAngle;
-            dragValue  = interp1([lowerIndex upperIndex],test.(testID).windAxesAero.dragForceCoeff([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
-            liftValue  = interp1([lowerIndex upperIndex],test.(testID).windAxesAero.liftForceCoeff([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
-            sideValue  = interp1([lowerIndex upperIndex],test.(testID).windAxesAero.sideForceCoeff([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
-        end
-
-        
+%         if matches(configSet,'hovering')
+%             xPlotVariable = test.(testID).state.betaDes;
+%             interpXPlotVariable = (test.(testID).state.betaDes(1):deltaAngleInterp:test.(testID).state.betaDes(end))';
+%             xPlotLabel    = '$\beta$';
+%         else
+%             xPlotVariable = test.(testID).state.alphaDes + offsetAngle;
+%             interpXPlotVariable = (test.(testID).state.alphaDes(1):deltaAngleInterp:test.(testID).state.alphaDes(end))' + offsetAngle;
+%             xPlotLabel    = '$\alpha$';
+%         end
+%         
+%         
+%         interpolatedDragForceCoeff = interp1(xPlotVariable,test.(testID).windAxesAero.dragForceCoeff,interpXPlotVariable,'pchip');
+%         interpolatedLiftForceCoeff = interp1(xPlotVariable,test.(testID).windAxesAero.liftForceCoeff,interpXPlotVariable,'pchip');
+%         interpolatedSideForceCoeff = interp1(xPlotVariable,test.(testID).windAxesAero.sideForceCoeff,interpXPlotVariable,'pchip');
 
         % Drag area plot
-        axes('Position',[.03 .6 .22 .25])
+        axes()
         box on
-        plot(xPlotVariable, test.(testID).windAxesAero.dragForceCoeff, 'Color', 'k', ...
-            'LineStyle', '-', 'linewidth', 1.5, 'DisplayName','$C_D A$'); hold on;
-        scatter(xMarkerAngle, dragValue, ...
-            30, 'red', 'filled', 'HandleVisibility', 'off'); hold on;
+        plot(interpXPlotVariable(1:testPointIndex), interpolatedDragForceCoeff(1:testPointIndex), 'Color', 'green', ...
+            'LineStyle', '-', 'linewidth', 2, 'DisplayName','$C_D A$'); hold on;
+        scatter(interpXPlotVariable(testPointIndex), interpolatedDragForceCoeff(testPointIndex), ...
+            45, 'green', 'filled', 'HandleVisibility', 'off'); hold on;
         grid on;
-        xlim([min(xPlotVariable) max(xPlotVariable)])
-        xlabel(xPlotLabel,'Interpreter','latex')
-        legend('Interpreter','latex','Location','best')
+        axis([min(xPlotVariable) max(xPlotVariable) 0.01*floor(min(100*test.(testID).windAxesAero.dragForceCoeff)) 0.01*ceil(max(100*test.(testID).windAxesAero.dragForceCoeff))])
+        xlabel(xPlotLabel,'Interpreter','latex','FontSize',20)
+        legend('Interpreter','latex','Location','nw','FontSize',20,'Color',[0,0,0],'TextColor',[1,1,1])
         legend show
+
+        ax2 = gca;
+        ax2.Position = [.03 .6 .22 .25];
+        ax2.Color  = [0,0,0];
+        ax2.XColor = [1,1,1];
+        ax2.YColor = [1,1,1];
+        ax2.ZColor = [1,1,1];
+        ax2.GridLineStyle = '--';
+        ax2.Box = 'off';
+
 
         % Lift and side force areas
-        axes('Position',[.03 .2 .22 .25])
+        axes()
         box on
-        plot(xPlotVariable, test.(testID).windAxesAero.liftForceCoeff, 'Color', 'b', ...
-            'LineStyle', '-', 'linewidth', 1.5, 'DisplayName','$C_L A$'); hold on;
-        plot(xPlotVariable, test.(testID).windAxesAero.sideForceCoeff, 'Color', 'y', ...
-            'LineStyle', '-', 'linewidth', 1.5, 'DisplayName','$C_S A$'); hold on;
-        scatter(xMarkerAngle, liftValue, ...
-            30, 'red', 'filled', 'HandleVisibility', 'off'); hold on;
-        scatter(xMarkerAngle, sideValue, ...
-            30, 'red', 'filled', 'HandleVisibility', 'off'); hold on;
+        plot(interpXPlotVariable(1:testPointIndex), interpolatedLiftForceCoeff(1:testPointIndex), 'Color', 'white', ...
+            'LineStyle', '-', 'linewidth', 2, 'DisplayName','$C_L A$'); hold on;
+        plot(interpXPlotVariable(1:testPointIndex), interpolatedSideForceCoeff(1:testPointIndex), 'Color', 'magenta', ...
+            'LineStyle', '-', 'linewidth', 2, 'DisplayName','$C_S A$'); hold on;
+        scatter(interpXPlotVariable(testPointIndex), interpolatedLiftForceCoeff(testPointIndex), ...
+            45, 'white', 'filled', 'HandleVisibility', 'off'); hold on;
+        scatter(interpXPlotVariable(testPointIndex), interpolatedSideForceCoeff(testPointIndex), ...
+            45, 'magenta', 'filled', 'HandleVisibility', 'off'); hold on;
         grid on;
-        xlim([min(xPlotVariable) max(xPlotVariable)])
-        xlabel(xPlotLabel,'Interpreter','latex')
-        legend('Interpreter','latex','Location','best')
+        axis([min(xPlotVariable) max(xPlotVariable) 0.01*floor(min(100*[test.(testID).windAxesAero.liftForceCoeff; test.(testID).windAxesAero.sideForceCoeff])) ...
+            0.01*ceil(max(100*[test.(testID).windAxesAero.liftForceCoeff; test.(testID).windAxesAero.sideForceCoeff]))])
+        xlabel(xPlotLabel,'Interpreter','latex','FontSize',20)
+        legend('Interpreter','latex','Location','e','FontSize',20,'Color',[0,0,0],'TextColor',[1,1,1])
         legend show
 
+        ax3 = gca;
+        ax3.Position = [.03 .2 .22 .25];
+        ax3.Color  = [0,0,0];
+        ax3.XColor = [1,1,1];
+        ax3.YColor = [1,1,1];
+        ax3.ZColor = [1,1,1];
+        ax3.GridLineStyle = '--';
+        ax3.Box = 'off';
 
         %% saving
         % saveas(fig1,['.\',saveFolderName,'\',coverName,'-',testID,'-',testPointID,'.svg']);
 
-        saveFolderName = ['pressure_interp_fig-',experiment];
+        saveFolderName = ['pressure_fancy_fig-',experiment];
         if (~exist(['./',saveFolderName],'dir'))
 
             mkdir(['./',saveFolderName]);
@@ -318,4 +368,4 @@ for testIndex = 48%:length(testList(:,1))
 end
 
 %% Remove path
-rmpath(genpath('../'));            % Adding the main folder path
+% rmpath(genpath('../'));            % Adding the main folder path

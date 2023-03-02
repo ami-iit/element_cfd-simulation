@@ -16,7 +16,7 @@ clc;
 
 % Experiment and test to be mapped
 experiment  = 'exp_21_03_22';   % 'exp_21_03_22' | 'exp_03_11_22'
-testID      = 'TID_0012';       
+testID      = 'TID_0001';       
 
 %% Import data
 
@@ -56,7 +56,7 @@ end
 
 %% Start point cycle
 
-for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
+for testPointIndex = (length(testpointList(:,1)) - 1) %1 : (length(testpointList(:,1)) - 1)
     
     % close scopes and clear previous test point data
     close all;
@@ -94,8 +94,8 @@ for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
     % set base Pose according to yaw and pitch angles
     R_yaw     = rotz(yawAngle);
     R_pitch   = roty(pitchAngle - 90);
-    basePose  = [R_yaw * R_pitch, [0.3; 0; 0];
-                      zeros(1,3),          1];
+    basePose  = [R_yaw * R_pitch, [10; 0; 0];
+                      zeros(1,3),         1];
 
     % data for using iDynTreeWrappers functions
     modelPath  = 'C:\Users\apaolino\code\component_ironcub\models\iRonCub-Mk1\iRonCub\robots\iRonCub-Mk1_Gazebo\';
@@ -181,7 +181,7 @@ for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
     %% robot visualization 
     iDynTreeWrappers.prepareVisualization(KinDynModel, meshFilePrefix, 'color', [0.96,0.96,0.96], ...
         'material', 'dull', ... 'style', 'wireframe','wireframe_rendering',0.8, ...
-        'transparency', 0.3, 'debug', true, 'view', [-45 5]);
+        'transparency', 0.3, 'debug', true, 'view', [-45 5]); %[-45 5]
 
     %% Pressure map plot
     fig1 = figure(1);
@@ -191,8 +191,31 @@ for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
         p = patch('Faces',coverData.(coverNames{j}).patchFaces,'Vertices',coverData.(coverNames{j}).patchPoints,...
             'FaceVertexCData',coverData.(coverNames{j}).interpPressValues,'FaceColor','interp','EdgeColor','none'); hold on;
     end
+    
+    % Set arrow sizes
+    cylPosition   = 9;
+    cylRadius     = 0.01;
+    cylLength     = 0.25;
+    arrowRatio    = 0.2;
+    
+    % Draw wind velocity vector
+    [Xc,Yc,Zc] = cylinder(cylRadius);
+    Zc         = Zc * cylLength;
+    surf(Zc + cylPosition,Yc,Xc,'FaceColor',[0, 0.4470, 0.7410],'EdgeColor','none');
+    patch(Zc(1,:) + cylPosition,Yc(1,:),Xc(1,:),[0, 0.4470, 0.7410]);
+    Yh(1,:) = Yc(1,:)*2;
+    Yh(2,:) = Yc(2,:)*0;
+    Xh(1,:) = Xc(1,:)*2;
+    Xh(2,:) = Xc(2,:)*0;
+    Zh      = Zc * arrowRatio;
+    surf(Zh + cylPosition + cylLength,Yh,Xh,'FaceColor',[0, 0.4470, 0.7410],'EdgeColor','none');
+    patch(Zh(1,:) + cylPosition + cylLength,Yh(1,:),Xh(1,:),[0, 0.4470, 0.7410]);
+    
+    % Assign wind velocity vector name
+    text(0.35*cylLength + cylPosition,0,0.05,'$V_w$','Interpreter','latex','FontSize',24);
+    
 
-    axis([-0.5 1 -1 1 -1 1])
+    axis([9 11 -1 1 -1 1])
     set(fig1, 'Position', [0 0 2304 1296]);
     if matches(configSet,'hovering')
         title(['Pressure map, ',configSet,'-',configName,', $\beta=',num2str(round(yawAngle),'%.0f'),'^\circ$'],'FontSize',22,'Interpreter','latex');
@@ -223,9 +246,13 @@ for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
     % end
 
     %%  set colorbar
-    caxis([round(testMinPress) round(testMaxPress)])
+    clim([round(testMinPress) round(testMaxPress)])
     c                   = colorbar('FontSize', 16, 'Location', 'east');
-    c.Ticks             = [round(testMinPress) c.Ticks round(testMaxPress)];
+    if round(testMinPress) ~= c.Ticks(1) 
+        c.Ticks = [round(testMinPress) c.Ticks]; 
+    elseif round(testMaxPress) ~= c.Ticks(end) 
+        c.Ticks = [c.Ticks round(testMaxPress)]; 
+    end
     c.Position          = [0.9 0.135 0.025 0.68];
     c.AxisLocation      = 'in';
     c.Label.String      = '$\Delta p$ [Pa]';
@@ -280,19 +307,19 @@ for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
     %% saving
     % saveas(fig1,['.\',saveFolderName,'\',coverName,'-',testID,'-',testPointID,'.svg']);
 
-    saveFolderName = ['pressure_fig-',experiment];
-    if (~exist(['./',saveFolderName],'dir'))
-
-        mkdir(['./',saveFolderName]);
-    end
-    saveas(fig1,['.\',saveFolderName,'\',testID,'-',testPointID,'.fig']);
+%     saveFolderName = ['pressure_fig-',experiment];
+%     if (~exist(['./',saveFolderName],'dir'))
+% 
+%         mkdir(['./',saveFolderName]);
+%     end
+%     saveas(fig1,['.\',saveFolderName,'\',testID,'-',testPointID,'.fig']);
 
 
     %% Report additional data
-    fprintf(['rt_foot \x394p = ',num2str(testPoint.(testPointID).pressureSensors.meanValues.S1,3),' [Pa] \n']);
-    fprintf(['lt_foot \x394p = ',num2str(testPoint.(testPointID).pressureSensors.meanValues.S3,3),' [Pa] \n\n']);
-    fprintf(['Global pressure range: ',num2str(globalMinPress,3),' [Pa] \x2264 \x394p \x2264 ',num2str(globalMaxPress,3),' [Pa] \n']);
-    fprintf(['Total acquisition time: \x394T = ',num2str(testPoint.(testPointID).pressureSensors.time(end),3),' [s] \n']);
+%     fprintf(['rt_foot \x394p = ',num2str(testPoint.(testPointID).pressureSensors.meanValues.S1,3),' [Pa] \n']);
+%     fprintf(['lt_foot \x394p = ',num2str(testPoint.(testPointID).pressureSensors.meanValues.S3,3),' [Pa] \n\n']);
+%     fprintf(['Global pressure range: ',num2str(globalMinPress,3),' [Pa] \x2264 \x394p \x2264 ',num2str(globalMaxPress,3),' [Pa] \n']);
+%     fprintf(['Total acquisition time: \x394T = ',num2str(testPoint.(testPointID).pressureSensors.time(end),3),' [s] \n']);
 
 end
 
