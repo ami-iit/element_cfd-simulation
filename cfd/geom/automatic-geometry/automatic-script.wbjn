@@ -1,0 +1,87 @@
+﻿# encoding: utf-8
+# 2023 R1
+SetScriptVersion(Version="23.1.153")
+
+########## INPUT DATA ##########
+# Set files folder
+dirPath = "C:/Users/apaolino/OneDrive - Fondazione Istituto Italiano Tecnologia/Documenti/ANSYS/testing/geometry_automation/"
+# File names
+pitchAnglesFile = "pitchAngles.txt"
+yawAnglesFile   = "yawAngles.txt"
+geometryFile    = "ironcub-model.scdoc"
+scriptFile      = "ironcub-model-script.scscript"
+jointConfigCSV  = "jointConfig.csv"
+
+
+# Load attitude angles
+file1 = open(dirPath + pitchAnglesFile, 'r')
+pitchAngleList = file1.readlines()
+file2 = open(dirPath + yawAnglesFile, 'r')
+yawAngleList = file2.readlines()
+
+file3 = open(dirPath + jointConfigCSV, 'r')
+jointConfigFile = file3.readlines()
+jointConfigList = []
+for jointConfig in jointConfigFile:
+    temp = jointConfig[:-1].split(',')
+    jointConfigList.append(temp[1:]) #splitting values by comma
+
+
+# Cycle on the joint config
+jointConfigCounter = 0
+for jointConfig in jointConfigList:
+    # Cycle on the pitch angles (other than 0 and 180)
+    for pitchAngle in pitchAngleList[1:-1]:
+        for yawAngle in yawAngleList:
+            # Load and open SC geometry
+            system1   = GetSystem(Name="Geom")
+            geometry1 = system1.GetContainer(ComponentName="Geometry")
+            geometry1.SetFile(FilePath = dirPath + geometryFile)     
+            geometry1.Edit(IsSpaceClaimGeometry=True)
+            
+            # Edit Parameters and refresh geometry
+            designPoint1 = Parameters.GetDesignPoint(Name="0")
+            designPoint1.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P1"),Expression=pitchAngle[0:-1])
+            designPoint1.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P2"),Expression=yawAngle[0:-1])
+            
+            jointCounter = 0
+            for jointAngle in jointConfig:
+                designPoint1.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P"+str(jointCounter+3)),Expression=jointAngle+" [degree]")
+                jointCounter += 1
+            
+            geometry1.Refresh()
+            
+            # Run the geometry script, close SC, save WB project
+            geometry1.RunScript(ScriptFile = dirPath + scriptFile)
+            geometry1.Exit()
+            Save(Overwrite=True)
+            
+    # Cycle on 0 and 180 pitch angles
+    for pitchAngle in [pitchAngleList[0],pitchAngleList[-1]]:
+        yawAngle = "0 [degree]"
+        
+        # Load and Open Geometry
+        system1   = GetSystem(Name="Geom")
+        geometry1 = system1.GetContainer(ComponentName="Geometry")
+        geometry1.SetFile(FilePath = dirPath + geometryFile)
+        geometry1.Edit(IsSpaceClaimGeometry=True)
+        
+        # Edit Parameters and refresh geometry
+        designPoint1 = Parameters.GetDesignPoint(Name="0")
+        designPoint1.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P1"),Expression=pitchAngle[0:-1])
+        designPoint1.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P2"),Expression=yawAngle)
+        
+        jointCounter = 0
+        for jointAngle in jointConfig:
+            designPoint1.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P"+str(jointCounter+3)),Expression=jointAngle+" [degree]")
+            jointCounter += 1
+        
+        geometry1.Refresh()
+        
+        # Run the geometry script, close SC, save WB project
+        geometry1.RunScript(ScriptFile = dirPath + scriptFile)
+        geometry1.Exit()
+        Save(Overwrite=True)
+        
+    jointConfigCounter +=1
+
