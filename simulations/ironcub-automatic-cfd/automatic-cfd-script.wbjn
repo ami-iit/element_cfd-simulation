@@ -1,0 +1,115 @@
+﻿# encoding: utf-8
+# 2023 R1
+SetScriptVersion(Version="23.1.153")
+
+########## INPUT DATA ##########
+# Set files folder
+dirPath = "E:/apaolino/automatic-cfd/"
+
+# File names
+geometryFile        = "ironcub-model-share.scdoc"
+scriptFile          = "ironcub-model-script.scscript"
+pitchAnglesFileName = "pitchAngles.csv"
+yawAnglesFileName   = "yawAngles.csv"
+jointConfigFileName = "jointConfig.csv"
+outputParamFileName = "outputParameters.csv"
+
+# Load pitch angles
+with open(dirPath + pitchAnglesFileName, 'r') as pitchAngleCSV:
+    pitchAngleFile   = pitchAngleCSV.readlines()
+    pitchAngleString = pitchAngleFile[0]
+    pitchAngleList   = pitchAngleString[:-1].split(',')
+
+# Load yaw angles
+with open(dirPath + yawAnglesFileName, 'r') as yawAngleCSV:
+    yawAngleFile   = yawAngleCSV.readlines()
+    yawAngleString = yawAngleFile[0]
+    yawAngleList   = yawAngleString[:-1].split(',')
+
+# Load robot joint config
+with open(dirPath + jointConfigFileName, 'r') as jointConfigCSV:
+    jointConfigFile  = jointConfigCSV.readlines()
+    jointConfigList  = []
+    jointConfigNames = []
+    for jointConfig in jointConfigFile:
+        temp = jointConfig[:-1].split(',')
+        jointConfigList.append(temp[1:]) #splitting values by comma
+        jointConfigNames.append(temp[0])
+
+# Load output parameters file      
+with open(dirPath + outputParamFileName, 'r') as outputParamCSV:
+    outputParameterFile   = outputParamCSV.readlines()
+    outputParameterList   = outputParameterFile[0].split(',')
+    outputParameterList   = outputParameterList[3:]
+    outputParameterNumber = len(outputParameterList)
+    
+
+
+# Cycle on the joint config
+jointConfigCounter = 0
+for jointConfig in jointConfigList:
+    
+    # Cycle on the yaw angles
+    for yawAngle in yawAngleList:
+    
+        # yaw angle different from -90 and 90 (singular configurations) check
+        if (yawAngle != "-90" and yawAngle != "90"):
+            pitchAngleListUpdated = pitchAngleList      # executes all the pitch angles
+        else:
+            pitchAngleListUpdated = ["0"]               # executes just 0 pitch angle
+            
+        # cycle for pitch angles
+        for pitchAngle in pitchAngleListUpdated:
+            
+            # Load and open SC geometry
+            geomSystem    = GetSystem(Name="Geom")
+            geomComponent = geomSystem.GetContainer(ComponentName="Geometry")
+            geomComponent.SetFile(FilePath = dirPath + geometryFile)     
+            geomComponent.Edit(IsSpaceClaimGeometry=True)
+            
+            # Edit Parameters and refresh geometry
+            designPoint = Parameters.GetDesignPoint(Name="0")
+            designPoint.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P"+str(outputParameterNumber+1)),Expression=pitchAngle+" [degree]")
+            designPoint.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P"+str(outputParameterNumber+2)),Expression=yawAngle+" [degree]")
+            
+            jointCounter = 0
+            for jointAngle in jointConfig:
+                designPoint.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P"+str(jointCounter+outputParameterNumber+3)),Expression=jointAngle+" [degree]")
+                jointCounter += 1
+            
+            geomComponent.Refresh()
+            
+            # Run the geometry script, close SC
+            geomComponent.RunScript(ScriptFile = dirPath + scriptFile)
+            geomComponent.Exit()
+            
+            # Generate the updated mesh
+            fluentSystem  = GetSystem(Name="FLTG")
+            meshComponent = fluentSystem.GetComponent(Name="Mesh")
+            meshComponent.Update(AllDependencies=True)
+            
+            # Update the Setup 
+            setupComponent = fluentSystem.GetComponent(Name="Setup")
+            setupComponent.Update(AllDependencies=True)
+            
+            # Run the simulation 
+            solutionComponent = fluentSystem.GetComponent(Name="Solution")
+            solutionComponent.Update(AllDependencies=True)
+            
+            # Save project after cycle end
+            Save(Overwrite=True)
+            
+            # Write Output Parameters to file
+            
+            outputParameterString  = str(jointConfigNames[jointConfigCounter]) + "," + str(pitchAngle) + "," + str(yawAngle)
+            outputParameterCounter = 0
+            for outputParameter in outputParameterList:
+                outputParameterValue = designPoint.GetParameterValue(Parameter=Parameters.GetParameter(Name="P"+str(outputParameterCounter+1)))
+                outputParameterString  = outputParameterString + "," + str(outputParameterValue)
+                outputParameterCounter += 1
+            
+            with open(dirPath + outputParamFileName, 'a') as outputParamCSV:
+                outputParamCSV.writelines("\n"+outputParameterString)
+        
+    jointConfigCounter +=1
+
