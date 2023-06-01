@@ -1,6 +1,7 @@
 ## Wind tunnel setup CFD results
 
-The results contained in this repo are classified based on different parameters.
+in this repo there are the aerodynamic force and torque coefficients results for the CFD simulations on the iRonCub wind tunnel setup geometry according to different _Meshes_, _Configurations_ and _Turbulence models_.
+the files are stored in _Fluent_ `.out` and standard `.txt` formats.
 
 ### Mesh
 
@@ -16,6 +17,8 @@ The results contained in this repo are classified based on different parameters.
 * `flight30`
 * `flight50`
 * `flight60`
+* `hovJointVar5`
+* `hovJointVar9`
 
 ### RANS turbulence model
 

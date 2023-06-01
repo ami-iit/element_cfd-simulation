@@ -1,21 +1,4 @@
-# CFD
+## Simulations
 
-In this folder are stored all the files related to the CFD simulations performed by [Antonello Paolino](https://github.com/antonellopaolino), starting from the simulations of the flow over the sphere and the iRonCub head, ending to the simulations over the iRonCub whole-body geometry. The outcome is to generate correct parameters to obtain the forces and torques on iRonCub in flight conditions.
-
-https://user-images.githubusercontent.com/75119799/141452850-bcd2fc05-2bc7-4a89-8f3d-3c8bcde92199.mp4
-
-## geometries
-
-Here you can find the simplified geometries used for the simulations and other useful files as the automatic-CAD configuration generator script.
-
-## iRonCub
-
-Here are collected all the simulations on iRonCub parts and whole-body simplified geometries.
-
-## sphere
-
-Here the preliminary simulations involving the flow over the sphere are reported for different flow conditions and turbulence models applied.
-
-## wind-tunnel
-
-Here there are all the results obtained by CFD simulations on the robot setup in the wind tunnel, testing different mesh refinements.
+In this repo there are some of the simulation projects and files used for the CFD studies on a simple bluff body as the sphere and the multi-object complex geometry of iRonCub.
+in particular in the `ironcub-automatic-cfd` it's possible to find out all the useful files and info to perform automatic CFD simulations on the iRonCub geometry according to the varying input parameters.
