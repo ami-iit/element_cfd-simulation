@@ -1,0 +1,258 @@
+Auto-Transcript Start Time:  15:42:21, 16 Jun 2023 W. Europe Daylight Time 
+Current Directory: "E:\apaolino\auto-cfd-sim\case"
+
+              Welcome to ANSYS Fluent 2023 R1
+
+              Copyright 1987-2023 ANSYS, Inc. All Rights Reserved.
+              Unauthorized use, distribution or duplication is prohibited.
+              This product is subject to U.S. laws governing export and re-export.
+              For full Legal Notice, see documentation.
+
+Build Time: Nov 28 2022 09:52:02 EST  Build Id: 10208  
+ 
+Connected License Server List:	1055@iitlicwge012.iit.local
+
+     --------------------------------------------------------------
+     This is an academic version of ANSYS FLUENT. Usage of this product
+     license is limited to the terms and conditions specified in your ANSYS
+     license form, additional terms section.
+     --------------------------------------------------------------
+Host spawning Node 0 on machine "IITICUBWS067" (win64).
+
+----------------------------------------------------------------------------------
+ID    Hostname      Core   O.S.         PID    Vendor                            
+----------------------------------------------------------------------------------
+n47   IITICUBWS067  48/48  Windows-x64  7564   Intel(R) Xeon(R) Silver 4214R     
+n46   IITICUBWS067  47/48  Windows-x64  17560  Intel(R) Xeon(R) Silver 4214R     
+n45   IITICUBWS067  46/48  Windows-x64  13988  Intel(R) Xeon(R) Silver 4214R     
+n44   IITICUBWS067  45/48  Windows-x64  18784  Intel(R) Xeon(R) Silver 4214R     
+n43   IITICUBWS067  44/48  Windows-x64  15820  Intel(R) Xeon(R) Silver 4214R     
+n42   IITICUBWS067  43/48  Windows-x64  13744  Intel(R) Xeon(R) Silver 4214R     
+n41   IITICUBWS067  42/48  Windows-x64  17668  Intel(R) Xeon(R) Silver 4214R     
+n40   IITICUBWS067  41/48  Windows-x64  12692  Intel(R) Xeon(R) Silver 4214R     
+n39   IITICUBWS067  40/48  Windows-x64  11660  Intel(R) Xeon(R) Silver 4214R     
+n38   IITICUBWS067  39/48  Windows-x64  12716  Intel(R) Xeon(R) Silver 4214R     
+n37   IITICUBWS067  38/48  Windows-x64  19592  Intel(R) Xeon(R) Silver 4214R     
+n36   IITICUBWS067  37/48  Windows-x64  19968  Intel(R) Xeon(R) Silver 4214R     
+n35   IITICUBWS067  36/48  Windows-x64  19224  Intel(R) Xeon(R) Silver 4214R     
+n34   IITICUBWS067  35/48  Windows-x64  20100  Intel(R) Xeon(R) Silver 4214R     
+n33   IITICUBWS067  34/48  Windows-x64  17416  Intel(R) Xeon(R) Silver 4214R     
+n32   IITICUBWS067  33/48  Windows-x64  18412  Intel(R) Xeon(R) Silver 4214R     
+n31   IITICUBWS067  32/48  Windows-x64  16804  Intel(R) Xeon(R) Silver 4214R     
+n30   IITICUBWS067  31/48  Windows-x64  19872  Intel(R) Xeon(R) Silver 4214R     
+n29   IITICUBWS067  30/48  Windows-x64  2884   Intel(R) Xeon(R) Silver 4214R     
+n28   IITICUBWS067  29/48  Windows-x64  17252  Intel(R) Xeon(R) Silver 4214R     
+----------------------------------------------------------------------------------
+ID    Hostname      Core   O.S.         PID    Vendor                            
+----------------------------------------------------------------------------------
+n27   IITICUBWS067  28/48  Windows-x64  19028  Intel(R) Xeon(R) Silver 4214R     
+n26   IITICUBWS067  27/48  Windows-x64  19504  Intel(R) Xeon(R) Silver 4214R     
+n25   IITICUBWS067  26/48  Windows-x64  11148  Intel(R) Xeon(R) Silver 4214R     
+n24   IITICUBWS067  25/48  Windows-x64  17780  Intel(R) Xeon(R) Silver 4214R     
+n23   IITICUBWS067  24/48  Windows-x64  15336  Intel(R) Xeon(R) Silver 4214R     
+n22   IITICUBWS067  23/48  Windows-x64  17972  Intel(R) Xeon(R) Silver 4214R     
+n21   IITICUBWS067  22/48  Windows-x64  16932  Intel(R) Xeon(R) Silver 4214R     
+n20   IITICUBWS067  21/48  Windows-x64  12444  Intel(R) Xeon(R) Silver 4214R     
+n19   IITICUBWS067  20/48  Windows-x64  15052  Intel(R) Xeon(R) Silver 4214R     
+n18   IITICUBWS067  19/48  Windows-x64  19608  Intel(R) Xeon(R) Silver 4214R     
+n17   IITICUBWS067  18/48  Windows-x64  18728  Intel(R) Xeon(R) Silver 4214R     
+n16   IITICUBWS067  17/48  Windows-x64  18844  Intel(R) Xeon(R) Silver 4214R     
+n15   IITICUBWS067  16/48  Windows-x64  15788  Intel(R) Xeon(R) Silver 4214R     
+n14   IITICUBWS067  15/48  Windows-x64  12172  Intel(R) Xeon(R) Silver 4214R     
+n13   IITICUBWS067  14/48  Windows-x64  11612  Intel(R) Xeon(R) Silver 4214R     
+n12   IITICUBWS067  13/48  Windows-x64  13516  Intel(R) Xeon(R) Silver 4214R     
+n11   IITICUBWS067  12/48  Windows-x64  12460  Intel(R) Xeon(R) Silver 4214R     
+n10   IITICUBWS067  11/48  Windows-x64  15892  Intel(R) Xeon(R) Silver 4214R     
+n9    IITICUBWS067  10/48  Windows-x64  10920  Intel(R) Xeon(R) Silver 4214R     
+n8    IITICUBWS067  9/48   Windows-x64  19380  Intel(R) Xeon(R) Silver 4214R     
+----------------------------------------------------------------------------------
+ID    Hostname      Core   O.S.         PID    Vendor                            
+----------------------------------------------------------------------------------
+n7    IITICUBWS067  8/48   Windows-x64  6072   Intel(R) Xeon(R) Silver 4214R     
+n6    IITICUBWS067  7/48   Windows-x64  9672   Intel(R) Xeon(R) Silver 4214R     
+n5    IITICUBWS067  6/48   Windows-x64  19196  Intel(R) Xeon(R) Silver 4214R     
+n4    IITICUBWS067  5/48   Windows-x64  18808  Intel(R) Xeon(R) Silver 4214R     
+n3    IITICUBWS067  4/48   Windows-x64  17080  Intel(R) Xeon(R) Silver 4214R     
+n2    IITICUBWS067  3/48   Windows-x64  12844  Intel(R) Xeon(R) Silver 4214R     
+n1    IITICUBWS067  2/48   Windows-x64  17072  Intel(R) Xeon(R) Silver 4214R     
+n0*   IITICUBWS067  1/48   Windows-x64  18644  Intel(R) Xeon(R) Silver 4214R     
+host  IITICUBWS067         Windows-x64  3436   Intel(R) Xeon(R) Silver 4214R     
+
+MPI Option Selected: intel
+Selected system interconnect: default
+----------------------------------------------------------------------------------
+
+Cleanup script file is E:\\apaolino\\auto-cfd-sim\\case\\cleanup-fluent-IITICUBWS067-3436.bat
+Fast-loading "C:\PROGRA~1\ANSYSI~1\v231\fluent\fluent23.1.0\\addons\afd\lib\hdfio.bin"
+Done.
+
+Reading from IITICUBWS067:"E:\apaolino\auto-cfd-sim\case\hovering.cas.h5" in NODE0 mode ...
+  Reading mesh ...
+Warning: reading 16 partition grid onto 48 compute node machine.
+         will auto partition.
+      319093 cells,     1 cell zone  ...
+         319093 mixed cells,  zone id: 13898
+     1504591 faces,    25 face zones ...
+           1989 polygonal wall faces,  zone id: 147
+           1573 polygonal wall faces,  zone id: 227
+            744 polygonal wall faces,  zone id: 249
+            752 polygonal wall faces,  zone id: 175
+           1567 polygonal wall faces,  zone id: 229
+           1627 polygonal wall faces,  zone id: 238
+            253 polygonal wall faces,  zone id: 157
+            252 polygonal wall faces,  zone id: 231
+           3413 polygonal wall faces,  zone id: 228
+           3377 polygonal wall faces,  zone id: 236
+           2746 polygonal wall faces,  zone id: 156
+           2768 polygonal wall faces,  zone id: 155
+           2950 polygonal wall faces,  zone id: 250
+           2964 polygonal wall faces,  zone id: 176
+            145 polygonal wall faces,  zone id: 223
+           8638 polygonal wall faces,  zone id: 214
+            122 polygonal wall faces,  zone id: 226
+            628 polygonal wall faces,  zone id: 173
+            631 polygonal wall faces,  zone id: 242
+            363 polygonal wall faces,  zone id: 152
+            119 polygonal wall faces,  zone id: 233
+            242 polygonal wall faces,  zone id: 253
+            249 polygonal wall faces,  zone id: 247
+            405 polygonal velocity-inlet faces,  zone id: 177
+        1466074 mixed interior faces,  zone id: 13900
+      981222 nodes,     1 node zone  ...
+  Done.
+
+
+Building...
+     mesh
+	auto partitioning mesh by Metis (fast, Laplace),
+	distributing mesh
+		parts................................................,
+		faces................................................,
+		nodes................................................,
+		cells................................................,
+        bandwidth reduction using Reverse Cuthill-McKee: 8080/900 = 8.97778
+     materials,
+     interface,
+     domains,
+	mixture
+     zones,
+	ironcub_head
+	ironcub_left_arm
+	ironcub_left_leg_upper
+	ironcub_right_leg_upper
+	ironcub_right_arm
+	ironcub_root_link
+	ironcub_left_arm_pitch
+	ironcub_right_arm_pitch
+	ironcub_left_turbine
+	ironcub_right_turbine
+	ironcub_right_back_turbine
+	ironcub_left_back_turbine
+	ironcub_left_leg_lower
+	ironcub_right_leg_lower
+	ironcub_torso_roll
+	ironcub_torso
+	ironcub_left_arm_roll
+	ironcub_right_leg_pitch
+	ironcub_left_leg_pitch
+	ironcub_torso_pitch
+	ironcub_right_arm_roll
+	ironcub_right_leg_roll
+	ironcub_left_leg_roll
+	inlet
+	interior--fluid:0
+	fluid:0
+     parallel,
+Done.
+
+> mesh/modify-zones/sep-face-zone-mark yes Invalid zone.
+inlet region_in yes
+318460 cells marked
+
+ Separates zone 177 into 2 zones.
+Updating new zone information...
+   created new zone inlet:001 from inlet
+done.
+
+> define/boundary-conditions/zone-type inlet pressure-outlet
+
+> solve/initialize/initialize-flow
+
+> solve/iterate 10
+
+  iter  continuity  x-velocity  y-velocity  z-velocity           k       omega     time/iter
+     1  1.0000e+00  1.0868e-08  1.0858e-08  7.2801e-08  7.1323e-01  3.7319e-01  0:00:00    9
+     2  1.0000e+00  5.2895e-06  5.6022e-06  1.1223e-05  7.9063e-01  3.5342e-01  0:00:16    8
+     3  1.0000e+00  5.1340e-06  5.5657e-06  2.7530e-05  3.6050e-01  3.1899e-01  0:00:13    7
+     4  6.5209e-01  3.6090e-06  4.0874e-06  1.5382e-05  2.1287e-01  2.6239e-01  0:00:09    6
+     5  3.9403e-01  2.4786e-06  2.7655e-06  8.3560e-06  1.6096e-01  1.9015e-01  0:00:06    5
+     6  2.6818e-01  1.8359e-06  2.0151e-06  6.0893e-06  1.3506e-01  1.2071e-01  0:00:04    4
+     7  2.1837e-01  1.4301e-06  1.5444e-06  4.0434e-06  1.2210e-01  6.7806e-02  0:00:03    3
+     8  1.7380e-01  1.2119e-06  1.2949e-06  3.1025e-06  1.1103e-01  3.6092e-02  0:00:01    2
+     9  1.3631e-01  1.0662e-06  1.1221e-06  2.5239e-06  1.0145e-01  1.9245e-02  0:00:01    1
+    10  1.0757e-01  9.6804e-07  1.0115e-06  2.1930e-06  9.3936e-02  1.0655e-02  0:00:00    0
+
+> (cx-use-window-id 1)
+(handle-key "?")
+plot/residuals y y y y y y
+
+> display/set/picture/driver jpeg
+
+> display/set/picture/driver png
+
+> display/save-picture "E:/apaolino/prova1"
+
+> display/set/picture
+
+/display/set/picture> 
+color-mode/             landscape?              x-resolution
+driver/                 preview                 y-resolution
+invert-background?      use-window-resolution?
+
+/display/set/picture> x-resolution
+Raster image width [960] 960
+
+/display/set/picture> y-resolution
+Raster image height [720] 720
+
+/display/set/picture> q
+
+> q
+Use "exit" to leave the main menu.
+
+> display/save-picture "E:/apaolino/prova1"
+
+> (cx-gui-do cx-activate-item "ToolBar*Copy*savepicture")
+(cx-gui-do cx-activate-item "Save Picture*PanelButtons*PushButton2(Cancel)")
+display set picture x-resolution 1920 y-resolution 1440
+
+> display/save-picture "E:/apaolino/prova1"
+The file "E:/apaolino/prova1.png" already exists.
+OK to overwrite? [cancel] 
+
+> display set picture x-resolution 960 y-resolution 720
+
+> display/set/picture/driver jpeg
+
+> display set picture
+
+/display/set/picture> x-res
+Raster image width [960] 
+
+/display/set/picture> display/sinvalid command [display]
+ave-picture "E:/apaolino/prova1"
+
+/display/set/picture> q
+
+> display/save-picture "E:/apaolino/prova1"
+
+> display/objects/display velocity-magnitude-contour
+
+> display/views/restore-view right
+
+> display/save-picture "E:/apaolino/prova2"
+
+> (cx-gui-do cx-activate-item "MenuBar*FileMenu*Exit")
+(cx-gui-do cx-activate-item "Question*OK")
+Auto-Transcript Stop Time:  15:54:07, 16 Jun 2023 W. Europe Daylight Time 
+Total Transcript Time: 11 Minute 46 Second.

@@ -1,0 +1,6 @@
+# encoding: utf-8
+# 2023 R1
+SetScriptVersion(Version="23.1.153")
+template1 = GetTemplate(TemplateName="FLUENT")
+system1 = template1.CreateSystem()
+Save(Overwrite=True)

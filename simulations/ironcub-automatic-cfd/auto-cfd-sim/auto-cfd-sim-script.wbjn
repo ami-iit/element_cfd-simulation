@@ -1,0 +1,115 @@
+# encoding: utf-8
+# 2023 R1
+SetScriptVersion(Version="23.1.153")
+
+########## INPUT DATA ##########
+# Set files folder
+dirPath = "E:/apaolino/auto-cfd-sim/"
+srcPath  = dirPath + "src/"
+dataPath = dirPath + "data/"
+casePath = dirPath + "case/"
+
+# File names
+pitchAnglesFileName = "pitchAngles.csv"
+yawAnglesFileName   = "yawAngles.csv"
+jointConfigFileName = "jointConfig.csv"
+outputParamFileName = "outputParameters.csv"
+
+# Load pitch angles
+with open(srcPath + pitchAnglesFileName, 'r') as pitchAngleCSV:
+    pitchAngleFile   = pitchAngleCSV.readlines()
+    pitchAngleString = pitchAngleFile[0]
+    pitchAngleList   = pitchAngleString[:-1].split(',')
+
+# Load yaw angles
+with open(srcPath + yawAnglesFileName, 'r') as yawAngleCSV:
+    yawAngleFile   = yawAngleCSV.readlines()
+    yawAngleString = yawAngleFile[0]
+    yawAngleList   = yawAngleString[:-1].split(',')
+
+# Load output parameters file      
+with open(dataPath + outputParamFileName, 'r') as outputParamCSV:
+    outputParameterFile   = outputParamCSV.readlines()
+    outputParameterList   = outputParameterFile[0].split(',')
+    outputParameterList   = outputParameterList[3:]
+    outputParameterNumber = len(outputParameterList)
+    
+# Load robot joint config names
+with open(srcPath + jointConfigFileName, 'r') as jointConfigCSV:
+    jointConfigFile  = jointConfigCSV.readlines()
+    jointConfigList  = []
+    jointConfigNames = []
+    for jointConfig in jointConfigFile:
+        temp = jointConfig[:-1].split(',')
+        jointConfigNames.append(temp[0])
+    
+# Cycle on the configurations
+for jointConfigName in jointConfigNames:
+
+    # Define Fluent case file name associated with joint configuration
+    fluentCaseFilePath = casePath + jointConfigName + ".cas.h5"
+
+    # Cycle on the yaw angles
+    for yawAngle in yawAngleList:
+    
+        # yaw angle different from -90 and 90 (singular configurations) check
+        if (yawAngle != "-90" and yawAngle != "90"):
+            pitchAngleListUpdated = pitchAngleList      # executes all the pitch angles
+        else:
+            pitchAngleListUpdated = ["0"]               # executes just 0 pitch angle
+            
+        # cycle for pitch angles
+        for pitchAngle in pitchAngleListUpdated:
+            
+            # Load the Fluent case mesh and setup
+            fluentSystem   = GetSystem(Name="FLU")
+            setupComponent = fluentSystem.GetComponent(Name="Setup")
+            setupContainer = fluentSystem.GetContainer(ComponentName="Setup")
+            setupContainer.Import(FilePath = fluentCaseFilePath, FileType="CffCase")
+            setupContainer.Edit()
+            
+            # Rotate mesh in Fluent according to pitch and yaw angles
+            setupContainer.SendCommand(Command="mesh/rotate " + pitchAngle + " 0 0 0 -1 0 0 ")
+            setupContainer.SendCommand(Command="mesh/rotate " +  yawAngle  + " 0 0 0 0 1 0 ")
+            
+            # Separate external surface according to face cell zone (region_in: Z >= -1[m])
+            setupContainer.SendCommand(Command="mesh/modify-zones/sep-face-zone-mark yes inlet region_in yes ")
+            
+            # Coherently modify boundary surfaces conditions
+            setupContainer.SendCommand(Command="define/boundary-conditions/zone-type inlet pressure-outlet ")
+            
+            # Initialize and run flow solver
+            setupContainer.SendCommand(Command="solve/initialize/initialize-flow ")
+            setupContainer.SendCommand(Command="solve/iterate 1000 ")
+            
+            # Save residuals
+            setupContainer.SendCommand(Command="plot/residuals y y y y y y ")
+            setupContainer.SendCommand(Command="display/set/picture/driver jpeg ")
+            setupContainer.SendCommand(Command="display/save-picture \"" + dataPath + "/residuals/" + jointConfigName + "-" + pitchAngle + "-" + yawAngle + "\" ")
+            
+            # Save contour
+            setupContainer.SendCommand(Command="display/objects/display velocity-magnitude-contour ")
+            setupContainer.SendCommand(Command="display/views/restore-view right ")
+            setupContainer.SendCommand(Command="display/save-picture \"" + dataPath + "/contours/" + jointConfigName + "-" + pitchAngle + "-" + yawAngle + "\" ")
+            
+            # Exit Fluent editor
+            setupContainer.Exit()
+            
+            # Run the simulation 
+            #solutionComponent = fluentSystem.GetComponent(Name="Solution")
+            #solutionComponent.Update(AllDependencies=True)
+            
+            # Write Output Parameters to file
+            designPoint = Parameters.GetDesignPoint(Name="0")
+            outputParameterString  = jointConfigName + "," + str(pitchAngle) + "," + str(yawAngle)
+            outputParameterCounter = 0
+            for outputParameter in outputParameterList:
+                outputParameterValue = designPoint.GetParameterValue(Parameter=Parameters.GetParameter(Name="P"+str(outputParameterCounter+1)))
+                outputParameterString  = outputParameterString + "," + str(outputParameterValue)
+                outputParameterCounter += 1
+            
+            with open(dataPath + outputParamFileName, 'a') as outputParamCSV:
+                outputParamCSV.writelines("\n"+outputParameterString)
+        
+
+

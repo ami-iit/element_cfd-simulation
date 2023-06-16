@@ -1,0 +1,6 @@
+# encoding: utf-8
+# 2023 R1
+SetScriptVersion(Version="23.1.153")
+fileReference1 = GetFileReference(Name="F3")
+fileReference1.Repair(FilePath="E:/apaolino/auto-cfd-sim/case/hovering.cas.h5")
+Save(Overwrite=True)

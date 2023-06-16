@@ -1,0 +1,812 @@
+Transcript Start Time:  13:56:07, 16 Jun 2023 W. Europe Daylight Time 
+Current Directory: "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model"
+
+Build Time: Nov 28 2022 09:52:02 EST 
+Executable Path: C:/PROGRA~1/ANSYSI~1/v231/fluent/ntbin/win64/fluent.exe
+
+-------------------------------------------------------------------------------------------
+ID    Hostname        Core   O.S.         PID    Vendor                                   
+-------------------------------------------------------------------------------------------
+n15   IITBMP014LW001  16/24  Windows-x64  56064  12th Gen Intel(R) Core(TM) i9-12950HX    
+n14   IITBMP014LW001  15/24  Windows-x64  12508  12th Gen Intel(R) Core(TM) i9-12950HX    
+n13   IITBMP014LW001  14/24  Windows-x64  42312  12th Gen Intel(R) Core(TM) i9-12950HX    
+n12   IITBMP014LW001  13/24  Windows-x64  11380  12th Gen Intel(R) Core(TM) i9-12950HX    
+n11   IITBMP014LW001  12/24  Windows-x64  24904  12th Gen Intel(R) Core(TM) i9-12950HX    
+n10   IITBMP014LW001  11/24  Windows-x64  8224   12th Gen Intel(R) Core(TM) i9-12950HX    
+n9    IITBMP014LW001  10/24  Windows-x64  4040   12th Gen Intel(R) Core(TM) i9-12950HX    
+n8    IITBMP014LW001  9/24   Windows-x64  24748  12th Gen Intel(R) Core(TM) i9-12950HX    
+n7    IITBMP014LW001  8/24   Windows-x64  39296  12th Gen Intel(R) Core(TM) i9-12950HX    
+n6    IITBMP014LW001  7/24   Windows-x64  27008  12th Gen Intel(R) Core(TM) i9-12950HX    
+n5    IITBMP014LW001  6/24   Windows-x64  48804  12th Gen Intel(R) Core(TM) i9-12950HX    
+n4    IITBMP014LW001  5/24   Windows-x64  15000  12th Gen Intel(R) Core(TM) i9-12950HX    
+n3    IITBMP014LW001  4/24   Windows-x64  24364  12th Gen Intel(R) Core(TM) i9-12950HX    
+n2    IITBMP014LW001  3/24   Windows-x64  36652  12th Gen Intel(R) Core(TM) i9-12950HX    
+n1    IITBMP014LW001  2/24   Windows-x64  48104  12th Gen Intel(R) Core(TM) i9-12950HX    
+n0*   IITBMP014LW001  1/24   Windows-x64  54896  12th Gen Intel(R) Core(TM) i9-12950HX    
+host  IITBMP014LW001         Windows-x64  34668  12th Gen Intel(R) Core(TM) i9-12950HX    
+
+MPI Option Selected: intel
+Selected system interconnect: default
+-------------------------------------------------------------------------------------------
+
+Cortex Process ID: 34864 
+License Server Path: 1055@iitlicwge012.iit.local 
+Reading "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\FLTG.114.msh.h5" ...
+3D mesh
+nodes: 994662
+edges: 16928
+faces: 1503808 
+cells: 312912 
+reading 76 node zones
+reading 129 edge zones
+reading 26 face zones
+reading 1 cell zones
+updating sub-domains...
+done.
+generating pointers...done.
+extracting boundary entities...
+ 118115 boundary nodes.
+ 39427 boundary faces.
+ 25 boundary face zones.
+done.
+generating cells...done.
+
+Importing one geom object per program-controlled and one zone per body ...
+    C:\\Program Files\\ANSYS Inc\\v231\\commonfiles\\CPython\\3_7\\winx64\\Release\\python\\..\\Ansys\\TGrid\\CADReaders.py started by apaolino on IITBMP014LW001 winx64 on Fri Jun 16 13:56:20 2023
+    using Python 3.7.13 (remotes/origin/3b89b4a151d5e27a7d119919e370e421549562b8-dirty:3b89b4a1, Sep 23 2) [MSC v.1920 64 bit (AMD64)]
+    
+    using Ansys.Meshing.FieldMesher build Nov 23 2022 18:41:14
+    
+    running ANSYS TGrid CADToTGridConverter ...
+    setting up parameters ...
+    setting up parameters done.
+    running conversion ...
+    converting 1 file(s) from Workbench to FLTG using output path 'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\FLTG\\Fluent\\FM_IITBMP014LW001_34864/out168691657934864.tgf'
+    converting file 'Geom.scdoc' (1 of 1) from Workbench to FLTG using output path 'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\FLTG\\Fluent\\FM_IITBMP014LW001_34864'
+    importing data ...
+    importing meshing model from PartMgr from file 'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\Geom\\DM\\Geom.scdoc' ...
+    setting enclosure and symmetry processing to False
+    setting transfer named selections to True
+    setting named selection prefixes to ''
+    setting mixed import resolution type to 'SolidAndSurface'
+    setting target application to 'FluentMeshing'
+    attaching to assembly ...
+    attaching to assembly done in 24.58 [s]
+    processing assembly 'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\Geom\\DM\\Geom.scdoc' with ID 1 and reference key '<?xml version="1.0" encoding="utf-16"?>
+    <IdTable xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <Table>
+        <Entry>
+          <Text>&lt;SnippetV1 sctype="SpaceClaim.OccurrenceMoniker`1[[SpaceClaim.IEvaluation, Core]], Core"&gt;&lt;instanceMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IInstance, Core]], Core" refId="2d996c92-6483-4528-9363-11f4662dce24:26" /&gt;&lt;originalMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IEvaluation, Core]], Core" refId="69a7b965-9056-4923-ac7f-7f5b99f3f947:2" /&gt;&lt;/SnippetV1&gt;</Text>
+          <Id>10000</Id>
+          <IsExploded>false</IsExploded>
+        </Entry>
+        <Entry>
+          <Text>&lt;SnippetV1 sctype="SpaceClaim.OccurrenceMoniker`1[[SpaceClaim.IEvaluation, Core]], Core"&gt;&lt;instanceMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IInstance, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:5" /&gt;&lt;originalMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IEvaluation, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:1" /&gt;&lt;/SnippetV1&gt;</Text>
+          <ExplodedBodyText>&lt;SnippetV1 sctype="SpaceClaim.OccurrenceMoniker`1[[SpaceClaim.IEvaluation, Core]], Core"&gt;&lt;instanceMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IInstance, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:5" /&gt;&lt;originalMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IEvaluation, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:8" /&gt;&lt;/SnippetV1&gt;</ExplodedBodyText>
+          <Id>10001</Id>
+          <IsExploded>true</IsExploded>
+        </Entry>
+        <Entry>
+          <Text>&lt;SnippetV1 sctype="SpaceClaim.OccurrenceMoniker`1[[SpaceClaim.IEvaluation, Core]], Core"&gt;&lt;instanceMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IInstance, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:5" /&gt;&lt;originalMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IEvaluation, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:1" /&gt;&lt;/SnippetV1&gt;</Text>
+          <ExplodedBodyText>&lt;SnippetV1 sctype="SpaceClaim.OccurrenceMoniker`1[[SpaceClaim.IEvaluation, Core]], Core"&gt;&lt;instanceMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IInstance, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:5" /&gt;&lt;originalMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IEvaluation, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:25" /&gt;&lt;/SnippetV1&gt;</ExplodedBodyText>
+          <Id>10002</Id>
+          <IsExploded>true</IsExploded>
+        </Entry>
+      </Table>
+    </IdTable>'
+    length unit = [m]
+    processing part 'iRonCub-share' with ID 3
+    processing part 'fluid' with ID 5
+    processing part 'fluid' with ID 7
+    processing named selection 'ironcub_head'
+    processing named selection 'ironcub_torso'
+    processing named selection 'ironcub_torso_pitch'
+    processing named selection 'ironcub_torso_roll'
+    processing named selection 'ironcub_left_back_turbine'
+    processing named selection 'ironcub_right_back_turbine'
+    processing named selection 'ironcub_left_arm_pitch'
+    processing named selection 'ironcub_left_arm_roll'
+    processing named selection 'ironcub_left_arm'
+    processing named selection 'ironcub_left_turbine'
+    processing named selection 'ironcub_right_arm'
+    processing named selection 'ironcub_right_arm_pitch'
+    processing named selection 'ironcub_right_arm_roll'
+    processing named selection 'ironcub_right_turbine'
+    processing named selection 'ironcub_root_link'
+    processing named selection 'ironcub_left_leg_pitch'
+    processing named selection 'ironcub_left_leg_roll'
+    processing named selection 'ironcub_left_leg_upper'
+    processing named selection 'ironcub_left_leg_lower'
+    processing named selection 'ironcub_right_leg_pitch'
+    processing named selection 'ironcub_right_leg_roll'
+    processing named selection 'ironcub_right_leg_upper'
+    processing named selection 'ironcub_right_leg_lower'
+    processing named selection 'inlet'
+    processing named selection 'outlet'
+    processing data ...
+    removing named collections of entities ...
+    removing named collections of entities stopped, no named collections selected.
+    analyzing feature edges ...
+    detecting feature edges, feature angle = 40 [deg] ...
+        Data information
+            Meshing model
+                Attributes:
+                    'LengthUnit': '[m]'
+                Entity summary:
+                    Collection: 25
+                    Component : 4
+                    Body      : 25
+                    Shell     : 25
+                    Face      : 904
+                    Loop      : 1006
+                    Edge      : 2070
+                    Vertex    : 1231
+                    Surface   : 904
+                    Curve     : 2070
+                Tessellation summary:
+                    Face facets  : 48451
+                    Edge segments: 20428
+                Bounding box:
+                    (-4.996330738067627, -5, -5) x (4.996330738067627, 5, 5)
+                Assembly component hierarchy:
+                    'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\Geom\\DM\\Geom.scdoc'
+                      'iRonCub-share'
+                      'fluid'
+                      'fluid'
+                NamedCollections:
+                    'ironcub_head'
+                    'ironcub_torso'
+                    'ironcub_torso_pitch'
+                    'ironcub_torso_roll'
+                    'ironcub_left_back_turbine'
+                    'ironcub_right_back_turbine'
+                    'ironcub_left_arm_pitch'
+                    'ironcub_left_arm_roll'
+                    'ironcub_left_arm'
+                    'ironcub_left_turbine'
+                    'ironcub_right_arm'
+                    'ironcub_right_arm_pitch'
+                    'ironcub_right_arm_roll'
+                    'ironcub_right_turbine'
+                    'ironcub_root_link'
+                    'ironcub_left_leg_pitch'
+                    [... 9 more ...]
+    
+    
+    exporting FLTG data to file 'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\FLTG\\Fluent\\FM_IITBMP014LW001_34864\\out168691657934864.tgf' ...
+    writing face-based mesh file 'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\FLTG\\Fluent\\FM_IITBMP014LW001_34864\\out168691657934864.tgf' ...
+    ======== Exported Data ========
+    Entity summary:
+        Object       : 3
+        Object region: 50
+        Zone         : 87
+    
+    running conversion done.
+    running ANSYS TGrid CADToTGridConverter done.
+    ran ANSYS TGrid CADToTGridConverter in 25.136 [s]
+        ======== Command Execution Log Manager ========
+        Number of execution logs: 0
+    
+
+Reading "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\FM_IITBMP014LW001_34864/out168691657934864.tgf"...
+Reading "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\FM_IITBMP014LW001_34864/out168691657934864.tgf"...
+nodes: 36348
+edges: 12728
+faces: 48121
+cells: 0
+reading 36348 storage data (id 1, type 41, double precision binary).
+generating pointers...done.
+extracting boundary entities...
+ 36348 boundary nodes.
+ 48121 boundary faces.
+ 32 boundary face zones.
+done.
+analyzing boundary connectivity...done.
+
+preparing mesh for display...done.
+
+---------------- Import of Geom, consisting of 3 parts/objects, complete. 
+ 
+
+---------------- A local size of 0.02 was added to ironcub-sizing
+
+---------------- The Global Max size was adjusted to 2 
+
+---------------- A local size of 2 was added to external-sizing
+Writing "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\Workflow\TaskObject3.msh.h5" ...
+writing 1 node zones
+writing 55 edge zones 
+writing 32 face zones 
+done.
+---------------- The Global Max size was adjusted to 4 
+    processing size functions/scoped sizing to create Size Field...
+
+Writing "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\FM_IITBMP014LW001_34864\Geom.sf"...
+Writing "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\FM_IITBMP014LW001_34864\Geom.sf"...
+Done.
+
+
+Importing one mesh object per program-controlled and one zone per body ...
+    C:\\Program Files\\ANSYS Inc\\v231\\commonfiles\\CPython\\3_7\\winx64\\Release\\python\\..\\Ansys\\TGrid\\CADReaders.py started by apaolino on IITBMP014LW001 winx64 on Fri Jun 16 13:56:51 2023
+    using Python 3.7.13 (remotes/origin/3b89b4a151d5e27a7d119919e370e421549562b8-dirty:3b89b4a1, Sep 23 2) [MSC v.1920 64 bit (AMD64)]
+    
+    using Ansys.Meshing.FieldMesher build Nov 23 2022 18:41:14
+    
+    running ANSYS TGrid CADToTGridConverter ...
+    setting up parameters ...
+    setting up parameters done.
+    running conversion ...
+    converting 1 file(s) from Workbench to FLTG using output path 'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\FLTG\\Fluent\\FM_IITBMP014LW001_34864/out168691661134864.tgf'
+    converting file 'Geom.scdoc.pmdb' (1 of 1) from Workbench to FLTG using output path 'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\FLTG\\Fluent\\FM_IITBMP014LW001_34864'
+    importing data ...
+    importing meshing model from PartMgr from file 'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\FLTG\\Fluent\\FM_IITBMP014LW001_34864\\\\Geom.scdoc.pmdb' ...
+    setting enclosure and symmetry processing to False
+    setting transfer named selections to True
+    setting named selection prefixes to ''
+    setting mixed import resolution type to 'SolidAndSurface'
+    setting target application to 'FluentMeshing'
+    initializing part manager from file ...
+    processing assembly 'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\Geom\\DM\\Geom.scdoc' with ID 1 and reference key '<?xml version="1.0" encoding="utf-16"?>
+    <IdTable xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <Table>
+        <Entry>
+          <Text>&lt;SnippetV1 sctype="SpaceClaim.OccurrenceMoniker`1[[SpaceClaim.IEvaluation, Core]], Core"&gt;&lt;instanceMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IInstance, Core]], Core" refId="2d996c92-6483-4528-9363-11f4662dce24:26" /&gt;&lt;originalMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IEvaluation, Core]], Core" refId="69a7b965-9056-4923-ac7f-7f5b99f3f947:2" /&gt;&lt;/SnippetV1&gt;</Text>
+          <Id>10000</Id>
+          <IsExploded>false</IsExploded>
+        </Entry>
+        <Entry>
+          <Text>&lt;SnippetV1 sctype="SpaceClaim.OccurrenceMoniker`1[[SpaceClaim.IEvaluation, Core]], Core"&gt;&lt;instanceMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IInstance, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:5" /&gt;&lt;originalMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IEvaluation, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:1" /&gt;&lt;/SnippetV1&gt;</Text>
+          <ExplodedBodyText>&lt;SnippetV1 sctype="SpaceClaim.OccurrenceMoniker`1[[SpaceClaim.IEvaluation, Core]], Core"&gt;&lt;instanceMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IInstance, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:5" /&gt;&lt;originalMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IEvaluation, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:8" /&gt;&lt;/SnippetV1&gt;</ExplodedBodyText>
+          <Id>10001</Id>
+          <IsExploded>true</IsExploded>
+        </Entry>
+        <Entry>
+          <Text>&lt;SnippetV1 sctype="SpaceClaim.OccurrenceMoniker`1[[SpaceClaim.IEvaluation, Core]], Core"&gt;&lt;instanceMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IInstance, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:5" /&gt;&lt;originalMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IEvaluation, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:1" /&gt;&lt;/SnippetV1&gt;</Text>
+          <ExplodedBodyText>&lt;SnippetV1 sctype="SpaceClaim.OccurrenceMoniker`1[[SpaceClaim.IEvaluation, Core]], Core"&gt;&lt;instanceMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IInstance, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:5" /&gt;&lt;originalMoniker sctype="SpaceClaim.BasicMoniker`1[[SpaceClaim.IEvaluation, Core]], Core" refId="ad986db0-4294-490c-96f4-5d3e39fa58b1:25" /&gt;&lt;/SnippetV1&gt;</ExplodedBodyText>
+          <Id>10002</Id>
+          <IsExploded>true</IsExploded>
+        </Entry>
+      </Table>
+    </IdTable>'
+    length unit = [m]
+    processing part 'iRonCub-share' with ID 3
+    processing part 'fluid' with ID 5
+    processing part 'fluid' with ID 7
+    processing named selection 'ironcub_head'
+    processing named selection 'ironcub_torso'
+    processing named selection 'ironcub_torso_pitch'
+    processing named selection 'ironcub_torso_roll'
+    processing named selection 'ironcub_left_back_turbine'
+    processing named selection 'ironcub_right_back_turbine'
+    processing named selection 'ironcub_left_arm_pitch'
+    processing named selection 'ironcub_left_arm_roll'
+    processing named selection 'ironcub_left_arm'
+    processing named selection 'ironcub_left_turbine'
+    processing named selection 'ironcub_right_arm'
+    processing named selection 'ironcub_right_arm_pitch'
+    processing named selection 'ironcub_right_arm_roll'
+    processing named selection 'ironcub_right_turbine'
+    processing named selection 'ironcub_root_link'
+    processing named selection 'ironcub_left_leg_pitch'
+    processing named selection 'ironcub_left_leg_roll'
+    processing named selection 'ironcub_left_leg_upper'
+    processing named selection 'ironcub_left_leg_lower'
+    processing named selection 'ironcub_right_leg_pitch'
+    processing named selection 'ironcub_right_leg_roll'
+    processing named selection 'ironcub_right_leg_upper'
+    processing named selection 'ironcub_right_leg_lower'
+    processing named selection 'inlet'
+    processing named selection 'outlet'
+    processing data ...
+    loading size function background grid from file 'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\FLTG\\Fluent\\FM_IITBMP014LW001_34864\\\\Geom.sf' ...
+    reading size function background grid file 'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\FLTG\\Fluent\\FM_IITBMP014LW001_34864\\\\Geom.sf' ...
+     Read 98439 vertices
+    initializing size function background grid done in 0.066 [s]
+    Breakout detected
+    Breakout detected
+    tessellating 904 faces done in 2.809 [s]
+    removing named collections of entities ...
+    removing named collections of entities stopped, no named collections selected.
+    analyzing feature edges ...
+    detecting feature edges, feature angle = 40 [deg] ...
+        Data information
+            Meshing model
+                Attributes:
+                    'LengthUnit': '[m]'
+                Entity summary:
+                    Collection: 25
+                    Component : 4
+                    Body      : 25
+                    Shell     : 25
+                    Face      : 904
+                    Loop      : 1006
+                    Edge      : 2070
+                    Vertex    : 1231
+                    Surface   : 904
+                    Curve     : 2070
+                Tessellation summary:
+                    Face facets  : 77527
+                    Edge segments: 12262
+                Bounding box:
+                    (-5, -4.998189449310303, -4.976796627044678) x (4.995017051696777, 4.984127044677734, 4.968813896179199)
+                Assembly component hierarchy:
+                    'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\Geom\\DM\\Geom.scdoc'
+                      'iRonCub-share'
+                      'fluid'
+                      'fluid'
+                NamedCollections:
+                    'ironcub_head'
+                    'ironcub_torso'
+                    'ironcub_torso_pitch'
+                    'ironcub_torso_roll'
+                    'ironcub_left_back_turbine'
+                    'ironcub_right_back_turbine'
+                    'ironcub_left_arm_pitch'
+                    'ironcub_left_arm_roll'
+                    'ironcub_left_arm'
+                    'ironcub_left_turbine'
+                    'ironcub_right_arm'
+                    'ironcub_right_arm_pitch'
+                    'ironcub_right_arm_roll'
+                    'ironcub_right_turbine'
+                    'ironcub_root_link'
+                    'ironcub_left_leg_pitch'
+                    [... 9 more ...]
+    
+    
+    exporting FLTG data to file 'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\FLTG\\Fluent\\FM_IITBMP014LW001_34864\\out168691661134864.tgf' ...
+    writing face-based mesh file 'C:\\Users\\apaolino\\code\\element_cfd-simulation\\simulations\\ironcub-automatic-cfd\\auto-cfd-model\\auto_cfd_model_files\\dp0\\FLTG\\Fluent\\FM_IITBMP014LW001_34864\\out168691661134864.tgf' ...
+    ======== Exported Data ========
+    Entity summary:
+        Object       : 3
+        Object region: 50
+        Zone         : 87
+    
+    running conversion done.
+    running ANSYS TGrid CADToTGridConverter done.
+    ran ANSYS TGrid CADToTGridConverter in 3.806 [s]
+        ======== Command Execution Log Manager ========
+        Number of execution logs: 0
+    
+
+Reading "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\FM_IITBMP014LW001_34864/out168691661134864.tgf"...
+Reading "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\FM_IITBMP014LW001_34864/out168691661134864.tgf"...
+nodes: 44872
+edges: 7007
+faces: 77524
+cells: 0
+reading 44872 storage data (id 1, type 41, double precision binary).
+appending mesh...
+done.
+generating pointers...done.
+extracting boundary entities...
+ 81220 boundary nodes.
+ 125645 boundary faces.
+ 64 boundary face zones.
+done.
+
+Reading "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\FM_IITBMP014LW001_34864\\Geom.sf"...
+Reading "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\FM_IITBMP014LW001_34864\\Geom.sf"...
+ Read 98439 vertices
+132 faces marked.
+
+---------------- Surface Meshing of Geom complete in  0.13 minutes.
+
+---------------- After surface meshing, 3 objects/parts have been detected. Either the Share Topology task should be added, or the Non-Conformal option should be invoked.
+
+---------------- Note that surface re-meshing and quality improvements will be executed after the Share Topology/Describe Geometry Tasks
+Writing "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\Workflow\TaskObject5.msh.h5" ...
+writing 2 node zones
+writing 110 edge zones 
+writing 64 face zones 
+done.
+Found overlapping faces sharing edge bn62815-bn62912 (-0.060097 0.009367 0.014541).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62815-bn62912 (-0.060097 0.009367 0.014541).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62812-bn62811 (-0.067504 -0.004275 0.025269).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62815-bn62814 (-0.059667 0.008976 0.014502).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62811-bn62812 (-0.067504 -0.004275 0.025269).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62814-bn62815 (-0.059667 0.008976 0.014502).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62915-bn62912 (-0.062196 0.006317 0.017526).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62915-bn62912 (-0.062196 0.006317 0.017526).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62811-bn62910 (-0.068368 -0.003770 0.025157).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62811-bn62910 (-0.068368 -0.003770 0.025157).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62912-bn62815 (-0.060097 0.009367 0.014541).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62912-bn62815 (-0.060097 0.009367 0.014541).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62814-bn62815 (-0.059667 0.008976 0.014502).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62915-bn62912 (-0.062196 0.006317 0.017526).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62915-bn62912 (-0.062196 0.006317 0.017526).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62811-bn62910 (-0.068368 -0.003770 0.025157).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62811-bn62910 (-0.068368 -0.003770 0.025157).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn62811-bn62812 (-0.067504 -0.004275 0.025269).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63291-bn63292 (0.060097 0.009367 0.014541).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63291-bn63292 (0.060097 0.009367 0.014541).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63334-bn63294 (0.067504 -0.004275 0.025269).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63292-bn63332 (0.059667 0.008976 0.014502).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63332-bn63292 (0.059667 0.008976 0.014502).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63294-bn63334 (0.067504 -0.004275 0.025269).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63291-bn63307 (0.062196 0.006317 0.017526).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63291-bn63307 (0.062196 0.006317 0.017526).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63295-bn63294 (0.068368 -0.003770 0.025157).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63295-bn63294 (0.068368 -0.003770 0.025157).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63334-bn63294 (0.067504 -0.004275 0.025269).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63295-bn63294 (0.068368 -0.003770 0.025157).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63295-bn63294 (0.068368 -0.003770 0.025157).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63291-bn63307 (0.062196 0.006317 0.017526).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63291-bn63307 (0.062196 0.006317 0.017526).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63292-bn63332 (0.059667 0.008976 0.014502).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63292-bn63291 (0.060097 0.009367 0.014541).
+Warning: 
+The regions may not be computed correctly.
+Found overlapping faces sharing edge bn63292-bn63291 (0.060097 0.009367 0.014541).
+Warning: 
+The regions may not be computed correctly.4 pair(s) found.
+Joining...
+ inlet and outlet 
+ ironcub_torso and ironcub_right_arm_roll 
+ ironcub_root_link and ironcub_right_leg_roll 
+ ironcub_root_link and ironcub_left_leg_roll 
+ Warning: Remeshing may alter the final dihedral angle.
+Done.
+0 pair(s) found.
+
+    computing regions...
+Warning: Region is named after face zone label "fluid-inlet" with maximum surface area out of multiple face zone labels (fluid-inlet fluid-outlet inlet outlet).
+
+Warning: Region is named after face zone label "ironcub_torso_roll" with maximum surface area out of multiple face zone labels (ironcub_torso ironcub_torso_roll).
+
+Warning: Region is named after face zone label "ironcub_left_arm_pitch" with maximum surface area out of multiple face zone labels (ironcub_left_arm_pitch ironcub_torso).
+
+Warning: Region is named after face zone label "ironcub_right_arm_pitch" with maximum surface area out of multiple face zone labels (ironcub_right_arm_pitch ironcub_torso).
+
+Warning: Region is named after face zone label "ironcub_right_arm" with maximum surface area out of multiple face zone labels (ironcub_right_arm ironcub_torso).
+
+Warning: Region is named after face zone label "ironcub_torso_pitch" with maximum surface area out of multiple face zone labels (ironcub_root_link ironcub_torso_pitch).
+
+Warning: Region is named after face zone label "ironcub_torso_roll" with maximum surface area out of multiple face zone labels (ironcub_torso_pitch ironcub_torso_roll).
+
+Warning: Region is named after face zone label "ironcub_left_arm_roll" with maximum surface area out of multiple face zone labels (ironcub_left_arm_pitch ironcub_left_arm_roll).
+
+Warning: Region is named after face zone label "ironcub_left_turbine" with maximum surface area out of multiple face zone labels (ironcub_left_arm ironcub_left_turbine).
+
+Warning: Region is named after face zone label "ironcub_right_turbine" with maximum surface area out of multiple face zone labels (ironcub_right_arm ironcub_right_turbine).
+
+Warning: Region is named after face zone label "ironcub_right_arm_roll" with maximum surface area out of multiple face zone labels (ironcub_right_arm_pitch ironcub_right_arm_roll).
+
+Warning: Region is named after face zone label "ironcub_right_leg_pitch" with maximum surface area out of multiple face zone labels (ironcub_right_leg_pitch ironcub_root_link).
+
+Warning: Region is named after face zone label "ironcub_left_leg_pitch" with maximum surface area out of multiple face zone labels (ironcub_left_leg_pitch ironcub_root_link).
+
+Warning: Region is named after face zone label "ironcub_left_leg_roll" with maximum surface area out of multiple face zone labels (ironcub_left_leg_pitch ironcub_left_leg_roll).
+
+Warning: Region is named after face zone label "ironcub_left_leg_roll" with maximum surface area out of multiple face zone labels (ironcub_left_leg_roll ironcub_left_leg_upper).
+
+Warning: Region is named after face zone label "ironcub_left_leg_upper" with maximum surface area out of multiple face zone labels (ironcub_left_leg_lower ironcub_left_leg_upper).
+
+Warning: Region is named after face zone label "ironcub_right_leg_roll" with maximum surface area out of multiple face zone labels (ironcub_right_leg_pitch ironcub_right_leg_roll).
+
+Warning: Region is named after face zone label "ironcub_right_leg_roll" with maximum surface area out of multiple face zone labels (ironcub_right_leg_roll ironcub_right_leg_upper).
+
+Warning: Region is named after face zone label "ironcub_right_leg_upper" with maximum surface area out of multiple face zone labels (ironcub_right_leg_lower ironcub_right_leg_upper).
+done
+
+---------------- Velocity-inlet zone type was automatically assigned to zones containing the string 'inlet'.
+
+---------------- Pressure-outlet zone type was automatically assigned to zones containing the string 'outlet'.
+
+---------------- 1 disconnected regions have been detected 
+0 faces marked.
+Deleting import_curvature_0
+Deleting import_proximity_0
+    processing size functions/scoped sizing to create Size Field...
+
+Writing "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\FM_IITBMP014LW001_34864\geom.sf"...
+Writing "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\FM_IITBMP014LW001_34864\geom.sf"...
+Done.
+
+
+remeshing...
+
+
+-------------------------- --------------------- -------------------- ---------------- ----------
+                      name skewed-cells (> 0.80)    averaged-skewness maximum-skewness face count
+-------------------------- --------------------- -------------------- ---------------- ----------
+
+               fluid-inlet                     0          0.048168321       0.77455228      62446
+              ironcub_head                     0          0.033887617       0.44635212       4032
+             ironcub_torso                     0          0.058982038       0.77455228      15358
+        ironcub_torso_roll                     0          0.048582013       0.37837225        450
+    ironcub_left_arm_pitch                     0          0.060920912       0.72346778        628
+   ironcub_right_arm_pitch                     0          0.058447058       0.67162978        768
+         ironcub_right_arm                     0          0.041119051       0.75866676       3234
+ ironcub_left_back_turbine                     0          0.045793496       0.48687641       4780
+ironcub_right_back_turbine                     0          0.047257256       0.55070987       4778
+       ironcub_torso_pitch                     0          0.057887848       0.48936012       1040
+         ironcub_root_link                     0          0.042276311       0.66932862       3442
+     ironcub_left_arm_roll                     0          0.068787256       0.39732368        258
+          ironcub_left_arm                     0          0.037947471       0.77932558       3236
+      ironcub_left_turbine                     0          0.043426097       0.69820604       5506
+     ironcub_right_turbine                     0           0.04294602       0.71611538       5476
+    ironcub_right_arm_roll                     0           0.06871054       0.40860575        310
+   ironcub_right_leg_pitch                     0          0.048433444       0.48649472       1914
+    ironcub_left_leg_pitch                     0          0.049283653       0.53849298       1916
+     ironcub_left_leg_roll                     0          0.053504368       0.54462348        714
+    ironcub_left_leg_upper                     0          0.049571374       0.46266187       1644
+    ironcub_left_leg_lower                     0          0.051025911       0.76332526       5090
+    ironcub_right_leg_roll                     0          0.057758461        0.4316029        682
+   ironcub_right_leg_upper                     0            0.0463667       0.49516147       1716
+   ironcub_right_leg_lower                     0          0.048705367       0.75110936       5172
+      ironcub_torso_roll:1                     0          0.079082985       0.33684195        364
+  ironcub_left_arm_pitch:1                     0          0.071156322       0.45166079        322
+ ironcub_right_arm_pitch:1                     0          0.066213002       0.42140944        448
+       ironcub_right_arm:1                     0          0.047031313       0.38566479        282
+     ironcub_torso_pitch:1                     0          0.056738055       0.54387412        410
+      ironcub_torso_roll:2                     0          0.057789505       0.40230009        374
+   ironcub_left_arm_roll:1                     0          0.072101212       0.72346778        234
+    ironcub_left_turbine:1                     0          0.043629888       0.77932558        538
+   ironcub_right_turbine:1                     0          0.042886262       0.75866676        542
+  ironcub_right_arm_roll:1                     0          0.068636709       0.39625863        328
+ ironcub_right_leg_pitch:1                     0          0.051204652       0.66343095        618
+  ironcub_left_leg_pitch:1                     0          0.047470115       0.66160904        614
+   ironcub_left_leg_roll:1                     0          0.036156132       0.66160904        836
+   ironcub_left_leg_roll:2                     0          0.072850297       0.46266187        276
+  ironcub_left_leg_upper:1                     0          0.049066108       0.35307291        466
+  ironcub_right_leg_roll:1                     0          0.041956307       0.66343095        814
+  ironcub_right_leg_roll:2                     0          0.079798363       0.49516147        256
+ ironcub_right_leg_upper:1                     0          0.044591144       0.43525386        506
+-------------------------- --------------------- -------------------- ---------------- ----------
+                      name skewed-cells (> 0.80)    averaged-skewness maximum-skewness face count
+-------------------------- --------------------- -------------------- ---------------- ----------
+
+                      geom                     0          0.048515063       0.77932558      71782
+
+---------------- Surface Quality improvement complete in :  0.02 minutes. The final maximum surface skewness is  0.78. 
+
+
+---------------- After Surface mesh, the model consists of 23 fluid/solid regions and 19 voids.
+
+---------------- Share Topology of geom complete in  0.18 minutes with a maximum skewness of  0.78. 
+
+
+---------------- Boundary Conditions Updated
+Writing "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\Workflow\TaskObject8.msh.h5" ...
+writing 77 node zones
+writing 180 edge zones 
+writing 104 face zones 
+done.
+---------------- Region identification of geom complete in  0.00 minutes. All Regions are displayed. 
+Writing "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\Workflow\TaskObject14.msh.h5" ...
+writing 77 node zones
+writing 180 edge zones 
+writing 104 face zones 
+done.
+
+-------------------------- --------------------- -------------------- ---------------- ----------
+                      name skewed-cells (> 0.70)    averaged-skewness maximum-skewness face count
+-------------------------- --------------------- -------------------- ---------------- ----------
+
+                   fluid:0                     0          0.047323994       0.69820604      62368
+              ironcub_head                     0          0.033887617       0.44635212       4032
+             ironcub_torso                     0          0.056271259       0.68838438      15296
+        ironcub_torso_roll                     0          0.048582013       0.37837225        450
+    ironcub_left_arm_pitch                     0           0.06201307       0.62021807        630
+   ironcub_right_arm_pitch                     0          0.058447058       0.67162978        768
+         ironcub_right_arm                     0          0.040813121       0.60860679       3232
+ ironcub_left_back_turbine                     0          0.045793496       0.48687641       4780
+ironcub_right_back_turbine                     0          0.047257256       0.55070987       4778
+       ironcub_torso_pitch                     0          0.057887848       0.48936012       1040
+         ironcub_root_link                     0          0.042276311       0.66932862       3442
+     ironcub_left_arm_roll                     0          0.068787256       0.39732368        258
+          ironcub_left_arm                     0          0.038259155       0.67811015       3238
+      ironcub_left_turbine                     0          0.043426097       0.69820604       5506
+     ironcub_right_turbine                     0          0.042869393       0.68824273       5476
+    ironcub_right_arm_roll                     0           0.06871054       0.40860575        310
+   ironcub_right_leg_pitch                     0          0.048433444       0.48649472       1914
+    ironcub_left_leg_pitch                     0          0.049283653       0.53849298       1916
+     ironcub_left_leg_roll                     0          0.053504368       0.54462348        714
+    ironcub_left_leg_upper                     0          0.049571374       0.46266187       1644
+    ironcub_left_leg_lower                     0           0.05000268       0.66388688       5082
+    ironcub_right_leg_roll                     0          0.057758461        0.4316029        682
+   ironcub_right_leg_upper                     0            0.0463667       0.49516147       1716
+   ironcub_right_leg_lower                     0          0.047760825       0.66087996       5164
+                    dead17                     0          0.079082985       0.33684195        364
+                    dead16                     0          0.071156322       0.45166079        322
+                    dead15                     0          0.066213002       0.42140944        448
+                    dead14                     0          0.047031313       0.38566479        282
+                    dead13                     0          0.056738055       0.54387412        410
+                    dead12                     0          0.057789505       0.40230009        374
+                    dead11                     0           0.07492197       0.62021807        236
+                    dead10                     0          0.045477788       0.67811015        540
+                     dead9                     0           0.04106176       0.56028878        540
+                     dead8                     0          0.068636709       0.39625863        328
+                     dead7                     0          0.051204652       0.66343095        618
+                     dead6                     0          0.047470115       0.66160904        614
+                     dead5                     0          0.036156132       0.66160904        836
+                     dead4                     0          0.072850297       0.46266187        276
+                     dead3                     0          0.049066108       0.35307291        466
+                     dead2                     0          0.041956307       0.66343095        814
+                     dead1                     0          0.079798363       0.49516147        256
+                     dead0                     0          0.044591144       0.43525386        506
+-------------------------- --------------------- -------------------- ---------------- ----------
+                      name skewed-cells (> 0.70)    averaged-skewness maximum-skewness face count
+-------------------------- --------------------- -------------------- ---------------- ----------
+
+                      geom                     0          0.047791206       0.69820604      71706
+
+---------------- Surface Quality improvement complete in :  0.00 minutes. The final maximum surface skewness is  0.70. 
+
+
+---------------- Regions Updated
+
+Created Scoped Prism: ironcub-boundary-layer
+
+---------------- Inflation control added to geom
+Writing "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\Workflow\TaskObject11.msh.h5" ...
+writing 77 node zones
+writing 180 edge zones 
+writing 104 face zones 
+done.
+    updating regions...
+    done.
+checking object "geom"...
+    skipping validating regions of mesh object "geom"...done.
+auto meshing object geom...
+
+processing scoped prisms...
+    starting orientation...done.
+    setting prism growth...done.
+done.
+Identifying Topology...
+
+The octree hexcore cells will be refined using local surface mesh sizes and body of influence (boi) size controls, if there are any defined.
+Generating Prisms...
+
+---- Warning --- Prism stair-step has occured in 16 location(s).
+
+Generating initial mesh...
+.
+
+
+Refining mesh...
+
+Create polyhedra ...
+.
+
+.
+
+.
+
+.
+
+.
+
+
+delete virtual and dead zones.
+
+Merging zones...
+
+Cleaning up dead entities...
+
+
+Merging Domains...
+done.
+
+Quality Measure has been changed to Orthogonal Quality.
+                     name       id cells (quality < 0.10)  minimum quality cell count
+------------------------- -------- ---------------------- ---------------- ----------
+                  fluid:0    13808                     14      0.011714846     318722
+
+                     name       id cells (quality < 0.10)  minimum quality cell count
+------------------------- -------- ---------------------- ---------------- ----------
+          Overall Summary     none                     14      0.011714846     318722
+
+Total Number of Cell Zones : 1
+
+[Quality Measure : Orthogonal Quality]
+
+---------------- 318722 cells were created in :  0.68 minutes
+
+---------------- The volume mesh quality criteria of 0.050 was not reached. Cells below the criteria are being displayed. The final minimum Orthogonal Quality is 0.012 
+
+---- Warning--- The mesh has a minimum Orthogonal Quality of: 0.012. Bad quality cells are drawn.
+---- Warning--- Insert the Improve Volume Mesh task to obtain a better quality.
+---- Warning--- Stair-stepping of all boundary layers occured at 16 locations 
+
+---------------- The volume meshing of geom is complete.
+
+Writing "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\Workflow\TaskObject16.msh.h5" ...
+writing 74 node zones
+writing 125 edge zones 
+writing 26 face zones 
+writing 1 cell zones 
+done.
+                     name       id cells (quality < 0.10)  minimum quality cell count
+------------------------- -------- ---------------------- ---------------- ----------
+                  fluid:0    13808                      0       0.13435473     318722
+
+                     name       id cells (quality < 0.10)  minimum quality cell count
+------------------------- -------- ---------------------- ---------------- ----------
+          Overall Summary     none                      0       0.13435473     318722
+
+Total Number of Cell Zones : 1
+
+[Quality Measure : Orthogonal Quality]
+
+---------------- The volume mesh quality criteria of 0.150 was not reached. Cells below the criteria are being displayed. The final minimum Orthogonal Quality is 0.134 
+
+Fast-loading "C:\PROGRA~1\ANSYSI~1\v231\fluent\fluent23.1.0\\addons\afd\lib\hdfio.bin"
+Done.
+Writing "C:\Users\apaolino\code\element_cfd-simulation\simulations\ironcub-automatic-cfd\auto-cfd-model\auto_cfd_model_files\dp0\FLTG\Fluent\FLTG.115.msh.h5" ...
+writing 74 node zones
+writing 125 edge zones 
+writing 26 face zones 
+writing 1 cell zones 
+done.Transcript Stop Time:  13:58:10, 16 Jun 2023 W. Europe Daylight Time 
+Total Transcript Time: 2 Minute 3 Second.
