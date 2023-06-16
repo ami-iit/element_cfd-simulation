@@ -85,11 +85,15 @@ for jointConfigName in jointConfigNames:
             # Save residuals
             setupContainer.SendCommand(Command="plot/residuals y y y y y y ")
             setupContainer.SendCommand(Command="display/set/picture/driver jpeg ")
+            setupContainer.SendCommand(Command="display/set/picture/use-window-resolution n ")
+            setupContainer.SendCommand(Command="display/set/picture x-resolution 1920 y-resolution 1440 ")
             setupContainer.SendCommand(Command="display/save-picture \"" + dataPath + "/residuals/" + jointConfigName + "-" + pitchAngle + "-" + yawAngle + "\" ")
             
             # Save contour
             setupContainer.SendCommand(Command="display/objects/display velocity-magnitude-contour ")
             setupContainer.SendCommand(Command="display/views/restore-view right ")
+            setupContainer.SendCommand(Command="display/set/picture/use-window-resolution n ")
+            setupContainer.SendCommand(Command="display/set/picture x-resolution 1920 y-resolution 1440 ")
             setupContainer.SendCommand(Command="display/save-picture \"" + dataPath + "/contours/" + jointConfigName + "-" + pitchAngle + "-" + yawAngle + "\" ")
             
             # Exit Fluent editor
