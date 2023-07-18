@@ -131,7 +131,7 @@ for jointConfigIndex = 1 : length(fieldnames(data))
 
             mkdir(['./',saveFolderName]);
         end
-        saveas(fig1,['.\',saveFolderName,'\cfd-',jointConfigName,'-a',num2str(pitchAngle,'%02.f'),'-b',num2str(yawAngle,'%02.f'),'.fig']);
+        saveas(fig1,['./',saveFolderName,'/cfd-',jointConfigName,'-a',num2str(pitchAngle,'%02.f'),'-b',num2str(yawAngle,'%02.f'),'.fig']);
 
     
     end
