@@ -3,8 +3,14 @@
 !flight-controllers/controlAndDataGui/*.fig
 !flight-controllers/wind-tunnel-control/src/static-gui/*.fig
 
+# Matlab temp files
+*.asv
+
 # GIFs
 *.gif
+
+# PNGs
+*.png
 
 # MP4s
 *.mp4
