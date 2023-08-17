@@ -15,6 +15,12 @@ dataFile = [dataPath,'outputParameters.mat'];
 load(dataFile);
 jointConfigNames = fieldnames(data);
 
+%% Create the folder to store the plots
+saveFolderName = 'data_post/plots/';
+if (~exist(['./',saveFolderName],'dir'))
+    mkdir(['./',saveFolderName]);
+end
+
 %% Aerodynamic forces application points definitions
 aeroFrameNames = {'head', 'chest', 'chest_l_jet_turbine', 'chest_r_jet_turbine', ...
                   'l_upper_arm','l_arm_jet_turbine','r_upper_arm','r_arm_jet_turbine',...
@@ -95,9 +101,21 @@ for linkIndex = 1 : length(cfdLinkNames)
             linkAngleOfAttack = acosd(transpose(linkAxisVersor) * [-1; 0; 0]); % [deg]
             % Store data
             linkAoAs(simIndex) = linkAngleOfAttack;
-            linkCdAs(simIndex) = data.(jointConfigName).([cfdLinkName,'_cd'])(simIndex);
-            linkClAs(simIndex) = data.(jointConfigName).([cfdLinkName,'_cl'])(simIndex);
-            linkCsAs(simIndex) = data.(jointConfigName).([cfdLinkName,'_cs'])(simIndex);
+            if linkIndex == 2
+                linkCdAs(simIndex) = data.(jointConfigName).([cfdLinkName,'_cd'])(simIndex) + ...
+                                     data.(jointConfigName).([cfdLinkNames{3},'_cd'])(simIndex) + ...
+                                     data.(jointConfigName).([cfdLinkNames{4},'_cd'])(simIndex);
+                linkClAs(simIndex) = data.(jointConfigName).([cfdLinkName,'_cl'])(simIndex) + ...
+                                     data.(jointConfigName).([cfdLinkNames{3},'_cl'])(simIndex) + ...
+                                     data.(jointConfigName).([cfdLinkNames{4},'_cl'])(simIndex);
+                linkCsAs(simIndex) = data.(jointConfigName).([cfdLinkName,'_cs'])(simIndex) + ...
+                                     data.(jointConfigName).([cfdLinkNames{3},'_cs'])(simIndex) + ...
+                                     data.(jointConfigName).([cfdLinkNames{4},'_cs'])(simIndex);
+            else
+                linkCdAs(simIndex) = data.(jointConfigName).([cfdLinkName,'_cd'])(simIndex);
+                linkClAs(simIndex) = data.(jointConfigName).([cfdLinkName,'_cl'])(simIndex);
+                linkCsAs(simIndex) = data.(jointConfigName).([cfdLinkName,'_cs'])(simIndex);
+            end
             
             if linkIndex == 1
                 yawAngles(simIndex)   = yawAngle;
@@ -109,86 +127,115 @@ for linkIndex = 1 : length(cfdLinkNames)
 
         end
         
-        % plot link CdAs vs AoA
-        figure(linkIndex);
-        title(cfdLinkName,'Interpreter','none');
-        scatter(linkAoAs,linkCdAs); hold on;
-        xlabel('$\alpha_{link}$','Interpreter','latex');
-        ylabel('$C_D A$','Interpreter','latex');
-%         legend(jointConfigNames);
-        grid on;
+%         % plot link CdAs vs AoA
+%         fig = figure(linkIndex);
+%         scatter(linkAoAs,linkCdAs,'k'); %hold on;
+%         xlabel('$\alpha_{link}$','Interpreter','latex');
+%         ylabel('$C_D A$','Interpreter','latex');
+%         title(cfdLinkName,'Interpreter','none');
+%         legend(jointConfigName);
+%         grid on;
+%         title_gca = get(gca,'title');
+%         yVar  = get(gca,'YLabel');
+%         saveas(fig,[saveFolderName,'separated/',title_gca.String,'_C',yVar.String(4),'_',jointConfigName,'.svg'])
+%         
+%         % plot link ClAs vs AoA
+%         fig = figure(length(cfdLinkNames)+linkIndex+1);
+%         scatter(linkAoAs,linkClAs,'k'); %hold on;
+%         xlabel('$\alpha_{link}$','Interpreter','latex');
+%         ylabel('$C_L A$','Interpreter','latex');
+%         title(cfdLinkName,'Interpreter','none');
+%         legend(jointConfigName);
+%         grid on;
+%         title_gca = get(gca,'title');
+%         yVar  = get(gca,'YLabel');
+%         saveas(fig,[saveFolderName,'separated/',title_gca.String,'_C',yVar.String(4),'_',jointConfigName,'.svg'])
+%         
+%         % plot link CsAs vs AoA
+%         fig = figure(2*length(cfdLinkNames)+linkIndex+2);
+%         scatter(linkAoAs,linkCsAs,'k'); %hold on;
+%         xlabel('$\alpha_{link}$','Interpreter','latex');
+%         ylabel('$C_S A$','Interpreter','latex');
+%         title(cfdLinkName,'Interpreter','none');
+%         legend(jointConfigName);
+%         grid on;
+%         title_gca = get(gca,'title');
+%         yVar  = get(gca,'YLabel');
+%         saveas(fig,[saveFolderName,'separated/',title_gca.String,'_C',yVar.String(4),'_',jointConfigName,'.svg'])
+
+        % plot link CnAs vs AoA
+%         fig = figure(linkIndex);
+%         scatter(linkAoAs,sqrt(linkClAs.^2 + linkCsAs.^2),'k'); %hold on;
+%         xlabel('$\alpha_{link}$','Interpreter','latex');
+%         ylabel('$C_N A$','Interpreter','latex');
+%         title(cfdLinkName,'Interpreter','none');
+%         legend(jointConfigName);
+%         grid on;
+%         title_gca = get(gca,'title');
+%         yVar  = get(gca,'YLabel');
+%         saveas(fig,[saveFolderName,'separated/',title_gca.String,'_C',yVar.String(4),'_',jointConfigName,'.svg'])
+
+        % plot link CfAs vs AoA
+%         fig = figure(linkIndex);
+%         scatter(linkAoAs,sqrt(linkClAs.^2 + linkCsAs.^2 + linkCdAs.^2),'k'); %hold on;
+%         xlabel('$\alpha_{link}$','Interpreter','latex');
+%         ylabel('$C_F A$','Interpreter','latex');
+%         title(cfdLinkName,'Interpreter','none');
+%         legend(jointConfigName);
+%         grid on;
+%         title_gca = get(gca,'title');
+%         yVar  = get(gca,'YLabel');
+%         saveas(fig,[saveFolderName,'separated/',title_gca.String,'_C',yVar.String(4),'_',jointConfigName,'.svg'])
         
-        % plot link ClAs vs AoA
-        figure(length(cfdLinkNames)+linkIndex+1);
-        title(cfdLinkName,'Interpreter','none');
-        scatter(linkAoAs,linkClAs); hold on;
-        xlabel('$\alpha_{link}$','Interpreter','latex');
-        ylabel('$C_L A$','Interpreter','latex');
-%         legend(jointConfigNames);
-        grid on;
-        
-        % plot link CsAs vs AoA
-        figure(2*length(cfdLinkNames)+linkIndex+2);
-        title(cfdLinkName,'Interpreter','none');
-        scatter(linkAoAs,linkCsAs); hold on;
-        xlabel('$\alpha_{link}$','Interpreter','latex');
-        ylabel('$C_S A$','Interpreter','latex');
-%         legend(jointConfigNames);
-        grid on;
-        
-        if linkIndex == 1
+%         if linkIndex == 1
+% 
+%             % plot ironcub CdA vs AoA at beta=0
+%             figure(length(cfdLinkNames)+1);
+%             title('iRonCub ($\beta = 0^\circ$)','Interpreter','latex');
+%             plot(pitchAngles(yawAngles==0),ironcubCdAs(yawAngles==0)); hold on;
+%             xlabel('$\alpha$','Interpreter','latex');
+%             ylabel('$C_D A$','Interpreter','latex');
+%             legend(jointConfigNames);
+%             grid on;
+% 
+%             % plot ironcub ClA vs AoA at beta=0
+%             figure(2*length(cfdLinkNames)+2);
+%             title('iRonCub ($\beta = 0^\circ$)','Interpreter','latex');
+%             plot(pitchAngles(yawAngles==0),ironcubClAs(yawAngles==0)); hold on;
+%             xlabel('$\alpha$','Interpreter','latex');
+%             ylabel('$C_L A$','Interpreter','latex');
+%             legend(jointConfigNames);
+%             grid on;
+% 
+%             % plot ironcub CsA vs AoA at beta=0
+%             figure(3*length(cfdLinkNames)+3);
+%             title('iRonCub ($\beta = 0^\circ$)','Interpreter','latex');
+%             plot(pitchAngles(yawAngles==0),ironcubCsAs(yawAngles==0)); hold on;
+%             xlabel('$\alpha$','Interpreter','latex');
+%             ylabel('$C_S A$','Interpreter','latex');
+%             legend(jointConfigNames);
+%             grid on;
+% 
+%         end
 
-            % plot ironcub CdA vs AoA at beta=0
-            figure(length(cfdLinkNames)+1);
-            title('iRonCub ($\beta = 0^\circ$)','Interpreter','latex');
-            plot(pitchAngles(yawAngles==0),ironcubCdAs(yawAngles==0)); hold on;
-            xlabel('$\alpha$','Interpreter','latex');
-            ylabel('$C_D A$','Interpreter','latex');
-            legend(jointConfigNames);
-            grid on;
-
-            % plot ironcub ClA vs AoA at beta=0
-            figure(2*length(cfdLinkNames)+2);
-            title('iRonCub ($\beta = 0^\circ$)','Interpreter','latex');
-            plot(pitchAngles(yawAngles==0),ironcubClAs(yawAngles==0)); hold on;
-            xlabel('$\alpha$','Interpreter','latex');
-            ylabel('$C_L A$','Interpreter','latex');
-            legend(jointConfigNames);
-            grid on;
-
-            % plot ironcub CsA vs AoA at beta=0
-            figure(3*length(cfdLinkNames)+3);
-            title('iRonCub ($\beta = 0^\circ$)','Interpreter','latex');
-            plot(pitchAngles(yawAngles==0),ironcubCsAs(yawAngles==0)); hold on;
-            xlabel('$\alpha$','Interpreter','latex');
-            ylabel('$C_S A$','Interpreter','latex');
-            legend(jointConfigNames);
-            grid on;
-
-        end
-
-
-    end
-
-end
-
-%% Create the folder to store the plots
-saveFolderName = 'data_post/plots/';
-if (~exist(['./',saveFolderName],'dir'))
-    mkdir(['./',saveFolderName]);
-end
-
-%% Save the plots
-for imgIndex = 1 : 3*length(cfdLinkNames)+3
     
-    fig   = figure(imgIndex);
-    title = get(gca,'title');
-    yVar  = get(gca,'YLabel');
-    if ~contains(title.String,'iRonCub')
-        saveas(fig,[saveFolderName,title.String,'_C',yVar.String(4),'.svg'])
-    else
-        saveas(fig,[saveFolderName,'ironcub_C',yVar.String(4),'.svg'])
+
+
     end
 
 end
+
+% %% Save the plots
+% for imgIndex = 1 : 3*length(cfdLinkNames)+3
+%     
+%     fig   = figure(imgIndex);
+%     title = get(gca,'title');
+%     yVar  = get(gca,'YLabel');
+%     if ~contains(title.String,'iRonCub')
+%         saveas(fig,[saveFolderName,title.String,'_C',yVar.String(4),'.svg'])
+%     else
+%         saveas(fig,[saveFolderName,'ironcub_C',yVar.String(4),'.svg'])
+%     end
+% 
+% end
 
