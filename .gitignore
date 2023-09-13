@@ -12,5 +12,8 @@
 # PNGs
 *.png
 
+# SVGs
+*.svg
+
 # MP4s
 *.mp4
