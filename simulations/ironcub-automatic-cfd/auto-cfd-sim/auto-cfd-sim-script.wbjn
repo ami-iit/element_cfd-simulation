@@ -10,16 +10,23 @@ dataPath = dirPath + "data/"
 casePath = dirPath + "case/"
 
 # File names
-pitchAnglesFileName = "pitchAngles.csv"
-yawAnglesFileName   = "yawAngles.csv"
-jointConfigFileName = "jointConfig.csv"
-outputParamFileName = "outputParameters.csv"
+pitchAnglesFileName    = "pitchAngles.csv"
+yawAnglesStartFileName = "yawAnglesStart.csv"
+yawAnglesFileName      = "yawAngles.csv"
+jointConfigFileName    = "jointConfig.csv"
+outputParamFileName    = "outputParameters.csv"
 
 # Load pitch angles
 with open(srcPath + pitchAnglesFileName, 'r') as pitchAngleCSV:
     pitchAngleFile   = pitchAngleCSV.readlines()
     pitchAngleString = pitchAngleFile[0]
     pitchAngleList   = pitchAngleString[:-1].split(',')
+
+# Load yaw angles for start configuration
+with open(srcPath + yawAnglesStartFileName, 'r') as yawAngleStartCSV:
+    yawAngleStartFile   = yawAngleStartCSV.readlines()
+    yawAngleStartString = yawAngleStartFile[0]
+    yawAngleStartList   = yawAngleStartString[:-1].split(',')
 
 # Load yaw angles
 with open(srcPath + yawAnglesFileName, 'r') as yawAngleCSV:
@@ -43,14 +50,17 @@ with open(srcPath + jointConfigFileName, 'r') as jointConfigCSV:
         temp = jointConfig[:-1].split(',')
         jointConfigNames.append(temp[0])
     
+jointConfigIndex = 0
 # Cycle on the configurations
 for jointConfigName in jointConfigNames:
 
     # Define Fluent case file name associated with joint configuration
     fluentCaseFilePath = casePath + jointConfigName + ".cas.h5"
 
+    yawAngleCycleList = yawAngleStartList if jointConfigIndex == 0 else yawAngleList
+    
     # Cycle on the yaw angles
-    for yawAngle in yawAngleList:
+    for yawAngle in yawAngleCycleList:
     
         # yaw angle different from -90 and 90 (singular configurations) check
         if (yawAngle != "-90" and yawAngle != "90"):
@@ -114,6 +124,8 @@ for jointConfigName in jointConfigNames:
             
             with open(dataPath + outputParamFileName, 'a') as outputParamCSV:
                 outputParamCSV.writelines("\n"+outputParameterString)
+                
+    jointConfigIndex += 1
         
 
 
