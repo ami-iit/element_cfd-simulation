@@ -41,6 +41,9 @@ After the wind tunnel tests performed @ Polimi it is necessary to perform a post
 ### [Reduce the gap between CFD and wind tunnel tests results](https://github.com/ami-iit/element_cfd-simulation/issues/113)
 After comparing the data between CFD and wind tunnel experiment, it will be possible to act on the simulations numerical models and parameters to reduce the gap between their results.
 
+### [Understand the performances of Lattice-Boltzmann Method for iRonCub CFD simulations](https://github.com/ami-iit/element_cfd-simulation/issues/142)
+We decided to investigate a promising frontier of CFD simulations exploting GPUs capabilities called Lattice-Boltzmann Methods; despite being already present in literature for internal or multi-phase fluids CFD simulations, in the last years the development of much more powerful GPUs has raised the interests in external aerodynamic simulations. We will compare and evaluate the performances of LBM with the more classical approach of Finite Volume Methods as implemented in ANSYS Fluent, to better understand the suitability of FluidX3D software for our scientific scopes.
+
 # Remarks
 ## CAD models
 The CAD models in this repository have been designed using [PTC Creo](https://www.ptc.com/en/products/cad/creo). Refer to [this guide](https://github.com/loc2/loc2-commons/wiki/Setup-PTC-Creo) to configure the shared libraries (e.g. for commercial components).
