@@ -31,6 +31,7 @@ varNames = table1.Properties.VariableNames;
 
 %% Data struct generation
 data       = struct();
+left_right_ind = [1 2 4 3 7 8 5 6 9 12 13 10 11];
 stopIndex  = 0;
 loopIter   = 1;
 
@@ -55,21 +56,57 @@ while (stopIndex < height(table1(:,1)))
                 fieldNames = fieldnames(data.(configName));
                 for fieldIndex = 1 : length(fieldNames)
                     fieldName = fieldNames{fieldIndex};
-                    if contains(fieldName,'_cd')
-                        data.(configName).(fieldName) = [data.(configName).(fieldName); data.(configName).(fieldName)(i)];
+                    aliasFieldName = fieldName;
+                    if contains(aliasFieldName,'left')
+                        aliasFieldName = ['right',fieldName(5:end)];
+                    elseif contains(aliasFieldName,'right')
+                        aliasFieldName = ['left',fieldName(6:end)];
+                    end
+                    if contains(aliasFieldName,'_cd')
+                        data.(configName).(fieldName) = [data.(configName).(fieldName); data.(configName).(aliasFieldName)(i)];
                     elseif contains(fieldName,'_cl')
-                        data.(configName).(fieldName) = [data.(configName).(fieldName); data.(configName).(fieldName)(i)];
+                        data.(configName).(fieldName) = [data.(configName).(fieldName); data.(configName).(aliasFieldName)(i)];
                     elseif contains(fieldName,'_cs')
-                        data.(configName).(fieldName) = [data.(configName).(fieldName); -data.(configName).(fieldName)(i)];
+                        data.(configName).(fieldName) = [data.(configName).(fieldName); -data.(configName).(aliasFieldName)(i)];
                     end
                 end
             end
         end
     end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%% TODO: mirroring non-symmetric configurations data %%%%%%%%%%%%%%%%%%%
+    %%%%% TODO: mirroring non-symmetric configurations data %%%%%%%%%%%%%%%%%%%
+    if ~matches(configName, {'hovering','flight30','flight60'})
+        aliasConfigName = [configName,'_alias'];
+        data.(aliasConfigName).jointConfig = nan(1,19);
+        data.(aliasConfigName).jointConfig(1) = data.(configName).jointConfig(1);
+        data.(aliasConfigName).jointConfig(2:3) = -data.(configName).jointConfig(2:3);
+        data.(aliasConfigName).jointConfig([4:7, 12:15]) = data.(configName).jointConfig([8:11, 16:19]);
+        data.(aliasConfigName).jointConfig([8:11, 16:19]) = data.(configName).jointConfig([4:7, 12:15]);
+        for i = 1 : length(data.(configName).yawAngle)
+            % Update attitudes
+            data.(aliasConfigName).yawAngle(i,:)   = -data.(configName).yawAngle(i);
+            data.(aliasConfigName).pitchAngle(i,:) =  data.(configName).pitchAngle(i);
+            fieldNames = fieldnames(data.(configName));
+            for fieldIndex = 1 : length(fieldNames)
+                fieldName = fieldNames{fieldIndex};
+                aliasFieldName = fieldName;
+                if contains(aliasFieldName,'left')
+                    aliasFieldName = ['right',fieldName(5:end)];
+                elseif contains(aliasFieldName,'right')
+                    aliasFieldName = ['left',fieldName(6:end)];
+                end
+                if contains(fieldName,'_cd')
+                    data.(aliasConfigName).(fieldName)(i,:) = data.(configName).(aliasFieldName)(i);
+                elseif contains(fieldName,'_cl')
+                    data.(aliasConfigName).(fieldName)(i,:) = data.(configName).(aliasFieldName)(i);
+                elseif contains(fieldName,'_cs')
+                    data.(aliasConfigName).(fieldName)(i,:) = -data.(configName).(aliasFieldName)(i);
+                end
+            end
 
+        end
+    end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
