@@ -1,0 +1,7 @@
+name: lbm_env
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - matplotlib
+  - opencv
