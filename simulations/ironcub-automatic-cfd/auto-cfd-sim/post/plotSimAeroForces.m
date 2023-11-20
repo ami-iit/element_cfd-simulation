@@ -128,16 +128,16 @@ for linkIndex = 1 : length(cfdLinkNames)
         end
         
 %         % plot link CdAs vs AoA
-%         fig = figure(linkIndex);
-%         scatter(linkAoAs,linkCdAs,'k'); %hold on;
-%         xlabel('$\alpha_{link}$','Interpreter','latex');
-%         ylabel('$C_D A$','Interpreter','latex');
-%         title(cfdLinkName,'Interpreter','none');
-%         legend(jointConfigName);
-%         grid on;
-%         title_gca = get(gca,'title');
-%         yVar  = get(gca,'YLabel');
-%         saveas(fig,[saveFolderName,'separated/',title_gca.String,'_C',yVar.String(4),'_',jointConfigName,'.svg'])
+        fig = figure(linkIndex);
+        scatter(linkAoAs,linkCdAs); hold on;
+        xlabel('$\alpha_{link}$','Interpreter','latex');
+        ylabel('$C_D A$','Interpreter','latex');
+        title(cfdLinkName,'Interpreter','none');
+        legend(jointConfigName);
+        grid on;
+        title_gca = get(gca,'title');
+        yVar  = get(gca,'YLabel');
+        saveas(fig,[saveFolderName,'separated/',title_gca.String,'_C',yVar.String(4),'_',jointConfigName,'.svg'])
 %         
 %         % plot link ClAs vs AoA
 %         fig = figure(length(cfdLinkNames)+linkIndex+1);

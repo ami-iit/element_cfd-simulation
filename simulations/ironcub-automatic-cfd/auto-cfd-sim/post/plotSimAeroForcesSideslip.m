@@ -49,7 +49,7 @@ gravAcc  = [0; 0; 9.81];
 basePose = eye(4);  % alpha=90 and beta=0
 
 
-for linkIndex = 1 : length(cfdLinkNames)
+for linkIndex = 11 %1 : length(cfdLinkNames)
 
     cfdLinkName = cfdLinkNames{linkIndex};
     aeroFrameName = aeroFrameNames{linkIndex};
@@ -81,6 +81,7 @@ for linkIndex = 1 : length(cfdLinkNames)
         linkCdAs = dummyVector;
         linkClAs = dummyVector;
         linkCsAs = dummyVector;
+        linkAoIs = dummyVector;
         
         yawAngles   = dummyVector;
         pitchAngles = dummyVector;
@@ -115,6 +116,7 @@ for linkIndex = 1 : length(cfdLinkNames)
             % Store data
             linkAoAs(simIndex) = linkAngleOfAttack;
             linkSsAs(simIndex) = linkSideslipAngle;
+            linkAoIs(simIndex) = jointPos(15)*180/pi;
             if linkIndex == 2
                 linkCdAs(simIndex) = data.(jointConfigName).([cfdLinkName,'_cd'])(simIndex) + ...
                                      data.(jointConfigName).([cfdLinkNames{3},'_cd'])(simIndex) + ...
@@ -142,19 +144,19 @@ for linkIndex = 1 : length(cfdLinkNames)
         end
         
         % plot link CdAs vs AoA
-%         fig = figure(linkIndex);
-%         scatter(linkAoAs,linkCdAs,[],linkSsAs); hold on;
-%         xlabel('$\alpha_{link}$','Interpreter','latex');
-%         ylabel('$C_D A$','Interpreter','latex');
-%         title(cfdLinkName,'Interpreter','none');
-%         grid on;
-%         c = colorbar;
+        fig = figure(linkIndex);
+        scatter(linkAoAs,linkCdAs,[],linkAoIs); hold on;
+        xlabel('$\alpha_{link}$','Interpreter','latex');
+        ylabel('$C_D A$','Interpreter','latex');
+        title(cfdLinkName,'Interpreter','none');
+        grid on;
+        c = colorbar;
 %         c.Limits = [0 180];
-%         c.Label.Interpreter = 'latex';
-%         c.Label.String = '$\beta_{link}$';
-%         c.Label.Position = [3, 95, 0];
-%         c.Label.Rotation = 0;
-%         c.Label.FontSize = 12;
+        c.Label.Interpreter = 'none';
+        c.Label.String = 'left_knee';
+        c.Label.Position = [3, 95, 0];
+        c.Label.Rotation = 0;
+        c.Label.FontSize = 12;
         
         % plot link ClAs vs AoA
 %         fig = figure(length(cfdLinkNames)+linkIndex+1);
@@ -187,19 +189,19 @@ for linkIndex = 1 : length(cfdLinkNames)
 %         c.Label.FontSize = 12;
 
         % plot link CnAs vs AoA
-        fig = figure(linkIndex);
-        scatter(linkAoAs,sqrt(linkClAs.^2 + linkCsAs.^2).*sign(linkClAs),[],linkSsAs); hold on;
-        xlabel('$\alpha_{link}$','Interpreter','latex');
-        ylabel('$C_N A$','Interpreter','latex');
-        title(cfdLinkName,'Interpreter','none');
-        grid on;
-        c = colorbar;
-        c.Limits = [0 180];
-        c.Label.Interpreter = 'latex';
-        c.Label.String = '$\beta_{link}$';
-        c.Label.Position = [3, 95, 0];
-        c.Label.Rotation = 0;
-        c.Label.FontSize = 12;
+%         fig = figure(linkIndex);
+%         scatter(linkAoAs,sqrt(linkClAs.^2 + linkCsAs.^2).*sign(linkClAs),[],linkSsAs); hold on;
+%         xlabel('$\alpha_{link}$','Interpreter','latex');
+%         ylabel('$C_N A$','Interpreter','latex');
+%         title(cfdLinkName,'Interpreter','none');
+%         grid on;
+%         c = colorbar;
+%         c.Limits = [0 180];
+%         c.Label.Interpreter = 'latex';
+%         c.Label.String = '$\beta_{link}$';
+%         c.Label.Position = [3, 95, 0];
+%         c.Label.Rotation = 0;
+%         c.Label.FontSize = 12;
 
         % plot link CfAs vs AoA
 %         fig = figure(linkIndex);
@@ -254,17 +256,17 @@ for linkIndex = 1 : length(cfdLinkNames)
 
 end
 
-%% Save the plots
-for imgIndex = 1 : 3*length(cfdLinkNames)+3
-    
-    fig   = figure(imgIndex);
-    title = get(gca,'title');
-    yVar  = get(gca,'YLabel');
-    if ~contains(title.String,'iRonCub')
-        saveas(fig,[saveFolderName,title.String,'_C',yVar.String(4),'.svg'])
-    else
-        saveas(fig,[saveFolderName,'ironcub_C',yVar.String(4),'.svg'])
-    end
-
-end
+% %% Save the plots
+% for imgIndex = 1 : 3*length(cfdLinkNames)+3
+%     
+%     fig   = figure(imgIndex);
+%     title = get(gca,'title');
+%     yVar  = get(gca,'YLabel');
+%     if ~contains(title.String,'iRonCub')
+%         saveas(fig,[saveFolderName,title.String,'_C',yVar.String(4),'.svg'])
+%     else
+%         saveas(fig,[saveFolderName,'ironcub_C',yVar.String(4),'.svg'])
+%     end
+% 
+% end
 
