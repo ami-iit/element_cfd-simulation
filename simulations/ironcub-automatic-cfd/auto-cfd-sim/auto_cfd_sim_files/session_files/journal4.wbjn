@@ -1,9 +1,0 @@
-# encoding: utf-8
-# 2023 R1
-SetScriptVersion(Version="23.1.153")
-fileReference1 = GetFileReference(Name="F3")
-fileReference1.Repair(FilePath="E:/apaolino/automatic-fluent/case/hovering.cas.h5")
-fileReference2 = GetFileReference(Name="F10")
-fileReference2.Repair(FilePath="E:/apaolino/automatic-fluent/case/hovering.cas.h5")
-ClearMessages()
-Save(Overwrite=True)

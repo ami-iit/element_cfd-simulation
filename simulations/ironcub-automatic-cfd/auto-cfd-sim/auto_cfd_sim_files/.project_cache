@@ -1,5 +1,4 @@
-﻿dp0/FLU/Fluent/hovering-1-00000.dat.h5
-dp0/FLU/Fluent/hovering.set
+﻿dp0/FLU/Fluent/hovering.set
 dp0/FLU/Fluent/Solution.trn
 dp0/act.dat
 dp0/designPoint.wbdp
@@ -9,6 +8,9 @@ session_files/journal3.wbjn
 session_files/journal3_crashed.wbjn
 session_files/journal4.wbjn
 session_files/journal5.wbjn
+session_files/journal6_crashed.wbjn
+session_files/journal7_crashed.wbjn
+session_files/journal8.wbjn
 dp0/
 dpall/
 progress_files/
