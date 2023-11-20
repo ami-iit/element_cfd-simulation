@@ -6,4 +6,8 @@ In this repo the automatic cfd pipeline is stored after splitting it in 2 main p
 
 * **`auto-cfd-sim`**: in this repo the input are the `.cas` file from the first pipeline part, the pitch and yaw angles and the output parameters file; the operations inside `ANSYS Fluent` allow to change pitch and yaw angles and then perform the simulations collecting th data on the whole-body aerodynamic force coefficients.
 
+* **`auto-cfd-sim-py`**: this repo encloses all the necessary files to perform automatic cfd simulations starting from already defined case files and puitch and yaw angles input files, the process is the same described in `auto-cfd-sim` but the main difference is that this routine doesn't rely on `ANSYS Workbench` automatic scripting features, but uses the new `pyfluent` packages which allow to use Fluent directly from command within a fully-integrated python code. This routine has 2 main advantages: 
+  - `Native GPU Solver` available from `ANSYS Fluent` (not from `ANSYS Workbench`);
+  - Easy to adapt to run on external workstations/servers after importing all the correct packages/files (or cloning the repo). 
+
 More details regarding the 2 pipeline parts are described in the relative repos.
