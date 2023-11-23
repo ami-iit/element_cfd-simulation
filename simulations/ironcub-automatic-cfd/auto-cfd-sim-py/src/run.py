@@ -9,10 +9,16 @@ import ansys.fluent.core as pyfluent
 from ansys.fluent.visualization import set_config
 from ansys.fluent.visualization.matplotlib import Plots
 from ansys.fluent.visualization.pyvista import Graphics
+from datetime import datetime
 
 import numpy as np 
 import pathlib
 import os
+
+######################### SIMULATION SETTINGS ##################################
+core_number         = 16        # number of cores to use (only pre-post mode if gpu is True)
+use_gpu             = False     # use GPU native solver
+iteration_number    = 1000      # number of iterations to run in the solver
 
 ################################# PATHS DEFINITION ############################## 
 # Define root folder path
@@ -113,13 +119,14 @@ for jointConfigName in jointConfigNames:
     yawAngleCycleList = yawAngleStartList if jointConfigIndex == 0 else yawAngleList
     
     ####################### Launch Fluent session via pyFluent #######################
-    print("Starting pyFluent session...")
+    timeFluentStart = datetime.now().strftime("%H:%M:%S")
+    print(f"[{timeFluentStart}] Starting pyFluent session...")
     solver = pyfluent.launch_fluent(
         mode="solver",                      # "meshing", "pure-meshing" or "solver"
         precision="double",                 # single or double precision
         version="3d",                       # 2d or 3d Fluent version
-        processor_count=8,                  # number of processors (only pre-post mode if gpu is True)
-        gpu=True,                           # use GPU native solver
+        processor_count=core_number,        # number of processors (only pre-post mode if gpu is True)
+        gpu=use_gpu,                        # use GPU native solver
         start_transcript=False,             # start transcript file
         cwd=str(rootPath/"log"),            # working directory
         show_gui=False,                     # show GUI or not
@@ -148,25 +155,27 @@ for jointConfigName in jointConfigNames:
 
             # Initialize and run flow solver
             solver.solution.initialization.initialize()
-            solver.solution.run_calculation.iterate(iter_count=1000)
+            solver.solution.run_calculation.iterate(iter_count=iteration_number)
 
             ################### pyFluent post (no pyfluent-visualization) ###################
 
             # plot and save residuals
             solver.tui.plot.residuals("y y y y y y")                        # plot residuals (y:yes; n:no; for each residual)
             solver.tui.display.set.picture.driver.jpeg()                    # set picture driver to jpeg
-            solver.tui.display.set.picture.use_window_resolution("n")       # use window resolution (y:yes; n:no)
-            solver.tui.display.set.picture.x_resolution(1920)               # set picture x resolution
-            solver.tui.display.set.picture.y_resolution(1440)               # set picture y resolution
-            solver.tui.display.save_picture(str(residualsPath / f"{jointConfigName}-{pitchAngle}-{yawAngle}"))  
+            solver.results.graphics.picture.use_window_resolution = False   # use window resolution
+            solver.results.graphics.picture.x_resolution = 1920             # set picture x resolution
+            solver.results.graphics.picture.y_resolution = 1440             # set picture y resolution
+            solver.tui.display.save_picture(str(residualsPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}"))
+            # solver.results.graphics.picture.save_picture(str(residualsPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}")) not working
 
-            # plot and save velocity magnitude contour on YZ plane 
-            solver.tui.display.objects.display("velocity-magnitude-contour")
-            solver.tui.display.views.restore_view("right")
-            solver.tui.display.set.picture.use_window_resolution("n")
-            solver.tui.display.set.picture.x_resolution(1920)
-            solver.tui.display.set.picture.y_resolution(1440)
-            solver.tui.display.save_picture(str(contoursPath / f"{jointConfigName}-{pitchAngle}-{yawAngle}"))
+            # plot and save velocity magnitude contour on YZ plane
+            solver.results.graphics.contour.display(object_name = "velocity-magnitude-contour")
+            solver.results.graphics.views.restore_view(view_name = "right")
+            solver.results.graphics.picture.use_window_resolution = False   # use window resolution
+            solver.results.graphics.picture.x_resolution = 1920             # set picture x resolution
+            solver.results.graphics.picture.y_resolution = 1440             # set picture y resolution
+            solver.tui.display.save_picture(str(contoursPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}"))
+            # solver.results.graphics.picture.save_picture(str(contoursPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}")) not working
 
             ################################## Export force report values ##################################        
             outputParameterValueList = solver.solution.report_definitions.compute(report_defs=outputParameterList)
@@ -179,11 +188,15 @@ for jointConfigName in jointConfigNames:
                     outputParameterString  = outputParameterString + f",{outputParameterValue}"
                     outputParameterCounter += 1
                 outputParamCSV.writelines(outputParameterString+"\n")
-
-            print(f"Cycle for {jointConfigName}, alpha={pitchAngle}, beta={yawAngle}: SUCCESS!")
+            
+            timeIterEnd = datetime.now().strftime("%H:%M:%S")
+            print(f"[{timeIterEnd}] Iter for {jointConfigName}, alpha={pitchAngle}, beta={yawAngle}: Success!")
     
     jointConfigIndex += 1
     # Close the solver process
     solver.exit()
+    timeJointConfigEnd = datetime.now().strftime("%H:%M:%S")
+    print(f"[{timeJointConfigEnd}] {jointConfigName} iterations completed!")
 
-print("Automatic CFD process completed successfully!")
+timeProcessEnd = datetime.now().strftime("%H:%M:%S")
+print(f"[{timeProcessEnd}]Automatic CFD process completed successfully!")
