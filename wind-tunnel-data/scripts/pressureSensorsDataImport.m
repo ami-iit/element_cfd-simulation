@@ -14,7 +14,6 @@ clc;
 
 %% Import filename list and add local path
 experiment = 'exp_21_03_22';        % Name of the experiment data folder
-addpath(genpath(['../',experiment,'/']));            % Adding the main folder path
 folderPath = ['../',experiment,'/data_GVPM'];
 testFileList = dir([folderPath,'/*.GVP']);  % List of the test files
 
@@ -100,6 +99,3 @@ end
 %% Complete conversion message
 clc;
 disp('conversion completed');
-
-%% Remove local path
-rmpath(genpath('../'));

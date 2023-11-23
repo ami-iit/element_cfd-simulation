@@ -11,8 +11,22 @@ clc;
 
 % Experiment and test to be mapped
 experiment      = 'exp_03_11_22';   % 'exp_21_03_22' | 'exp_03_11_22'
-GVPM_folderPath = ['../',experiment,'/data_GVPM'];
-testList        = dir([GVPM_folderPath,'/*.GVP']);  % List of the test files
+robotName       = 'iRonCub-Mk1';
+
+% Path definition
+if matches(robotName,'iRonCub-Mk1')
+    ironcubSoftwarePath  = getenv('IRONCUB_SOFTWARE_SOURCE_DIR');
+elseif matches(robotName,'iRonCub-Mk3')
+    ironcubSoftwarePath  = getenv('IRONCUB_COMPONENT_SOURCE_DIR');
+end
+windTunnelDataPath  = ['../',experiment,'/data_GVPM/'];
+matlabDataPath      = ['../',experiment,'/data_Matlab/'];
+coversPath          = ['./srcPressureAnalysis/',robotName,'/covers/'];
+sensorsMapPath      = ['./srcPressureAnalysis/',robotName,'/sensorsMapping/'];
+sensorsPlotPath     = ['./srcPressureAnalysis/',robotName,'/sensorsPlotting/'];
+
+% get the list of all the tests
+testList        = dir([windTunnelDataPath,'/*.GVP']);  % List of the test files
 
 for testIndex = 51%:length(testList(:,1))
 
@@ -21,10 +35,8 @@ for testIndex = 51%:length(testList(:,1))
     %% Import data
 
     % adding the main folder path
-    GVPM_folderPath = ['../',experiment,'/data_GVPM'];
-    ws_FolderPath = ['../',experiment,'/data_Matlab/'];
-    testpointList   = dir([GVPM_folderPath,'/',testID,'*.pth']);
-    test.(testID) = load([ws_FolderPath,testID,'/aerodynamicForces.mat']);  % test data loading
+    testpointList   = dir([windTunnelDataPath,'/',testID,'*.pth']);
+    test.(testID) = load([matlabDataPath,testID,'/aerodynamicForces.mat']);  % test data loading
 
     % Import robot joint positions
     testConfig = readcell(['./srcPressureAnalysis/localConfigurations/',experiment,'-test-config.csv']);
@@ -44,7 +56,7 @@ for testIndex = 51%:length(testList(:,1))
     for testPointIndex = 1 : (length(testpointList(:,1)) - 1)
         % loading the workspaces for each test point
         [~,testPointID,~]       = fileparts(testpointList(testPointIndex,:).name(10:15));
-        testPoint.(testPointID) = load([ws_FolderPath,testID,'/pressureSensorsData/',testPointID,'.mat']);  % test point data loading
+        testPoint.(testPointID) = load([matlabDataPath,testID,'/pressureSensorsData/',testPointID,'.mat']);  % test point data loading
         % assigning the max and min values
         pressArray    = struct2array(testPoint.(testPointID).pressureSensors.meanValues);
         maxPointPress = max(pressArray);
@@ -73,7 +85,7 @@ for testIndex = 51%:length(testList(:,1))
 
         % close scopes and clear previous test point data
         close all;
-        clearvars -except testPointIndex jointConfig testID testpointList ...
+        clearvars -except *Path testPointIndex jointConfig testID testpointList ...
             experiment testMaxPress testMinPress configSet configName jointPos ...
             testList N_interp_points N_total_points test deltaAngleInterp
         
@@ -91,9 +103,8 @@ for testIndex = 51%:length(testList(:,1))
         [~,upperTestPointID,~] = fileparts(testpointList(upperIndex,:).name(10:15));
 
         % Load data from matlab workspaces
-        ws_FolderPath            = ['../',experiment,'/data_Matlab/'];
-        testPoint.(lowerTestPointID) = load([ws_FolderPath,testID,'/pressureSensorsData/',lowerTestPointID,'.mat']);  % lower test point data loading
-        testPoint.(upperTestPointID) = load([ws_FolderPath,testID,'/pressureSensorsData/',upperTestPointID,'.mat']);  % upper test point data loading
+        testPoint.(lowerTestPointID) = load([matlabDataPath,testID,'/pressureSensorsData/',lowerTestPointID,'.mat']);  % lower test point data loading
+        testPoint.(upperTestPointID) = load([matlabDataPath,testID,'/pressureSensorsData/',upperTestPointID,'.mat']);  % upper test point data loading
 
         % Names of the covers and relative frames
         coverNames = {'face_front','face_back','chest','backpack','pelvis','lt_pelvis_wing','rt_pelvis_wing',...
@@ -123,12 +134,12 @@ for testIndex = 51%:length(testList(:,1))
                           zeros(1,3),         1];
 
         % data for using iDynTreeWrappers functions
-        modelPath  = 'C:\Users\apaolino\code\component_ironcub\models\iRonCub-Mk1\iRonCub\robots\iRonCub-Mk1_Gazebo\';
+        modelPath  = [ironcubSoftwarePath,'/models/iRonCub-Mk1/iRonCub/robots/iRonCub-Mk1_Gazebo/'];
         fileName   = 'model_stl.urdf';
-        meshFilePrefix = 'C:\Users\apaolino\code\component_ironcub\models';
+        meshFilePrefix = [ironcubSoftwarePath,'/models'];
         jointNames = {'torso_pitch','torso_roll','torso_yaw', 'l_shoulder_pitch', 'l_shoulder_roll','l_shoulder_yaw', ...
-            'l_elbow', 'r_shoulder_pitch', 'r_shoulder_roll','r_shoulder_yaw','r_elbow', 'l_hip_pitch', 'l_hip_roll', ...
-            'l_hip_yaw','l_knee','l_ankle_pitch','l_ankle_roll', 'r_hip_pitch','r_hip_roll','r_hip_yaw','r_knee','r_ankle_pitch','r_ankle_roll'};
+                      'l_elbow', 'r_shoulder_pitch', 'r_shoulder_roll','r_shoulder_yaw','r_elbow', 'l_hip_pitch', 'l_hip_roll', ...
+                      'l_hip_yaw','l_knee','l_ankle_pitch','l_ankle_roll', 'r_hip_pitch','r_hip_roll','r_hip_yaw','r_knee','r_ankle_pitch','r_ankle_roll'};
         jointVel = zeros(23,1);
         baseVel  = zeros(6,1);
         gravAcc  = [0; 0; 9.81];
@@ -136,15 +147,16 @@ for testIndex = 51%:length(testList(:,1))
         % idyntree initialization
         KinDynModel = iDynTreeWrappers.loadReducedModel(jointNames, 'root_link', modelPath, fileName, false);
         iDynTreeWrappers.setRobotState(KinDynModel, basePose, jointPos, baseVel, jointVel, gravAcc);
-
+        
+        % Set import file options
+        opts = detectImportOptions([sensorsMapPath,'chest_sensors.txt']);
 
         for j = 1:length(coverNames)
 
             %% Load geometric data
             coverName = coverNames{j};
-            coverData.(coverName).geom = stlread(['./srcPressureAnalysis/covers/',coverName,'.stl']);
-            opts = detectImportOptions('./srcPressureAnalysis/sensorsMapping/chest_sensors.txt');
-            pressureSensors = table2struct(readtable(['./srcPressureAnalysis/sensorsMapping/',coverName,'_sensors.txt'],opts),"ToScalar",true);
+            coverData.(coverName).geom = stlread([coversPath,coverName,'.stl']);
+            pressureSensors = table2struct(readtable([sensorsMapPath,coverName,'_sensors.txt'],opts),"ToScalar",true);
             coverData.(coverName).sensorsNames = pressureSensors.Var1;
             coverData.(coverName).x_sensors    = pressureSensors.Var2;
             coverData.(coverName).y_sensors    = pressureSensors.Var3;
@@ -348,10 +360,8 @@ for testIndex = 51%:length(testList(:,1))
 
         %% saving
         % saveas(fig1,['.\',saveFolderName,'\',coverName,'-',testID,'-',testPointID,'.svg']);
-
         saveFolderName = ['pressure_fancy_fig-',experiment];
         if (~exist(['./',saveFolderName],'dir'))
-
             mkdir(['./',saveFolderName]);
         end
         saveas(fig1,['.\',saveFolderName,'\',testID,'-',num2str(testPointIndex,'%04.f'),'.fig']);

@@ -94,14 +94,12 @@ for testIndex = 1:length(testList(:,1))
     %% Save imported struct data in workspace
 
     if (~exist(['../',experiment,'/data_Matlab'],'dir'))
-
         mkdir(['../',experiment,'/data_Matlab']);
     end
 
     [~,testName,~] = fileparts(fileName);
 
     if (~exist(['../',experiment,'/data_Matlab/',num2str(testName)],'dir'))
-
         mkdir(['../',experiment,'/data_Matlab/',num2str(testName)]);
     end
 
