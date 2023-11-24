@@ -16,7 +16,7 @@ import pathlib
 import os
 
 ######################### SIMULATION SETTINGS ##################################
-core_number         = 16        # number of cores to use (only pre-post mode if gpu is True)
+core_number         = 48        # number of cores to use (only pre-post mode if gpu is True)
 use_gpu             = False     # use GPU native solver
 iteration_number    = 1000      # number of iterations to run in the solver
 
@@ -136,7 +136,7 @@ for jointConfigName in jointConfigNames:
     for yawAngle in yawAngleCycleList:
 
         # Singular configuration check: |yawAngle| == 90 => wind direction not changing with pitch angle
-        pitchAngleCycleList = pitchAngleList if (abs(yawAngle) - 90 > 1e-4) else [0.0]
+        pitchAngleCycleList = pitchAngleList if ( abs(abs(yawAngle) - 90) > 1e-4 ) else [0.0]
 
         # Start the cycle for different pitch angles
         for pitchAngle in pitchAngleCycleList:
