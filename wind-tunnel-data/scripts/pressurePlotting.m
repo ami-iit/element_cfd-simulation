@@ -5,14 +5,12 @@ clc;
 %% Initialization
 
 % Test and point to be analyzed
-experiment  = 'exp_21_03_22'; % Experiment data {exp_21_03_22, exp_28_10_22}
-robotName   = 'iRonCub-Mk1';
-testID      = 'TID_0002';
-testPointID = 'PT0010';
-jointConfig = 'hovering'; % | hovering | flight30 | flight50 | flight60 |
+experiment  = 'exp_2023_12_11'; % Experiment: exp_2022_03_21 | exp_2022_11_03 | exp_2023_12_11
+robotName   = 'iRonCub-Mk3';
+testID      = 'TID_0001';
+testPointID = 'PT0001';
 
 % Path definition
-windTunnelDataPath  = ['../',experiment,'/data_GVPM'];
 matlabDataPath      = ['../',experiment,'/data_Matlab/'];
 sensorsDirPath      = ['./srcPressureAnalysis/',robotName,'/sensorsPlotting/'];
 
@@ -21,11 +19,7 @@ sensorsDirPath      = ['./srcPressureAnalysis/',robotName,'/sensorsPlotting/'];
 testPoint.(testPointID) = load([matlabDataPath,testID,'/pressureSensorsData/',testPointID,'.mat']);  % test point data loading
 
 % Names of the covers and relative frames
-coverNames = {'face_front','face_back','chest','backpack',...
-              'pelvis','lt_pelvis_wing','rt_pelvis_wing',...
-              'rt_arm_front','rt_arm_rear','lt_arm_front','lt_arm_rear', ...
-              'rt_thigh_front','rt_thigh_rear','lt_thigh_front','lt_thigh_rear',...
-              'rt_shin_front','rt_shin_rear','lt_shin_front','lt_shin_rear'};
+coverList = dir([sensorsDirPath,'*.txt']);  % List of the covers files
               
 % Initizalizing global values
 globalMinPress = 1e4;
@@ -34,12 +28,12 @@ globalMaxPress = -1e4;
 % Set file importing options
 opts = detectImportOptions([sensorsDirPath,'chest_sensors_plotting.txt']);
 
-for j = 1:length(coverNames)
+for j = 1:length(coverList)
 
     %% Load cover data
-    coverName = coverNames{j};
-    coverSensorsPositionFile = [sensorsDirPath,coverName,'_sensors_plotting.txt'];
-    pressureSensors = table2struct(readtable(coverSensorsPositionFile,opts),"ToScalar",true);
+    coverFileName   = coverList(j).name;
+    coverName       = coverFileName(1:end-21);
+    pressureSensors = table2struct(readtable([sensorsDirPath,coverFileName],opts),"ToScalar",true);
     coverData.(coverName).sensorsNames = pressureSensors.Var1;
     coverData.(coverName).x_sensors    = pressureSensors.Var2;
     coverData.(coverName).y_sensors    = pressureSensors.Var3;
@@ -69,7 +63,7 @@ for j = 1:length(coverNames)
     nSensors = length(coverData.(coverName).meanPressValues(:,1));
     color = interp1(linspace(0,nSensors,length(cmap(:,1))), cmap, 1:nSensors);
 
-    for i = 1 : nSensors
+    for i = 1 : nSensors    % Plot the sensors data and print sensors name on plot
         plot(testPoint.(testPointID).pressureSensors.time,coverData.(coverName).pressValues(i,:), ...
             'Color',color(i,:),'DisplayName',coverData.(coverName).sensorsNames{i}); hold on;
         text(testPoint.(testPointID).pressureSensors.time(end),coverData.(coverName).pressValues(i,end), ...
@@ -82,7 +76,7 @@ for j = 1:length(coverNames)
 %     legend('Location','best')
 
     % save pressure plot images
-    saveFolder = './pressure-plots/';
+    saveFolder = ['./pressure-plots/',experiment,'/'];
     if (~exist(saveFolder,'dir'))
         mkdir(saveFolder);
     end
@@ -93,7 +87,5 @@ for j = 1:length(coverNames)
 end % end of cover iteration
 
 %% Report additional data
-fprintf(['rt_foot \x394p = ',num2str(testPoint.(testPointID).pressureSensors.meanValues.S1,3),' [Pa] \n']);
-fprintf(['lt_foot \x394p = ',num2str(testPoint.(testPointID).pressureSensors.meanValues.S3,3),' [Pa] \n\n']);
 fprintf(['Global pressure range: ',num2str(globalMinPress,3),' [Pa] \x2264 \x394p \x2264 ',num2str(globalMaxPress,3),' [Pa] \n']);
 fprintf(['Total acquisition time: \x394T = ',num2str(testPoint.(testPointID).pressureSensors.time(end),3),' [s] \n']);
