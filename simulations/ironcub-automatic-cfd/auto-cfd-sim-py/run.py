@@ -16,13 +16,13 @@ import pathlib
 import os
 
 ######################### SIMULATION SETTINGS ##################################
-core_number         = 48        # number of cores to use (only pre-post mode if gpu is True)
+core_number         = 16        # number of cores to use (only pre-post mode if gpu is True)
 use_gpu             = False     # use GPU native solver
 iteration_number    = 1000      # number of iterations to run in the solver
 
 ################################# PATHS DEFINITION ############################## 
 # Define root folder path
-rootPath = pathlib.Path(__file__).parents[1]
+rootPath = pathlib.Path(__file__).parents[0]
 
 # Define case, data, source and log directory paths
 caseDirPath = rootPath / "case" # Fluent case directory path
@@ -128,7 +128,7 @@ for jointConfigName in jointConfigNames:
         processor_count=core_number,        # number of processors (only pre-post mode if gpu is True)
         gpu=use_gpu,                        # use GPU native solver
         start_transcript=False,             # start transcript file
-        cwd=str(rootPath/"log"),            # working directory
+        cwd=str(logPath),                   # working directory
         show_gui=False,                     # show GUI or not
         additional_arguments=mpi_option)    # additional arguments (used for MPI option)
 
