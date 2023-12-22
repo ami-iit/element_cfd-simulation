@@ -9,6 +9,9 @@
 # GIFs
 *.gif
 
+# JPEGs
+*.jpg
+
 # PNGs
 *.png
 
