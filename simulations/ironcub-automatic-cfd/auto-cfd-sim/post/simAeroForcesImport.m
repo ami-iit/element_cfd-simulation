@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This script automatically imports the CFD simulated data in Fluent and
-% exported in .csv format, coverting them into .mat format
+% exported in .csv format, converting them into .mat format
 %
 % Author: Antonello Paolino
 %
@@ -17,7 +17,7 @@ dataPath = '../data/';
 dataFile = [dataPath,'outputParameters.csv'];
 
 srcPath  = '../src/';
-jointConfigFile = [srcPath,'jointConfig.csv'];
+jointConfigFile = [srcPath,'jointConfigFull.csv'];
 
 opts     = detectImportOptions(dataFile);
 opts.PreserveVariableNames = false;         % Changing from '-' to '_' in the variable names
