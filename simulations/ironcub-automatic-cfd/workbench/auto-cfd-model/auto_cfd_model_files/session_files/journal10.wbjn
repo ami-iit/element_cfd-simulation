@@ -1,0 +1,26 @@
+# encoding: utf-8
+# 2023 R1
+SetScriptVersion(Version="23.1.153")
+RunScript(FilePath=GetAbsoluteUserPathName("ANSYS/ironcub-automatic-cfd/automatic-cfd-script.wbjn"))
+RunScript(FilePath=GetAbsoluteUserPathName("ANSYS/ironcub-automatic-cfd/automatic-cfd-script.wbjn"))
+system1 = GetSystem(Name="FLTG")
+setup1 = system1.GetContainer(ComponentName="Setup")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 1)')
+tGridData1 = GetDataEntity("/Mesh/TGridData:TGridData")
+tGridData1.NumberOfProcs = 16
+fluentLauncherSettings1 = setup1.GetFluentLauncherSettings()
+fluentLauncherSettings1.NumberOfProcessors = 16
+RunScript(FilePath=GetAbsoluteUserPathName("ANSYS/ironcub-automatic-cfd/automatic-cfd-script.wbjn"))
+RunScript(FilePath=GetAbsoluteUserPathName("ANSYS/ironcub-automatic-cfd/automatic-cfd-script.wbjn"))
+setup1.SendCommand(Command='(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 1)')
+setup1.SendCommand(Command='/file/set-tui-version "23.1"(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 1)')
+setup1.SendCommand(Command='/file/set-tui-version "23.1"(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)')
+RunScript(FilePath=GetAbsoluteUserPathName("ANSYS/ironcub-automatic-cfd/automatic-cfd-script.wbjn"))
+setup1.SendCommand(Command='(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 1)')
+setup1.SendCommand(Command='/file/set-tui-version "23.1"(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 1)')
+setup1.SendCommand(Command='/file/set-tui-version "23.1"(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 1)')
+setup1.SendCommand(Command='/file/set-tui-version "23.1"')
+Open(FilePath=GetAbsoluteUserPathName("ANSYS/ironcub-automatic-cfd/automatic_cfd_project.wbpj"))

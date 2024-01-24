@@ -1,0 +1,95 @@
+﻿# encoding: utf-8
+# 2023 R1
+SetScriptVersion(Version="23.1.153")
+
+# LIBRARIES
+import os
+import sys
+
+########## INPUT DATA ##########
+# Set files folder
+rootPath = "C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/auto-cfd-geom/"
+srcPath  = rootPath + "src/"
+geomPath = rootPath + "geom/"
+geomDMAssPath  = rootPath + "auto_cfd_geom_files/dp0/Geom/DM/"
+geomDMCompPath = rootPath + "auto_cfd_geom_files/dp0/Geom/DM/otherDocs/"
+
+# File names
+geometrySrcFile     = "ironcub-geom.scdoc"
+ironcubModelSrcFile = "iRonCub-share.scdoc"
+assFileName         = 'Geom.scdoc'
+compFileName        = 'iRonCub-share.scdoc'
+geomScriptFile      = "ironcub-geom-script.scscript"
+jointConfigFileName = "jointConfig.csv"
+
+# Load robot joint config
+with open(srcPath + jointConfigFileName, 'r') as jointConfigCSV:
+    jointConfigFile  = jointConfigCSV.readlines()
+    jointConfigList  = []
+    jointConfigNames = []
+    for jointConfig in jointConfigFile:
+        temp = jointConfig[:-1].split(',')
+        jointConfigList.append(temp[1:]) #splitting values by comma
+        jointConfigNames.append(temp[0])
+    
+
+# Cycle on the joint config to generate the robot geometry in SpaceClaim
+jointConfigCounter = 0
+for jointConfig in jointConfigList:
+    
+    defaultPitchAngle = "0";
+    defaultYawAngle = "0";
+        
+    # Load and open SC geometry
+    geomSystem    = GetSystem(Name="Geom")
+    geomComponent = geomSystem.GetContainer(ComponentName="Geometry")
+    geomComponent.SetFile(FilePath = srcPath + geometrySrcFile)
+    geomComponent.Edit(IsSpaceClaimGeometry=True)
+
+    # Edit Parameters and refresh geometry
+    designPoint = Parameters.GetDesignPoint(Name="0")
+    designPoint.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P1"),Expression=defaultPitchAngle+" [degree]")
+    designPoint.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P2"),Expression=defaultYawAngle+" [degree]")
+    
+    jointCounter = 0
+    for jointAngle in jointConfig:
+        designPoint.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P"+str(jointCounter+3)),Expression=jointAngle+" [degree]")
+        jointCounter += 1
+        
+    # designPoint.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P"+str(jointCounter+3)),Expression=str(jointConfigCounter))
+    
+    geomComponent.Refresh()
+    
+    # Run the geometry script
+    geomComponent.RunScript(ScriptFile = srcPath + geomScriptFile)
+    
+    # Close SC
+    geomComponent.Exit()
+    
+    # Save project after cycle end
+    Save(Overwrite=True)
+    
+    # Create directory for the current joint config file
+    newGeomDirPath = geomPath + jointConfigNames[jointConfigCounter] + "/"
+    if not os.path.exists(newGeomDirPath):
+        os.makedirs(newGeomDirPath)
+    
+    # Copy and move the generated assembly file
+    srcAssPath = geomDMAssPath + assFileName
+    destAssPath = newGeomDirPath + assFileName
+    if not os.path.exists(destAssPath):
+        with open(srcAssPath, 'rb') as source_file:
+            with open(destAssPath, 'wb') as destination_file:
+                destination_file.write(source_file.read())
+                
+    # Copy and move the generated component file
+    srcCompPath = geomDMCompPath + compFileName
+    destCompPath = newGeomDirPath + compFileName
+    if not os.path.exists(destCompPath):
+        with open(srcCompPath, 'rb') as source_file:
+            with open(destCompPath, 'wb') as destination_file:
+                destination_file.write(source_file.read())
+                
+    # Increment joint config counter
+    jointConfigCounter +=1
+

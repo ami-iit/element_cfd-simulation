@@ -1,0 +1,92 @@
+﻿# encoding: utf-8
+# 2023 R1
+SetScriptVersion(Version="23.1.153")
+
+########## INPUT DATA ##########
+# Set files folder
+dirPath  = "C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/auto-cfd-model/"
+srcPath  = dirPath + "src/"
+geomPath = dirPath + "geom/"
+casePath = dirPath + "case/"
+
+# File names
+geometryFile        = "ironcub-model-share.scdoc"
+geomScriptFile      = "ironcub-model-script.scscript"
+jointConfigFileName = "jointConfig.csv"
+outputParamFileName = "outputParameters.csv"
+
+# Load robot joint config
+with open(srcPath + jointConfigFileName, 'r') as jointConfigCSV:
+    jointConfigFile  = jointConfigCSV.readlines()
+    jointConfigList  = []
+    jointConfigNames = []
+    for jointConfig in jointConfigFile:
+        temp = jointConfig[:-1].split(',')
+        jointConfigList.append(temp[1:]) #splitting values by comma
+        jointConfigNames.append(temp[0])
+
+# Load output parameters file      
+with open(srcPath + outputParamFileName, 'r') as outputParamCSV:
+    outputParameterFile   = outputParamCSV.readlines()
+    outputParameterList   = outputParameterFile[0].split(',')
+    outputParameterList   = outputParameterList[3:]
+    outputParameterNumber = len(outputParameterList)
+    
+
+# Cycle on the joint config to generate the Fluent case data
+jointConfigCounter = 0
+for jointConfig in jointConfigList:
+    
+    defaultPitchAngle = "0";
+    defaultYawAngle = "0";
+        
+    # Load and open SC geometry
+    geomSystem    = GetSystem(Name="Geom")
+    geomComponent = geomSystem.GetContainer(ComponentName="Geometry")
+    geomComponent.SetFile(FilePath = geomPath + geometryFile)
+    geomComponent.Edit(IsSpaceClaimGeometry=True)
+
+    # Edit Parameters and refresh geometry
+    designPoint = Parameters.GetDesignPoint(Name="0")
+    designPoint.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P"+str(outputParameterNumber+1)),Expression=defaultPitchAngle+" [degree]")
+    designPoint.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P"+str(outputParameterNumber+2)),Expression=defaultYawAngle+" [degree]")
+    
+    jointCounter = 0
+    for jointAngle in jointConfig:
+        designPoint.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P"+str(jointCounter+outputParameterNumber+3)),Expression=jointAngle+" [degree]")
+        jointCounter += 1
+    
+    geomComponent.Refresh()
+    
+    # Run the geometry script, close SC
+    geomComponent.RunScript(ScriptFile = geomPath + geomScriptFile)
+    geomComponent.Exit()
+    
+    # Generate the updated mesh
+    fluentSystem  = GetSystem(Name="FLTG")
+    meshComponent = fluentSystem.GetComponent(Name="Mesh")
+    meshComponent.Update(AllDependencies=True)
+    
+    # Open Fluent setup
+    fluentSystem   = GetSystem(Name="FLTG")
+    setupContainer = fluentSystem.GetContainer(ComponentName="Setup")
+    setupContainer.Edit()
+    
+    # Merge inlet and outlet surfaces
+    #setupContainer.SendCommand(Command="define/boundary-conditions/zone-type outlet velocity-inlet ")
+    #setupContainer.SendCommand(Command="mesh/modify-zones/merge-zones inlet outlet () ")
+    
+    # Create cell-register
+    #setupContainer.SendCommand(Command="solve/cell-registers/add region_in type hexahedron min-point -100 -100 -1 max-point 100 100 100 ")
+    
+    # Save Fluent case file
+    setupContainer.SendCommand(Command="file/write-case \"" + casePath + jointConfigNames[jointConfigCounter] + ".cas.h5\" ")
+    
+    # Exit Fluent editor
+    setupContainer.Exit()
+    
+    # Save project after cycle end
+    Save(Overwrite=True)
+        
+    jointConfigCounter +=1
+

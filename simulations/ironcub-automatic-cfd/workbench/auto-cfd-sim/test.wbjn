@@ -1,0 +1,15 @@
+﻿# encoding: utf-8
+# 2023 R2
+SetScriptVersion(Version="23.2.142")
+RunScript(FilePath="C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/auto-cfd-geom/auto-cfd-geom-script.wbjn")
+RunScript(FilePath="C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/auto-cfd-geom/auto-cfd-geom-script.wbjn")
+RunScript(FilePath="C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/auto-cfd-geom/auto-cfd-geom-script.wbjn")
+RunScript(FilePath="C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/auto-cfd-geom/auto-cfd-geom-script.wbjn")
+system1 = GetSystem(Name="Geom")
+geometry1 = system1.GetContainer(ComponentName="Geometry")
+geometry1.SetFile(FilePath="C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/auto-cfd-geom/src/ironcub-geom.scdoc")
+geometry1.Edit(IsSpaceClaimGeometry=True)
+geometry1.Exit()
+Save(Overwrite=True)
+RunScript(FilePath="C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/auto-cfd-geom/auto-cfd-geom-script.wbjn")
+Save(Overwrite=True)
