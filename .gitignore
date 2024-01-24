@@ -6,6 +6,9 @@
 # Matlab temp files
 *.asv
 
+# numpy dataset
+*.npy
+
 # GIFs
 *.gif
 
