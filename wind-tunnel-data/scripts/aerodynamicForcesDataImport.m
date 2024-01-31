@@ -13,7 +13,7 @@ clear all;
 clc;
 
 %% Import filename list and add local path
-experiment = 'exp_21_03_22';        % Name of the experiment data folder
+experiment = 'exp_2023_12_11';        % Name of the experiment data folder
 folderPath = ['../',experiment,'/data_GVPM'];
 testList = dir([folderPath,'/*.GVP']);  % List of the test files
 
@@ -57,9 +57,14 @@ for testIndex = 1:length(testList(:,1))
     end
 
     %% Modify body torques reference frame to the robot leg pitch axis
-
-    r_x = -0.497;    % [m] distance along x between the reference frames
-    r_z =  0.021;   % [m] distance along z between the reference frames
+    
+    if matches(experiment,{'exp_2022_03_21','exp_2022_11_03'})
+        r_x = -0.497;    % [m] distance along x between the reference frames
+        r_z =  0.021;   % [m] distance along z between the reference frames
+    elseif matches(experiment,'exp_2023_12_11')
+        r_x = -0.228;    % [m] distance along x between the reference frames
+        r_z =  0.0485;   % [m] distance along z between the reference frames
+    end
     
     bodyAero.xTorque = scaleAero.xTorque - scaleAero.yForce * r_z;
     bodyAero.yTorque = scaleAero.yTorque + scaleAero.xForce * r_z - scaleAero.zForce * r_x;

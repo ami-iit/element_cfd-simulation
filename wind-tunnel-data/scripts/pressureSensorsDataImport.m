@@ -13,12 +13,13 @@ clear all;
 clc;
 
 %% Import filename list and add local path
-experiment = 'exp_21_03_22';        % Name of the experiment data folder
-folderPath = ['../',experiment,'/data_GVPM'];
-testFileList = dir([folderPath,'/*.GVP']);  % List of the test files
+experiment         = 'exp_2023_12_11';        % Name of the experiment data folder
+windTunnelDataPath = ['../',experiment,'/data_GVPM/'];
+testFileList       = dir([windTunnelDataPath,'/*.GVP']);  % List of the test files
 
 %% Initialize progress message
 disp('progress: [0%] completed');
+tic
 
 %% Operations for each test
 for testIndex = 1 : length(testFileList)
@@ -26,50 +27,60 @@ for testIndex = 1 : length(testFileList)
     testFileName   = testFileList(testIndex).name;
     [~,testName,~] = fileparts(testFileName);   % extracting the test name from the file name
 
-    pressFileList     = dir([folderPath,'/',testName,'*.pth']);
-    meanPressFileList = dir([folderPath,'/',testName,'*.prm']);
+    pressFileList     = dir([windTunnelDataPath,testName,'*.pth']);
+    meanPressFileList = dir([windTunnelDataPath,testName,'*.prm']);
 
     % Initialize data structure
     pressureSensors = struct();
 
     % Load pressure sensors names
-    pressNames = readtable([folderPath,'/Pressure_Sensors_Map.csv'],'Range','B:B');
+    pressNames = readtable([windTunnelDataPath,'Pressure_Sensors_Map.csv'],'Range','B:B');
     pressNames = table2array(pressNames);
 
     %% Loop for each test point
-    for testPointIndex = 1 : (length(pressFileList(:,1)) - 1)
 
-        % Import data from files
-        pressFileName     = pressFileList(testPointIndex).name;
-        meanPressFileName = meanPressFileList(testPointIndex).name;
+    if matches(experiment,'exp_2023_12_11')
+        testPointNumber = length(meanPressFileList(:,1));
+    else
+        testPointNumber = length(meanPressFileList(:,1)) - 1; % last one is a zeros file
+    end
 
-        pressValues = readmatrix([folderPath,'/',pressFileName],'FileType','text','Range','E1');
-        pressValues = pressValues(2:end,:);
+    for testPointIndex = 1 : testPointNumber
+        
+        if ~matches(experiment,'exp_2023_12_11')
 
-        pressTimeStamp = readcell([folderPath,'/',pressFileName],'FileType','text');
-        pressTimeStamp = datetime(vertcat(pressTimeStamp{2:end,1}), ...
-                        'InputFormat','HH:mm:ss.SSSSSS dd/MM/yyyy', ...
-                        'Format','ss.SSSSSS');
-        pressTimeStamp = pressTimeStamp - pressTimeStamp(1);
-        pressTimeStamp = seconds(pressTimeStamp);
+            % Import time-varying data from files
+            pressFileName  = pressFileList(testPointIndex).name;
+            pressValues    = readmatrix([windTunnelDataPath,pressFileName],'FileType','text','Range','E1');
+            pressValues    = pressValues(2:end,:);
+            pressTimeStamp = readcell([windTunnelDataPath,pressFileName],'FileType','text');
+            pressTimeStamp = datetime(vertcat(pressTimeStamp{2:end,1}), ...
+                                      'InputFormat','HH:mm:ss.SSSSSS dd/MM/yyyy', ...
+                                      'Format','ss.SSSSSS');
+            pressTimeStamp = pressTimeStamp - pressTimeStamp(1);
+            pressTimeStamp = seconds(pressTimeStamp);
 
-        pressMeanValues = readmatrix([folderPath,'/',meanPressFileName],'FileType','text','Range','B:B');
+            % Assign data to the struct variables
+            pressureSensors.time = pressTimeStamp;
+            for i = 1:length(pressNames)
+                pressureSensors.values.(pressNames{i}) = pressValues(:,i);
+            end
 
-
-        % Assign data to the struct variables
-        pressureSensors.time = pressTimeStamp;
-
-        for i = 1:length(pressNames)
-
-            pressureSensors.values.(pressNames{i}) = pressValues(:,i);
-            pressureSensors.meanValues.(pressNames{i}) = pressMeanValues(i);
         end
 
+        % Import averaged data from files
+        meanPressFileName = meanPressFileList(testPointIndex).name;
+        pressMeanValues   = readmatrix([windTunnelDataPath,meanPressFileName],'FileType','text','Range','B:B');
+
+        % Assign data to the struct variables
+        for i = 1:length(pressNames)
+            pressureSensors.meanValues.(pressNames{i}) = pressMeanValues(i);
+        end
         pressureSensors.testID = str2double(testName(5:8));
         pressureSensors.pointID = testPointIndex;
 
         % Save imported struct data in workspace
-        pointFileName = pressFileName(10:15);
+        pointFileName = meanPressFileName(10:15);
 
         if (~exist(['../',experiment,'/data_Matlab'],'dir'))
 
@@ -90,10 +101,15 @@ for testIndex = 1 : length(testFileList)
 
     end
     
-    %% 
+    %% status display
     status = testIndex/length(testFileList) * 100;
     clc;
     disp(['progress: [',num2str(round(status)),'%] completed']);
+
+    elapsedTime = toc;
+    totalTime = elapsedTime/(status/100);
+    remainingTime = totalTime - elapsedTime;
+    disp(['remaining time: [',num2str(round(remainingTime)),'s]']);
 end
 
 %% Complete conversion message
