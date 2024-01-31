@@ -45,7 +45,7 @@ for testIndex = 2%:length(testList(:,1))
 
     % Assign the joints configuration relative to the test
     jointPosData = importdata(['./srcPressureAnalysis/localConfigurations/',experiment,'-',configSet,'-config.csv']);
-    jointPos     = jointPosData.data(matches(jointPosData.textdata(:),configName),:) * pi/180 *0;
+    jointPos     = jointPosData.data(matches(jointPosData.textdata(:),configName),:) * pi/180;
 
     %% Find test total pressure range
 
@@ -125,11 +125,11 @@ for testIndex = 2%:length(testList(:,1))
                            'rt_thigh_front','rt_thigh_back','lt_thigh_front','lt_thigh_back',...
                            'rt_shin_front','rt_shin_back','lt_shin_front','lt_shin_back', ...
                            'rt_foot_front','rt_foot_back','lt_foot_front','lt_foot_back'};
-            coverFrames = {'head','head','chest','chest', ...
-                           'chest','r_shoulder_1','l_upper_arm','l_upper_arm', ...
-                           'r_upper_leg','r_upper_leg','l_upper_leg','l_upper_leg', ...
-                           'r_lower_leg','r_lower_leg','l_lower_leg','l_lower_leg', ...
-                           'r_foot_front','r_foot_rear','l_foot_front','l_foot_rear'};
+            % coverFrames = {'head','head','chest','chest', ...
+            %                'chest','r_shoulder_1','l_upper_arm','l_upper_arm', ...
+            %                'r_upper_leg','r_upper_leg','l_upper_leg','l_upper_leg', ...
+            %                'r_lower_leg','r_lower_leg','l_lower_leg','l_lower_leg', ...
+            %                'r_foot_front','r_foot_rear','l_foot_front','l_foot_rear'};
             frameNames  = {'head','head','chest','chest', ...
                            'r_upper_arm','r_upper_arm','l_upper_arm','l_upper_arm', ...
                            'r_upper_leg','r_upper_leg','l_upper_leg','l_upper_leg', ...
@@ -171,13 +171,6 @@ for testIndex = 2%:length(testList(:,1))
 
         % idyntree initialization
         KinDynModel = iDynTreeWrappers.loadReducedModel(jointNames, 'root_link', modelPath, fileName, false);
-        
-        % Get covers transform at initial state
-        iDynTreeWrappers.setRobotState(KinDynModel, basePose, 0*jointPos, baseVel, jointVel, gravAcc);
-        coverTransforms = struct();
-        for in = 1:length(coverNames)
-            coverTransforms.(coverNames{in}) = iDynTreeWrappers.getRelativeTransform(KinDynModel,frameNames{in},coverFrames{in});
-        end
         iDynTreeWrappers.setRobotState(KinDynModel, basePose, jointPos, baseVel, jointVel, gravAcc);
         
         % Set import file options
@@ -214,12 +207,11 @@ for testIndex = 2%:length(testList(:,1))
 
             % Move pressure sensors locations from cover to global coordinates
             w_H_l = iDynTreeWrappers.getWorldTransform(KinDynModel,frameNames{j});
-            l_H_c = coverTransforms.(coverName);
-
             xyz_sensors = [coverData.(coverName).x_sensors, coverData.(coverName).y_sensors, coverData.(coverName).z_sensors]/1000;
+
             for i = 1:length(xyz_sensors(:,1))
                 v_link  = [transpose(xyz_sensors(i,:)); 1];
-                v_world = w_H_l*l_H_c*v_link;
+                v_world = w_H_l*v_link;
                 coverData.(coverName).x_globalSensors(i,1) = v_world(1);
                 coverData.(coverName).y_globalSensors(i,1) = v_world(2);
                 coverData.(coverName).z_globalSensors(i,1) = v_world(3);
@@ -230,7 +222,7 @@ for testIndex = 2%:length(testList(:,1))
             coverData.(coverName).patchFaces         = coverData.(coverName).geom.ConnectivityList;
             for i = 1:length(coverData.(coverName).patchPoints(:,1))
                 v_link  = [transpose(coverData.(coverName).patchPoints(i,:)); 1];
-                v_world = w_H_l*l_H_c*v_link;
+                v_world = w_H_l*v_link;
                 coverData.(coverName).patchPoints(i,:)   = transpose(v_world(1:3));
             end
 
@@ -264,7 +256,7 @@ for testIndex = 2%:length(testList(:,1))
 
         %% Pressure map plot
         fig1 = figure(1);
-        for j = 5:length(coverNames)
+        for j = 1:length(coverNames)
             % plot the cover surface interpolated contour
             coverData.(coverNames{j}).interpPressValues = coverData.(coverNames{j}).interpFunction(coverData.(coverNames{j}).geom.Points);
             p = patch('Faces',coverData.(coverNames{j}).patchFaces,'Vertices',coverData.(coverNames{j}).patchPoints,...
