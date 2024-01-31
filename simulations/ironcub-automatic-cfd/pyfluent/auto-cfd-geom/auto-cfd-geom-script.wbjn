@@ -8,7 +8,7 @@ import sys
 
 ########## INPUT DATA ##########
 # Set files folder
-rootPath = "C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/auto-cfd-geom/"
+rootPath = "C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/pyfluent/auto-cfd-geom/"
 srcPath  = rootPath + "src/"
 geomPath = rootPath + "geom/"
 geomDMAssPath  = rootPath + "auto_cfd_geom_files/dp0/Geom/DM/"
