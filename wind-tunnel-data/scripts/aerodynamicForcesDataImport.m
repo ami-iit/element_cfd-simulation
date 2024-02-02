@@ -56,19 +56,21 @@ for testIndex = 1:length(testList(:,1))
         windAxesAero.(aeroCoeffNames{i}) = data(:,50+i);
     end
 
-    %% Modify body torques reference frame to the robot leg pitch axis
+    %% Modify body torques reference frame from scale to robot body
     
     if matches(experiment,{'exp_2022_03_21','exp_2022_11_03'})
-        r_x = -0.497;    % [m] distance along x between the reference frames
+        r_x = -0.497;   % [m] distance along x between the reference frames
+        r_y =  0;       % [m] distance along y between the reference frames
         r_z =  0.021;   % [m] distance along z between the reference frames
     elseif matches(experiment,'exp_2023_12_11')
-        r_x = -0.228;    % [m] distance along x between the reference frames
-        r_z =  0.0485;   % [m] distance along z between the reference frames
+        r_x =  0;       % [m] distance along x between the reference frames
+        r_y =  0.0485;  % [m] distance along y between the reference frames
+        r_z =  0.228;   % [m] distance along z between the reference frames
     end
     
-    bodyAero.xTorque = scaleAero.xTorque - scaleAero.yForce * r_z;
-    bodyAero.yTorque = scaleAero.yTorque + scaleAero.xForce * r_z - scaleAero.zForce * r_x;
-    bodyAero.zTorque = scaleAero.zTorque + scaleAero.yForce * r_x;
+    bodyAero.xTorque = bodyAero.xTorque + bodyAero.zForce * r_y - bodyAero.yForce * r_z;
+    bodyAero.yTorque = bodyAero.yTorque + bodyAero.xForce * r_z - bodyAero.zForce * r_x;
+    bodyAero.zTorque = bodyAero.zTorque + bodyAero.yForce * r_x - bodyAero.xForce * r_y;
 
     % Non-dimensional torques evaluation (accounting only for dynamic
     % pressure because of unitary nominal surface, length and chord
@@ -76,25 +78,41 @@ for testIndex = 1:length(testList(:,1))
     bodyAero.yTorqueCoeff = bodyAero.yTorque ./ (state.dynPress);
     bodyAero.zTorqueCoeff = bodyAero.zTorque ./ (state.dynPress);
 
-    %% Modify wind axes torques reference frame to the robot leg pitch axis
+    %% Modify force/torques reference frame from robot body to wind axes
     
     % This is performed accounting for the transformation between the two
     % frames produced by the rotations alpha and beta in the wind tunnel
 
-    windAxesAero.rollTorque  = - bodyAero.xTorque .*cosd(state.alphaMeas).*cosd(state.betaMeas) ...
-                               - bodyAero.yTorque .*cosd(state.alphaMeas).*sind(state.betaMeas) ...
-                               + bodyAero.zTorque .*sind(state.alphaMeas);
-    windAxesAero.pitchTorque = - bodyAero.xTorque .*sind(state.betaMeas) ...
-                               + bodyAero.yTorque .*cosd(state.betaMeas);
-    windAxesAero.yawTorque   = - bodyAero.xTorque .*sind(state.alphaMeas).*cosd(state.betaMeas) ...
-                               - bodyAero.yTorque .*sind(state.alphaMeas).*sind(state.betaMeas) ...
-                               - bodyAero.zTorque .*cosd(state.alphaMeas);
+    wind_R_body = @(alpha, beta) roty(180) * rotz(beta) * roty(alpha);
+
+    for i = 1 : length(state.alphaDes)
+
+        % compute the force(f_b) and moment(m_b) in body frame
+        f_b    = [bodyAero.xForce(i); bodyAero.yForce(i); bodyAero.zForce(i)];
+        m_b    = [bodyAero.xTorque(i); bodyAero.yTorque(i); bodyAero.zTorque(i)];
+
+        % transform f_b and m_b to wind axes (f_w, m_w)
+        w_R_b  = wind_R_body(state.alphaDes(i),state.betaDes(i));
+        f_w    = w_R_b * f_b;
+        m_w    = w_R_b * m_b;
+
+        % assign force/torque values
+        windAxesAero.dragForce(i)   = f_w(1);
+        windAxesAero.sideForce(i)   = f_w(2);
+        windAxesAero.liftForce(i)   = f_w(3);
+        windAxesAero.rollTorque(i)  = m_w(1);
+        windAxesAero.pitchTorque(i) = m_w(2);
+        windAxesAero.yawTorque(i)   = m_w(3);
+    end
     
-    % Non-dimensional torques evaluation (accounting only for dynamic
+    % Non-dimensional force/torque evaluation (accounting only for dynamic
     % pressure because of unitary nominal surface, length and chord
-    windAxesAero.rollTorqueCoeff  = windAxesAero.rollTorque ./ (state.dynPress);
+    windAxesAero.dragForceCoeff   = windAxesAero.dragForce   ./ (state.dynPress);
+    windAxesAero.sideForceCoeff   = windAxesAero.sideForce   ./ (state.dynPress);
+    windAxesAero.liftForceCoeff   = windAxesAero.liftForce   ./ (state.dynPress);
+    windAxesAero.rollTorqueCoeff  = windAxesAero.rollTorque  ./ (state.dynPress);
     windAxesAero.pitchTorqueCoeff = windAxesAero.pitchTorque ./ (state.dynPress);
-    windAxesAero.yawTorqueCoeff   = windAxesAero.yawTorque ./ (state.dynPress);
+    windAxesAero.yawTorqueCoeff   = windAxesAero.yawTorque   ./ (state.dynPress);
 
     %% Save imported struct data in workspace
 
