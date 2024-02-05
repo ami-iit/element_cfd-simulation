@@ -39,7 +39,7 @@ meshDirPath = rootPath / "mesh" # mesh directory path
 caseDirPath = rootPath / "case" # Fluent case directory path
 dataDirPath = rootPath / "data" # data directory path
 srcDirPath  = rootPath / "src"  # source directory path
-logPath     = rootPath / "log"  # log directory path
+logDirPath  = rootPath / "log"  # log directory path
 
 # Define file names
 jointConfigFileName    = "jointConfig.csv"
@@ -73,7 +73,7 @@ for jointConfigName in jointConfigNames:
         processor_count=core_number,        # number of processors (only pre-post mode if gpu is True)
         gpu=use_gpu,                        # use GPU native solver
         start_transcript=False,             # start transcript file
-        cwd=str(logPath),                   # working directory
+        cwd=str(logDirPath),                # working directory
         show_gui=False,                     # show GUI or not
         additional_arguments=mpi_option)    # additional arguments (used for MPI option)
     
@@ -254,7 +254,7 @@ for jointConfigName in jointConfigNames:
     #     processor_count=core_number,        # number of processors (only pre-post mode if gpu is True)
     #     gpu=use_gpu,                        # use GPU native solver
     #     start_transcript=False,             # start transcript file
-    #     cwd=str(logPath),                   # working directory
+    #     cwd=str(logDirPath),                # working directory
     #     show_gui=False,                     # show GUI or not
     #     additional_arguments=mpi_option)    # additional arguments (used for MPI option)
     
@@ -291,41 +291,88 @@ for jointConfigName in jointConfigNames:
     inlet.turb_viscosity_ratio = 0.01
     
     # Reference values
-    solver.setup.reference_values.compute.from_zone_name.set_state('inlet')
+    solver.setup.reference_values.velocity.set_state(inlet.vmag.value())
     
     # Methods
     solver.solution.methods.p_v_coupling.flow_scheme.set_state('Coupled')
     solver.solution.methods.warped_face_gradient_correction.enable(enable=True, gradient_correction_mode='memory-saving-mode')
     
+    
     ### Report definition generation
-    solver.solution.report_definitions.force["test"] = {}
-    surfacesList = solver.solution.report_definitions.force["test"].thread_names.allowed_values()
     
-    surfacesSkipList = []
-    surfacesMergeList = []
+    # initialize ironcub cd, cl, cs reports
+    solver.solution.report_definitions.drag["ironcub-cd"] = {}
+    solver.solution.report_definitions.drag["ironcub-cl"] = {}
+    solver.solution.report_definitions.drag["ironcub-cs"] = {}
     
-    for surfaceName in surfacesList:
+    # get the list of surfaces
+    surfaceList = solver.solution.report_definitions.drag["ironcub-cd"].thread_names.allowed_values()
+    
+    # define ironcub-cd report
+    cd = solver.solution.report_definitions.drag["ironcub-cd"]
+    cd.thread_names.set_state(surfaceList)
+    cd.force_vector.set_state([0, 0, -1])
+    cd.average_over.set_state(100)
+
+    # define ironcub-cl report
+    cl = solver.solution.report_definitions.drag["ironcub-cl"]
+    cl.thread_names.set_state(surfaceList)
+    cl.force_vector.set_state([0, 1, 0])
+    cl.average_over.set_state(100)
+
+    # define ironcub-cs report
+    cs = solver.solution.report_definitions.drag["ironcub-cs"]
+    cs.thread_names.set_state(surfaceList)
+    cs.force_vector.set_state([-1, 0, 0])
+    cs.average_over.set_state(100)
+    
+    # define surfaces to be skipped
+    surfaceSkipList = [
+        'ironcub_left_arm_pitch', 'ironcub_left_arm_roll','ironcub_right_arm_pitch', 'ironcub_right_arm_roll',
+        'ironcub_left_leg_pitch', 'ironcub_left_leg_roll','ironcub_right_leg_pitch', 'ironcub_right_leg_roll',
+        'ironcub_torso_pitch', 'ironcub_torso_roll'
+        ]
+    # define surfaces to enclose the skipped ones
+    surfaceMergeList = [
+        'ironcub_left_arm', 'ironcub_left_arm', 'ironcub_right_arm', 'ironcub_right_arm', 
+        'ironcub_root_link','ironcub_left_leg_upper','ironcub_root_link','ironcub_right_leg_upper',
+        'ironcub_torso'
+        ]
+    
+    # define the reports for the surfaces
+    for surfaceName in surfaceList:
         
-        # define cd report
-        solver.solution.report_definitions.drag[surfaceName+"-cd"] = {}
-        cd = solver.solution.report_definitions.drag[surfaceName+"-cd"]
-        cd.thread_names.set_state(surfaceName)
-        cd.force_vector.set_state([0, 0, -1])
-        cd.average_over.set_state(100)
-        
-        # define cl report
-        solver.solution.report_definitions.drag[surfaceName+"-cl"] = {}
-        cl = solver.solution.report_definitions.drag[surfaceName+"-cl"]
-        cl.thread_names.set_state(surfaceName)
-        cl.force_vector.set_state([0, 1, 0])
-        cl.average_over.set_state(100)
-        
-        # define cs report
-        solver.solution.report_definitions.drag[surfaceName+"-cs"] = {}
-        cs = solver.solution.report_definitions.drag[surfaceName+"-cs"]
-        cs.thread_names.set_state(surfaceName)
-        cs.force_vector.set_state([-1, 0, 0])
-        cs.average_over.set_state(100)
+        if surfaceName in surfaceSkipList:
+            continue    # skip cycle for the surfaces in the skip list
+        else:
+            reportSurfNames = [surfaceName]
+            reportDefName   = surfaceName[8:]
+            reportDefName   = reportDefName.replace('_', '-')
+            
+            if surfaceName in surfaceMergeList:     # add the skip surfaces to the report surface list
+                surfaceNamesAdd = [surfaceSkipList[index] for index, value in enumerate(surfaceMergeList) if value == surfaceName]
+                reportSurfNames.extend(surfaceNamesAdd)
+            
+            # define surface cd report
+            solver.solution.report_definitions.drag[reportDefName+"-cd"] = {}
+            cd = solver.solution.report_definitions.drag[reportDefName+"-cd"]
+            cd.thread_names.set_state(reportSurfNames)
+            cd.force_vector.set_state([0, 0, -1])
+            cd.average_over.set_state(100)
+            
+            # define surface cl report
+            solver.solution.report_definitions.drag[reportDefName+"-cl"] = {}
+            cl = solver.solution.report_definitions.drag[reportDefName+"-cl"]
+            cl.thread_names.set_state(reportSurfNames)
+            cl.force_vector.set_state([0, 1, 0])
+            cl.average_over.set_state(100)
+            
+            # define surface cs report
+            solver.solution.report_definitions.drag[reportDefName+"-cs"] = {}
+            cs = solver.solution.report_definitions.drag[reportDefName+"-cs"]
+            cs.thread_names.set_state(reportSurfNames)
+            cs.force_vector.set_state([-1, 0, 0])
+            cs.average_over.set_state(100)
     
     # Create surface for contour plot
     solver.tui.surface.plane_surface('yz_plane yz-plane 0')         # Create the YZ plane
@@ -343,8 +390,9 @@ for jointConfigName in jointConfigNames:
     timeJointConfigEnd = datetime.now().strftime("%H:%M:%S")
     print(f"[{timeJointConfigEnd}] {jointConfigName} mesh generated!")
     
-# Cleanup mesh directory
-cleanFilesExceptExtension(meshDirPath, '.h5')
+# Cleanup auxiliary files and directories
+cleanFilesExceptExtension(meshDirPath, '.h5')           # Cleanup mesh directory
+cleanFilesExceptExtension(logDirPath, ['.log', '.trn']) # Cleanup log directory
 
 # End of the process message
 timeProcessEnd = datetime.now().strftime("%H:%M:%S")

@@ -25,11 +25,13 @@ def getJointConfigNames(jointConfigFilePath):
     return jointConfigNames
 
 
-# Function to get the joint configuration names from the joint configuration file
-def cleanFilesExceptExtension(directory, allowedExtension):
+# Function to clean files and directories in a directory except the ones with the allowed extensions
+def cleanFilesExceptExtension(directory, allowedExtensions):
+    if isinstance(allowedExtensions, str):  # Convert to list if single string is provided
+        allowedExtensions = [allowedExtensions]
     directoryPath = pathlib.Path(directory)
     for item in directoryPath.glob('**/*'):
-        if item.is_file() and not item.suffix == allowedExtension:
+        if item.is_file() and item.suffix not in allowedExtensions:
             try:
                 item.unlink()
                 print(f"Deleted file: {item}")
