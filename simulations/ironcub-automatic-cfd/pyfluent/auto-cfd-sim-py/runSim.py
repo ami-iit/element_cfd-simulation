@@ -15,10 +15,12 @@ import numpy as np
 import pathlib
 import os
 
+from src.utils import getAnglesList, getOutputParameterList, getJointConfigNames
+
 ######################### SIMULATION SETTINGS ##################################
 core_number         = 16        # number of cores to use (only pre-post mode if gpu is True)
 use_gpu             = True      # use GPU native solver
-iteration_number    = 1000      # number of iterations to run in the solver
+iteration_number    = 100       # number of iterations to run in the solver
 
 ################################# PATHS DEFINITION ############################## 
 # Define root folder path
@@ -28,7 +30,7 @@ rootPath = pathlib.Path(__file__).parents[0]
 caseDirPath = rootPath / "case" # Fluent case directory path
 dataDirPath = rootPath / "data" # data directory path
 srcDirPath  = rootPath / "src"  # source directory path
-logPath     = rootPath / "log"  # log directory path
+logDirPath  = rootPath / "log"  # log directory path
 
 # Define file names
 pitchAnglesFileName    = "pitchAngles.csv"
@@ -61,47 +63,16 @@ contoursPath  = dataDirPath / dataDirectories[1]
 pressuresPath = dataDirPath / dataDirectories[2]
 
 ######################### PROCESS PARAMETERS LOADING ############################
-# Load pitch angles from file
-with open(str(pitchAnglesFilePath), 'r') as pitchAngleCSV:
-    pitchAngleFile      = pitchAngleCSV.readlines()
-    pitchAngleString    = pitchAngleFile[0]
-    pitchAngleListStr   = pitchAngleString[:-1].split(',')
-    pitchAngleList      = [float(pitchAngleStr) for pitchAngleStr in pitchAngleListStr]
 
-# Load yaw angles for start configuration from file
-with open(str(yawAnglesStartFilePath), 'r') as yawAngleStartCSV:
-    yawAngleStartFile       = yawAngleStartCSV.readlines()
-    yawAngleStartString     = yawAngleStartFile[0]
-    yawAngleStartListStr    = yawAngleStartString[:-1].split(',')
-    yawAngleStartList       = [float(yawAngleStartStr) for yawAngleStartStr in yawAngleStartListStr]
-
-# Load yaw angles for successive configurations from file
-with open(str(yawAnglesFilePath), 'r') as yawAngleCSV:
-    yawAngleFile    = yawAngleCSV.readlines()
-    yawAngleString  = yawAngleFile[0]
-    yawAngleListStr = yawAngleString[:-1].split(',')
-    yawAngleList    = [float(yawAngleStr) for yawAngleStr in yawAngleListStr]
-
-# Load output parameters from file
-with open(str(outputParamFilePath), 'r') as outputParamCSV:
-    outputParameterFile   = outputParamCSV.readlines()
-    outputParameterList   = outputParameterFile[0][:-1].split(',')
-    outputParameterList   = outputParameterList[3:]
-    
-# Load robot joint config names
-with open(str(jointConfigFilePath), 'r') as jointConfigCSV:
-    jointConfigFile  = jointConfigCSV.readlines()
-    jointConfigNames = []
-    for jointConfig in jointConfigFile:
-        temp = jointConfig[:-1].split(',')
-        jointConfigNames.append(temp[0])
+pitchAngleList = getAnglesList(pitchAnglesFilePath)                 # Load pitch angles
+yawAngleStartList = getAnglesList(yawAnglesStartFilePath)           # Load yaw angles (first cycle)
+yawAngleList = getAnglesList(yawAnglesFilePath)                     # Load yaw angles (other cycles)
+outputParameterList  = getOutputParameterList(outputParamFilePath)  # Load output parameters
+jointConfigNames = getJointConfigNames(jointConfigFilePath)         # Load joint configiguration names
     
 ################################# MPI OPTION ####################################
-# this fixes the MPI error on Linux setting MPI to openmpi (needed for the ws)
-if os.name == "posix":
-    mpi_option = "-mpi=openmpi"
-else:
-    mpi_option = ""
+# this fixes the MPI error on Linux setting MPI to openmpi (needed for the server)
+mpi_option = "-mpi=openmpi" if os.name=="posix" else ""
 
 ############################## Start the automatic process ########################
 jointConfigIndex = 0
@@ -125,7 +96,7 @@ for jointConfigName in jointConfigNames:
         processor_count=core_number,        # number of processors (only pre-post mode if gpu is True)
         gpu=use_gpu,                        # use GPU native solver
         start_transcript=False,             # start transcript file
-        cwd=str(logPath),                   # working directory
+        cwd=str(logDirPath),                # working directory
         show_gui=False,                     # show GUI or not
         additional_arguments=mpi_option)    # additional arguments (used for MPI option)
 
@@ -151,12 +122,12 @@ for jointConfigName in jointConfigNames:
             solver.tui.mesh.modify_zones.zone_type("inlet", "pressure-outlet")              # change new "inlet" zone to pressure-outlet BC type ("inlet:001" will stay inlet BC type)
 
             # Initialize and run flow solver
-            solver.solution.initialization.initialize()
+            solver.solution.initialization.hybrid_initialize()
             solver.solution.run_calculation.iterate(iter_count=iteration_number)
 
-            ################### pyFluent post (no pyfluent-visualization) ###################
+            ################################# pyFluent post #################################
 
-            # plot and save residuals
+            # Plot and save residuals
             solver.tui.plot.residuals("y y y y y y")                        # plot residuals (y:yes; n:no; for each residual)
             solver.tui.display.set.picture.driver.jpeg()                    # set picture driver to jpeg
             solver.results.graphics.picture.use_window_resolution = False   # use window resolution
@@ -165,8 +136,13 @@ for jointConfigName in jointConfigNames:
             solver.tui.display.save_picture(str(residualsPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}"))
             # solver.results.graphics.picture.save_picture(str(residualsPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}")) not working
 
-            # plot and save velocity magnitude contour on YZ plane
-            solver.results.graphics.contour.display(object_name = "velocity-magnitude-contour")
+            # Create and save velocity magnitude contour on YZ plane
+            velMagContourName = "velocity-magnitude-contour"        # Name of the contour plot
+            graphX = Graphics(solver)                               # Import the visualization module
+            velocityContour = graphX.Contours[velMagContourName]    # Create a contour plot
+            velocityContour.field = "velocity-magnitude"            # Set the field to plot
+            velocityContour.surfaces_list = ["yz_plane"]            # Set the surface to plot
+            solver.results.graphics.contour.display(object_name = velMagContourName)
             solver.results.graphics.views.restore_view(view_name = "right")
             solver.results.graphics.picture.use_window_resolution = False   # use window resolution
             solver.results.graphics.picture.x_resolution = 1920             # set picture x resolution
@@ -187,13 +163,12 @@ for jointConfigName in jointConfigNames:
                 outputParamCSV.writelines(outputParameterString+"\n")
             
             ################################## Export pressures ##################################
-            solver.results.graphics.vector["velocity_vector_symmetry"] = {}
-            surfaceNameList = solver.results.graphics.vector["velocity_vector_symmetry"].surfaces_list()
+            surfaceNameList = solver.solution.report_definitions.drag["ironcub-cd"].thread_names.allowed_values()
             for surfaceName in surfaceNameList:
                 pressFilePath = str(pressuresPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}-{surfaceName}.txt")
                 solver.file.export.ascii(name = pressFilePath, surface_name_list = [surfaceName], delimiter = "space", cell_func_domain = ["pressure"], location = "node")
             
-            # Export single pressure data (useless for now, but it can be enhanced someway later)
+            # Export single pressure data (useless for now, but it can be enhanced someway later to redue the number of files)
             # pressFilePath = str(pressuresPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}.txt")
             # solver.file.export.ascii(name = pressFilePath, surface_name_list = surfaceNameList, delimiter = "space", cell_func_domain = ["pressure"], location = "node")
             
