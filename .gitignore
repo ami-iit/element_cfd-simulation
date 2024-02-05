@@ -26,3 +26,7 @@
 
 # Pycache
 *.pyc
+
+# Fluent transcript/log files
+*.trn
+*.log
