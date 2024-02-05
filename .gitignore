@@ -23,3 +23,6 @@
 
 # MP4s
 *.mp4
+
+# Pycache
+*.pyc
