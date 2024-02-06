@@ -136,19 +136,31 @@ for jointConfigName in jointConfigNames:
             solver.tui.display.save_picture(str(residualsPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}"))
             # solver.results.graphics.picture.save_picture(str(residualsPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}")) not working
 
-            # Create and save velocity magnitude contour on YZ plane
-            velMagContourName = "velocity-magnitude-contour"        # Name of the contour plot
-            graphX = Graphics(solver)                               # Import the visualization module
-            velocityContour = graphX.Contours[velMagContourName]    # Create a contour plot
-            velocityContour.field = "velocity-magnitude"            # Set the field to plot
-            velocityContour.surfaces_list = ["yz_plane"]            # Set the surface to plot
-            solver.results.graphics.contour.display(object_name = velMagContourName)
+            ####### Create and save velocity magnitude contour on YZ plane
+            solver.results.graphics.contour["velocity-contour"] = {}  # Create the contour
+            solver.results.graphics.contour["velocity-contour"] = {
+                "field" : "velocity-magnitude", 
+                "surfaces_list" : ["yz_plane"], 
+                "node_values" : True, 
+                "range_option" : {
+                    "option" : "auto-range-on", 
+                    "auto_range_on" : {"global_range" : False}
+                    }
+                }
+            solver.results.graphics.contour.display(object_name = "velocity-contour")
             solver.results.graphics.views.restore_view(view_name = "right")
             solver.results.graphics.picture.use_window_resolution = False   # use window resolution
             solver.results.graphics.picture.x_resolution = 1920             # set picture x resolution
             solver.results.graphics.picture.y_resolution = 1440             # set picture y resolution
             solver.tui.display.save_picture(str(contoursPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}"))
             # solver.results.graphics.picture.save_picture(str(contoursPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}")) not working
+            
+            # meshSurfaceList = solver.solution.report_definitions["ironcub-cd"].thread_names.allowed_values()
+            # solver.results.graphics.mesh["mesh-1"] = {}  # Create the mesh
+            # solver.results.graphics.mesh["mesh-1"] = {
+            #     "surfaces_list" : meshSurfaceList, 
+            # }
+            # solver.results.graphics.contour.display(object_name = "mesh-1")            
 
             ################################## Export force report values ##################################        
             outputParameterValueList = solver.solution.report_definitions.compute(report_defs=outputParameterList)
