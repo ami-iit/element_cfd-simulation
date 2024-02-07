@@ -177,7 +177,7 @@ for jointConfigName in jointConfigNames:
             ################################## Export pressures ##################################
             surfaceNameList = solver.solution.report_definitions.drag["ironcub-cd"].thread_names.allowed_values()
             for surfaceName in surfaceNameList:
-                pressFilePath = str(pressuresPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}-{surfaceName}.txt")
+                pressFilePath = str(pressuresPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}-{surfaceName}.prs")
                 solver.file.export.ascii(name = pressFilePath, surface_name_list = [surfaceName], delimiter = "space", cell_func_domain = ["pressure"], location = "node")
             
             # Export single pressure data (useless for now, but it can be enhanced someway later to redue the number of files)
