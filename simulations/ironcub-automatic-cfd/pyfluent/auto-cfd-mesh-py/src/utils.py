@@ -3,6 +3,17 @@ import os
 import pathlib
 import shutil
 
+# ANSI color codes class
+class colors:
+    RED    = '\033[91m'
+    GREEN  = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE   = '\033[94m'
+    PURPLE = '\033[95m'
+    CYAN   = '\033[96m'
+    WHITE  = '\033[97m'
+    RESET  = '\033[0m'
+
 # Function to get the input parameter list from the input parameter file
 def getOutputParameterList(outputParamFilePath):
     with open(str(outputParamFilePath), 'r') as outputParamCSV:
