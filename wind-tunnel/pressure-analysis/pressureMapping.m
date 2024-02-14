@@ -19,7 +19,7 @@ robotName       = 'iRonCub-Mk3';
 
 % FLAGS
 INTERPOLATE_DATA = false;
-SAVE_IMAGES      = false;
+SAVE_IMAGES      = true;
 
 % Variables
 deltaAngleInterp = 1; % [deg]
@@ -83,13 +83,13 @@ elseif matches(robotName,'iRonCub-Mk3')
     coverNames  = {'head_front','head_back','chest','chest_back',...
                    'rt_arm_front','rt_arm_back','lt_arm_front','lt_arm_back', ...
                    'rt_thigh_front','rt_thigh_back','lt_thigh_front','lt_thigh_back',...
-                   'rt_shin_front','rt_shin_back','lt_shin_front','lt_shin_back', ...
-                   'rt_foot_front','rt_foot_back','lt_foot_front','lt_foot_back'};
+                   'rt_shin_front','rt_shin_back','lt_shin_front','lt_shin_back'}; ... , ...
+                   ... 'rt_foot_front','rt_foot_back','lt_foot_front','lt_foot_back'};
     frameNames  = {'head','head','chest','chest', ...
                    'r_upper_arm','r_upper_arm','l_upper_arm','l_upper_arm', ...
                    'r_upper_leg','r_upper_leg','l_upper_leg','l_upper_leg', ...
-                   'r_lower_leg','r_lower_leg','l_lower_leg','l_lower_leg', ...
-                   'r_foot_front','r_foot_front','l_foot_front','l_foot_front'};
+                   'r_lower_leg','r_lower_leg','l_lower_leg','l_lower_leg'}; ... , ...
+                   ... 'r_foot_front','r_foot_front','l_foot_front','l_foot_front'};
 end
 
 % Set import file options
@@ -115,7 +115,7 @@ end
 %%                  START CYCLE FOR EACH TEST IN THE REPO                %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-for testIndex = 2 %: length(testList(:,1))
+for testIndex = 3 %: length(testList(:,1))
     
     %% Import test data
     testID = testList(testIndex).name(1:end-4);
@@ -213,12 +213,12 @@ for testIndex = 2 %: length(testList(:,1))
         pitchAngle = interp1([lowerIndex upperIndex],test.(testID).state.alphaDes([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1) + offsetAngle;
 
         % set base Pose according to yaw and pitch angles
-        R_yaw     = rotz(yawAngle - 180);
+        R_yaw     = rotz(-yawAngle+180);
         R_pitch   = roty(pitchAngle - 180);
-        % basePose  = [R_yaw * R_pitch, [10; 0; 0];
-        %                   zeros(1,3),         1];
-        basePose  = [R_yaw * R_pitch, [0; 0; 0];
+        basePose  = [R_yaw * R_pitch, [10; 0; 0];
                           zeros(1,3),         1];
+        % basePose  = [R_yaw * R_pitch, [0; 0; 0];
+        %                   zeros(1,3),         1];
 
         % Set idyntree model base pose and joint configuration
         iDynTreeWrappers.setRobotState(KinDynModel, basePose, jointPosRad, baseVel, jointVel, gravAcc);
