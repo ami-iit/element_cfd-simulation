@@ -5,11 +5,11 @@ clc;
 
 %% Test
 experiment    = 'exp_2023_12_11'; % Name of the experiment data folder
-figFolderName = ['pressure-fig/',experiment,'/'];
+figFolderName = ['./fig/',experiment,'/'];
 testList      = dir([figFolderName,'*-0001.fig']);  % List of the test files
 
 %% Create the folder to store the GIF file
-saveFolderName = ['pressure-gifs/',experiment,'/'];
+saveFolderName = ['/gifs/',experiment,'/'];
 if (~exist(['./',saveFolderName],'dir'))
     mkdir(['./',saveFolderName]);
 end

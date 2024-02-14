@@ -12,7 +12,7 @@ testPointID = 'PT0001';
 
 % Path definition
 matlabDataPath      = ['../',experiment,'/data_Matlab/'];
-sensorsDirPath      = ['./srcPressureAnalysis/',robotName,'/sensorsPlotting/'];
+sensorsDirPath      = ['./src/',robotName,'/sensorsPlotting/'];
 
 %% Import filename list and add local path
 % Load pressure data 
@@ -76,7 +76,7 @@ for j = 1:length(coverList)
 %     legend('Location','best')
 
     % save pressure plot images
-    saveFolder = ['./pressure-plots/',experiment,'/'];
+    saveFolder = ['./plots/',experiment,'/'];
     if (~exist(saveFolder,'dir'))
         mkdir(saveFolder);
     end

@@ -43,7 +43,7 @@ configurationsPath  = ['./src/',robotName,'/localConfigurations/'];
 testList        = dir([windTunnelDataPath,'/*.GVP']);  % List of the test files
 
 % Results path definition
-pressFigPath = ['./pressure-fig/',experiment,'/'];
+pressFigPath = ['./fig/',experiment,'/'];
 if (~exist(pressFigPath,'dir') && SAVE_IMAGES), mkdir(pressFigPath); end
 
 %% initialize robot model
