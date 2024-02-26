@@ -115,7 +115,7 @@ end
 %%                  START CYCLE FOR EACH TEST IN THE REPO                %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-for testIndex = 3 %: length(testList(:,1))
+for testIndex = 23 : length(testList(:,1))
     
     %% Import test data
     testID = testList(testIndex).name(1:end-4);
@@ -205,7 +205,7 @@ for testIndex = 3 %: length(testList(:,1))
         if matches(configSet,'hovering')
             offsetAngle = 90;   % [deg]
         elseif matches(configSet,'flight')
-            offsetAngle = 45;   % [deg]
+            offsetAngle = 0;   % [deg]
         end
         
         % robot attitude angles in wind tunnel
@@ -221,7 +221,7 @@ for testIndex = 3 %: length(testList(:,1))
         %                   zeros(1,3),         1];
 
         % Set idyntree model base pose and joint configuration
-        iDynTreeWrappers.setRobotState(KinDynModel, basePose, jointPosRad, baseVel, jointVel, gravAcc);
+        iDynTreeWrappers.setRobotState(KinDynModel, basePose, 0*jointPosRad, baseVel, jointVel, gravAcc);
 
         %% robot visualization
         iDynTreeWrappers.prepareVisualization( ...
@@ -302,7 +302,7 @@ for testIndex = 3 %: length(testList(:,1))
         windVector.Color      = [0 0.75 1];        
 
         % Draw wind velocity vector
-        % arrow3d(windVector.Position, windVector.Components, windVector.Color);
+        arrow3D(windVector.Position, windVector.Components, windVector.Color);
 
         % Display wind velocity vector name
         text(0.35*windVector.Components(1) + windVector.Position(1),0,0.07,'$V_w$','Interpreter','latex','FontSize',48,'Color',windVector.Color);
