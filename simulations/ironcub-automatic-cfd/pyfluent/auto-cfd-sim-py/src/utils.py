@@ -1,37 +1,57 @@
-# File containing some utility functions
+"""
+Author: Antonello Paolino
+Date: 2024-02-28
+Description:    This file encloses some utility functions used in the main script.
+"""
+
+# Import libraries
 import os
 import pathlib
 import shutil
 
+
+# ANSI color codes class
+class colors:
+    RED = "\033[91m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    BLUE = "\033[94m"
+    PURPLE = "\033[95m"
+    CYAN = "\033[96m"
+    WHITE = "\033[97m"
+    RESET = "\033[0m"
+
+
 # Function to get the list of angles from the angles file
 def getAnglesList(anglesFilePath):
-    with open(str(anglesFilePath), 'r') as angleCSV:
-        angleFile    = angleCSV.readlines()
-        angleString  = angleFile[0]
-        angleListStr = angleString[:-1].split(',')
-        angleList    = [float(angleStr) for angleStr in angleListStr]
-        
+    with open(str(anglesFilePath), "r") as angleCSV:
+        angleFile = angleCSV.readlines()
+        angleString = angleFile[0]
+        angleListStr = angleString[:-1].split(",")
+        angleList = [float(angleStr) for angleStr in angleListStr]
+
     return angleList
+
 
 # Function to get the output parameter list from the output parameter file
 def getOutputParameterList(outputParamFilePath):
-    with open(str(outputParamFilePath), 'r') as outputParamCSV:
-        outputParameterFile   = outputParamCSV.readlines()
-        outputParameterList   = outputParameterFile[0][:-1].split(',')
-        outputParameterList   = outputParameterList[3:]
-    
+    with open(str(outputParamFilePath), "r") as outputParamCSV:
+        outputParameterFile = outputParamCSV.readlines()
+        outputParameterList = outputParameterFile[0][:-1].split(",")
+        outputParameterList = outputParameterList[3:]
+
     return outputParameterList
 
 
 # Function to get the joint configuration names from the joint configuration file
 def getJointConfigNames(jointConfigFilePath):
-    with open(str(jointConfigFilePath), 'r') as jointConfigCSV:
-        jointConfigFile  = jointConfigCSV.readlines()
+    with open(str(jointConfigFilePath), "r") as jointConfigCSV:
+        jointConfigFile = jointConfigCSV.readlines()
         jointConfigNames = []
         for jointConfig in jointConfigFile:
-            temp = jointConfig[:-1].split(',')
+            temp = jointConfig[:-1].split(",")
             jointConfigNames.append(temp[0])
-        
+
     return jointConfigNames
 
 
@@ -40,7 +60,7 @@ def cleanFilesExceptExtension(directory, allowedExtensions):
     if isinstance(allowedExtensions, str):  # Convert to list if single string is provided
         allowedExtensions = [allowedExtensions]
     directoryPath = pathlib.Path(directory)
-    for item in directoryPath.glob('**/*'):
+    for item in directoryPath.glob("**/*"):
         if item.is_file() and item.suffix not in allowedExtensions:
             try:
                 item.unlink()
