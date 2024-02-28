@@ -69,15 +69,15 @@ for directory in dataDirectories:
     if not directoryPath.exists():
         directoryPath.mkdir()
         print(
-            colors.CYAN
-            + f"[Message] Creating {directory} directory: '{directoryPath}'."
-            + colors.RESET
+            colors.CYAN,
+            f"[Message] Creating {directory} directory: '{directoryPath}'.",
+            colors.RESET,
         )
     else:
         print(
-            colors.CYAN
-            + f"[Message] {directory} directory: '{directoryPath}'."
-            + colors.RESET
+            colors.CYAN,
+            f"[Message] {directory} directory: '{directoryPath}'.",
+            colors.RESET,
         )
 
 # Define residuals, contours and pressures paths

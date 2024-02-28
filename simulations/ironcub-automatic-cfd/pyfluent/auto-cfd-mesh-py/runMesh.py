@@ -583,9 +583,9 @@ for jointConfigName in jointConfigNames:
 
         timeJointConfigEnd = datetime.now().strftime("%H:%M:%S")
         print(
-            colors.GREEN
-            + f"[{timeJointConfigEnd}] {jointConfigName} mesh generated!"
-            + colors.RESET,
+            colors.GREEN,
+            f"[{timeJointConfigEnd}] {jointConfigName} mesh generated!",
+            colors.RESET,
         )
 
 
@@ -600,8 +600,8 @@ for jointConfigName in jointConfigNames:
 
         timeJointConfigEnd = datetime.now().strftime("%H:%M:%S")
         print(
-            colors.RED
-            + f"[{timeJointConfigEnd}] {jointConfigName} mesh failed with the following error: \n",
+            colors.RED,
+            f"[{timeJointConfigEnd}] {jointConfigName} mesh failed with the following error: \n",
             exceptionMessage,
             colors.RESET,
         )
@@ -619,7 +619,7 @@ cleanFilesExceptExtension(logDirPath, [".log", ".trn", ".bat"])
 
 timeProcessEnd = datetime.now().strftime("%H:%M:%S")
 print(
-    colors.GREEN
-    + f"[{timeProcessEnd}] Automatic meshing process completed!"
-    + colors.RESET,
+    colors.GREEN,
+    f"[{timeProcessEnd}] Automatic meshing process completed!",
+    colors.RESET,
 )
