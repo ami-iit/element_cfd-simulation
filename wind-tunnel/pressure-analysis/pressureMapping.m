@@ -18,7 +18,7 @@ experiment      = 'exp_2023_12_11';
 robotName       = 'iRonCub-Mk3';
 
 % FLAGS
-INTERPOLATE_DATA = false;
+INTERPOLATE_DATA = true;
 SAVE_IMAGES      = true;
 
 % Variables
@@ -115,7 +115,9 @@ end
 %%                  START CYCLE FOR EACH TEST IN THE REPO                %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-for testIndex = 23 : length(testList(:,1))
+testNumber = length(testList(:,1));
+
+for testIndex = 2 : testNumber
     
     %% Import test data
     testID = testList(testIndex).name(1:end-4);
@@ -214,26 +216,29 @@ for testIndex = 23 : length(testList(:,1))
 
         % set base Pose according to yaw and pitch angles
         R_yaw     = rotz(-yawAngle+180);
-        R_pitch   = roty(pitchAngle - 180);
+        R_pitch   = roty(90 - pitchAngle); % for Mk3
+        % R_pitch   = roty(pitchAngle - 180); % for Mk1
         basePose  = [R_yaw * R_pitch, [10; 0; 0];
                           zeros(1,3),         1];
         % basePose  = [R_yaw * R_pitch, [0; 0; 0];
         %                   zeros(1,3),         1];
 
         % Set idyntree model base pose and joint configuration
-        iDynTreeWrappers.setRobotState(KinDynModel, basePose, 0*jointPosRad, baseVel, jointVel, gravAcc);
+        iDynTreeWrappers.setRobotState(KinDynModel, basePose, jointPosRad, baseVel, jointVel, gravAcc);
 
         %% robot visualization
+
+        % Set non-visible figure
+        fig = figure('visible','off');
+
+        % Plot transparent robot geometry
         iDynTreeWrappers.prepareVisualization( ...
             KinDynModel, meshFilePrefix, 'color', [0.96,0.96,0.96], ...
             'material', 'dull', 'transparency', 0.3, 'debug', true, ...
-            'view', [-45 5]);
+            'view', [-45 5], 'reuseFigure', 'gcf');
  
         
         %% Plot covers contours
-        
-        % Set figure
-        fig = figure(1);
 
         for j = 1:length(coverNames)
             
@@ -372,10 +377,10 @@ for testIndex = 23 : length(testList(:,1))
         % Drag area plot
         axes()
         box on
-        plot(interpXPlotVariable(1:testPointIndex), interpolatedDragForceCoeff(1:testPointIndex), 'Color', 'green', ...
+        plot(interpXPlotVariable, interpolatedDragForceCoeff, 'Color', 'green', ...
             'LineStyle', '-', 'linewidth', 2, 'DisplayName','$C_D A$'); hold on;
         scatter(interpXPlotVariable(testPointIndex), interpolatedDragForceCoeff(testPointIndex), ...
-            45, 'green', 'filled', 'HandleVisibility', 'off'); hold on;
+            90, 'green', 'filled', 'HandleVisibility', 'off'); hold on;
         grid on;
         axis([min(xPlotVariable) max(xPlotVariable) 0.01*floor(min(100*test.(testID).windAxesAero.dragForceCoeff)) 0.01*ceil(max(100*test.(testID).windAxesAero.dragForceCoeff))])
         xlabel(xPlotLabel,'Interpreter','latex','FontSize',20)
@@ -395,14 +400,14 @@ for testIndex = 23 : length(testList(:,1))
         % Lift and side force areas
         axes()
         box on
-        plot(interpXPlotVariable(1:testPointIndex), interpolatedLiftForceCoeff(1:testPointIndex), 'Color', 'white', ...
+        plot(interpXPlotVariable, interpolatedLiftForceCoeff, 'Color', 'white', ...
             'LineStyle', '-', 'linewidth', 2, 'DisplayName','$C_L A$'); hold on;
-        plot(interpXPlotVariable(1:testPointIndex), interpolatedSideForceCoeff(1:testPointIndex), 'Color', 'magenta', ...
+        plot(interpXPlotVariable, interpolatedSideForceCoeff, 'Color', 'magenta', ...
             'LineStyle', '-', 'linewidth', 2, 'DisplayName','$C_S A$'); hold on;
         scatter(interpXPlotVariable(testPointIndex), interpolatedLiftForceCoeff(testPointIndex), ...
-            45, 'white', 'filled', 'HandleVisibility', 'off'); hold on;
+            90, 'white', 'filled', 'HandleVisibility', 'off'); hold on;
         scatter(interpXPlotVariable(testPointIndex), interpolatedSideForceCoeff(testPointIndex), ...
-            45, 'magenta', 'filled', 'HandleVisibility', 'off'); hold on;
+            90, 'magenta', 'filled', 'HandleVisibility', 'off'); hold on;
         grid on;
         axis([min(xPlotVariable) max(xPlotVariable) 0.01*floor(min(100*[test.(testID).windAxesAero.liftForceCoeff; test.(testID).windAxesAero.sideForceCoeff])) ...
             0.01*ceil(max(100*[test.(testID).windAxesAero.liftForceCoeff; test.(testID).windAxesAero.sideForceCoeff]))])
@@ -422,6 +427,8 @@ for testIndex = 23 : length(testList(:,1))
         %% Save image
         if SAVE_IMAGES
             saveas(fig,[pressFigPath,testID,'-',num2str(testPointIndex,'%04.f'),'.fig']);
+            clc;
+            disp([testID,'-',num2str(testPointIndex,'%04.f'),'.fig saved']);
         end
 
         %% Report additional data

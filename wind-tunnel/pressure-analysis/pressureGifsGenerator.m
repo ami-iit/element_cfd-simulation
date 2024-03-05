@@ -26,7 +26,9 @@ for n = 1 : (length(testpointList(:,1)) - 1)
 
     [~,testPoint,~] = fileparts(testpointList(n,:).name(10:end-4));
     
-    h = openfig([figFolderName,testID,'-',testPoint,'.fig']);
+    h = openfig([figFolderName,testID,'-',testPoint,'.fig'],'invisible');
+    clc;
+    disp(['processing ',testID,'-',testPoint,'.fig ...']);
 
     % Set the frame dimensions
     set(h, 'Position', [0 0 1620 1080]);
