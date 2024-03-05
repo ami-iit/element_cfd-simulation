@@ -216,12 +216,15 @@ for testIndex = 2 : testNumber
 
         % set base Pose according to yaw and pitch angles
         R_yaw     = rotz(-yawAngle+180);
-        R_pitch   = roty(90 - pitchAngle); % for Mk3
-        % R_pitch   = roty(pitchAngle - 180); % for Mk1
+
+        if matches(configSet,'hovering')
+            R_pitch   = roty(pitchAngle - 180);
+        elseif matches(configSet,'flight')
+            R_pitch   = roty(90 - pitchAngle); % for Mk3
+        end
+
         basePose  = [R_yaw * R_pitch, [10; 0; 0];
                           zeros(1,3),         1];
-        % basePose  = [R_yaw * R_pitch, [0; 0; 0];
-        %                   zeros(1,3),         1];
 
         % Set idyntree model base pose and joint configuration
         iDynTreeWrappers.setRobotState(KinDynModel, basePose, jointPosRad, baseVel, jointVel, gravAcc);
