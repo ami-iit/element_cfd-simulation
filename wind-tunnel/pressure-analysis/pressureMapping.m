@@ -18,6 +18,7 @@ experiment      = 'exp_2023_12_11';
 robotName       = 'iRonCub-Mk3';
 
 % FLAGS
+SHOW_IMAGES      = false;
 INTERPOLATE_DATA = true;
 SAVE_IMAGES      = true;
 
@@ -46,7 +47,7 @@ testList        = dir([windTunnelDataPath,'/*.GVP']);  % List of the test files
 pressFigPath = ['./fig/',experiment,'/'];
 if (~exist(pressFigPath,'dir') && SAVE_IMAGES), mkdir(pressFigPath); end
 
-%% initialize robot model
+%% Initialize robot model
 
 modelPath  = [ironcubSoftwarePath,'/models/',robotName,'/iRonCub/robots/',robotName,'_Gazebo/'];
 fileName   = 'model_stl.urdf';
@@ -83,13 +84,11 @@ elseif matches(robotName,'iRonCub-Mk3')
     coverNames  = {'head_front','head_back','chest','chest_back',...
                    'rt_arm_front','rt_arm_back','lt_arm_front','lt_arm_back', ...
                    'rt_thigh_front','rt_thigh_back','lt_thigh_front','lt_thigh_back',...
-                   'rt_shin_front','rt_shin_back','lt_shin_front','lt_shin_back'}; ... , ...
-                   ... 'rt_foot_front','rt_foot_back','lt_foot_front','lt_foot_back'};
+                   'rt_shin_front','rt_shin_back','lt_shin_front','lt_shin_back'};
     frameNames  = {'head','head','chest','chest', ...
                    'r_upper_arm','r_upper_arm','l_upper_arm','l_upper_arm', ...
                    'r_upper_leg','r_upper_leg','l_upper_leg','l_upper_leg', ...
-                   'r_lower_leg','r_lower_leg','l_lower_leg','l_lower_leg'}; ... , ...
-                   ... 'r_foot_front','r_foot_front','l_foot_front','l_foot_front'};
+                   'r_lower_leg','r_lower_leg','l_lower_leg','l_lower_leg'};
 end
 
 % Set import file options
@@ -117,7 +116,7 @@ end
 
 testNumber = length(testList(:,1));
 
-for testIndex = 2 : testNumber
+for testIndex = 70 : testNumber
     
     %% Import test data
     testID = testList(testIndex).name(1:end-4);
@@ -143,7 +142,7 @@ for testIndex = 2 : testNumber
     testMaxPress = -1e4;
     testMinPress = 1e4;
     
-    for testPointIndex = 1 : (length(testpointList(:,1)) - 1)   % zeros in last test
+    for testPointIndex = 1 : (length(testpointList(:,1)) - 1)   % zeros in last test point
         % loading the pressures for each test point
         [~,testPointID,~]       = fileparts(testpointList(testPointIndex,:).name(10:15));
         testPoint.(testPointID) = load([matlabDataPath,testID,'/pressureSensorsData/',testPointID,'.mat']);  % test point data loading
@@ -180,21 +179,18 @@ for testIndex = 2 : testNumber
 
     for testPointIndex = 1 : N_total_points
 
-        % close scopes and clear previous test point data
+        % close scopes and clear previous figure data
         close all;
-        % clearvars -except *Path testPointIndex jointConfig testID testpointList ...
-        %     experiment testMaxPress testMinPress configSet configName jointPos ...
-        %     testList N_interp_points N_total_points test deltaAngleInterp robotName
-        clearvars fig1 
+        clearvars fig
         
         % Define lower and upper test indices for the interpolated index
         lowerIndex = floor((testPointIndex-1)/N_interp_points + 1);
         upperIndex = ceil((testPointIndex-1)/N_interp_points + 1);
 
-        if lowerIndex == upperIndex && testPointIndex~=N_total_points
-            upperIndex = upperIndex + 1;
-        elseif lowerIndex == upperIndex && testPointIndex==N_total_points
-            lowerIndex = lowerIndex - 1;
+        if lowerIndex == upperIndex
+            NEED_FOR_INTERPOLATION = false;
+        else
+            NEED_FOR_INTERPOLATION = true;
         end
         
         % Get lower and upper test point IDs
@@ -211,8 +207,13 @@ for testIndex = 2 : testNumber
         end
         
         % robot attitude angles in wind tunnel
-        yawAngle   = interp1([lowerIndex upperIndex],test.(testID).state.betaDes([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
-        pitchAngle = interp1([lowerIndex upperIndex],test.(testID).state.alphaDes([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1) + offsetAngle;
+        if NEED_FOR_INTERPOLATION
+            yawAngle   = interp1([lowerIndex upperIndex],test.(testID).state.betaDes([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1);
+            pitchAngle = interp1([lowerIndex upperIndex],test.(testID).state.alphaDes([lowerIndex upperIndex]),(testPointIndex-1)/N_interp_points + 1) + offsetAngle;
+        else
+            yawAngle   = test.(testID).state.betaDes(lowerIndex);
+            pitchAngle = test.(testID).state.alphaDes(lowerIndex) + offsetAngle;
+        end
 
         % set base Pose according to yaw and pitch angles
         R_yaw     = rotz(-yawAngle+180);
@@ -220,7 +221,7 @@ for testIndex = 2 : testNumber
         if matches(configSet,'hovering')
             R_pitch   = roty(pitchAngle - 180);
         elseif matches(configSet,'flight')
-            R_pitch   = roty(90 - pitchAngle); % for Mk3
+            R_pitch   = roty(90 - pitchAngle);
         end
 
         basePose  = [R_yaw * R_pitch, [10; 0; 0];
@@ -230,9 +231,12 @@ for testIndex = 2 : testNumber
         iDynTreeWrappers.setRobotState(KinDynModel, basePose, jointPosRad, baseVel, jointVel, gravAcc);
 
         %% robot visualization
-
-        % Set non-visible figure
+        
+        % Initialize figure
         fig = figure('visible','off');
+
+        % Set figure visibility
+        if SHOW_IMAGES, fig = figure('visible','on'); end
 
         % Plot transparent robot geometry
         iDynTreeWrappers.prepareVisualization( ...
@@ -252,8 +256,15 @@ for testIndex = 2 : testNumber
             for i = 1:length(coverData.(coverName).sensorsNames)
                 lowerMeanPress = testPoint.(lowerTestPointID).pressureSensors.meanValues.(coverData.(coverName).sensorsNames{i});
                 upperMeanPress = testPoint.(upperTestPointID).pressureSensors.meanValues.(coverData.(coverName).sensorsNames{i});
-                coverData.(coverName).meanPressValues(i,1) = interp1([lowerIndex upperIndex]*ones(1,length(lowerMeanPress)), ...
-                                                              [lowerMeanPress upperMeanPress], (testPointIndex-1)/N_interp_points + 1 );
+                if NEED_FOR_INTERPOLATION
+                    lowerMeanPress = testPoint.(lowerTestPointID).pressureSensors.meanValues.(coverData.(coverName).sensorsNames{i});
+                    upperMeanPress = testPoint.(upperTestPointID).pressureSensors.meanValues.(coverData.(coverName).sensorsNames{i});
+                    coverData.(coverName).meanPressValues(i,1) = interp1([lowerIndex upperIndex]*ones(1,length(lowerMeanPress)), ...
+                                                                         [lowerMeanPress upperMeanPress], (testPointIndex-1)/N_interp_points + 1 );
+                else
+                    meanPress = testPoint.(lowerTestPointID).pressureSensors.meanValues.(coverData.(coverName).sensorsNames{i});
+                    coverData.(coverName).meanPressValues(i,1) = meanPress;
+                end
             end
 
 
@@ -313,7 +324,7 @@ for testIndex = 2 : testNumber
         arrow3D(windVector.Position, windVector.Components, windVector.Color);
 
         % Display wind velocity vector name
-        text(0.35*windVector.Components(1) + windVector.Position(1),0,0.07,'$V_w$','Interpreter','latex','FontSize',48,'Color',windVector.Color);
+        text(0.35*windVector.Components(1) + windVector.Position(1),0,0.1,'$V_w$','Interpreter','latex','FontSize',48,'Color',windVector.Color);
 
         % Draw aerodynamic force
 %         arrow3d(basePose(1:3,4), 4*[interpolatedDragForceCoeff(testPointIndex) interpolatedLiftForceCoeff(testPointIndex) interpolatedSideForceCoeff(testPointIndex)], [1 1 0], 0.006);
