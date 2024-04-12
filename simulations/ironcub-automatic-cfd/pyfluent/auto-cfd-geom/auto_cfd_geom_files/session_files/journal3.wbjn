@@ -1,9 +1,0 @@
-# encoding: utf-8
-# 2023 R2
-SetScriptVersion(Version="23.2.142")
-RunScript(FilePath="C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/pyfluent/auto-cfd-geom/auto-cfd-geom-script.wbjn")
-RunScript(FilePath="C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/pyfluent/auto-cfd-geom/auto-cfd-geom-script.wbjn")
-RunScript(FilePath="C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/pyfluent/auto-cfd-geom/auto-cfd-geom-script.wbjn")
-RunScript(FilePath="C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/pyfluent/auto-cfd-geom/auto-cfd-geom-script.wbjn")
-RunScript(FilePath="C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/pyfluent/auto-cfd-geom/auto-cfd-geom-script.wbjn")
-Open(FilePath="C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/workbench/auto-cfd-model/auto_cfd_model.wbpj")
