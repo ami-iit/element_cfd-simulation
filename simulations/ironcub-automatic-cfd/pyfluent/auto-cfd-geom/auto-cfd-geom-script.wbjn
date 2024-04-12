@@ -7,20 +7,28 @@ import os
 import sys
 
 ########## INPUT DATA ##########
+# Set robot model: ironcub-mk1 | ironcub-mk3
+robotName = "ironcub-mk3"
+
 # Set files folder
 rootPath = "C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/pyfluent/auto-cfd-geom/"
 srcPath  = rootPath + "src/"
-geomPath = rootPath + "geom/"
+geomPath = rootPath + "geom/" + robotName[-3:] + "/"
 geomDMAssPath  = rootPath + "auto_cfd_geom_files/dp0/Geom/DM/"
 geomDMCompPath = rootPath + "auto_cfd_geom_files/dp0/Geom/DM/otherDocs/"
 
 # File names
-geometrySrcFile     = "ironcub-geom.scdoc"
-ironcubModelSrcFile = "iRonCub-share.scdoc"
 assFileName         = 'Geom.scdoc'
-compFileName        = 'iRonCub-share.scdoc'
-geomScriptFile      = "ironcub-geom-script.scscript"
-jointConfigFileName = "jointConfig.csv"
+if robotName == "ironcub-mk1":
+    geometrySrcFile     = "ironcub-geom.scdoc"
+    compFileName        = 'iRonCub-share.scdoc'
+    geomScriptFile      = "ironcub-geom-script.scscript"
+    jointConfigFileName = "jointConfig.csv"
+elif robotName == "ironcub-mk3":
+    geometrySrcFile     = "ironcub-mk3-fluid.scdoc"
+    compFileName        = 'ironcub-mk3.scdoc'
+    geomScriptFile      = "automatic_robot_configuration.scscript"
+    jointConfigFileName = "jointConfig-mk3.csv"
 
 # Load robot joint config
 with open(srcPath + jointConfigFileName, 'r') as jointConfigCSV:

@@ -2,9 +2,9 @@
 
 ## Intro
 
-This repo contains all the code to run automatic CFD simulation on iRonCub-Mk1 geometry using the _pyfluent API_ for _Python_. The project is divided into:
+This repo contains all the code to run automatic CFD simulation on iRonCub-Mk1 and iRonCub-Mk3 geometries using the _pyfluent API_ for _Python_. The project is divided into:
 
-* **`auto-cfd-geom`**: the code here allows to generate geometries in _ANSYS Workbench_ starting from a given robot joint configurations file. The generated geometries can then be passed to the next cycle of the autometic process.
+* **`auto-cfd-geom`**: the code here allows to generate geometries in _ANSYS Workbench_ starting from a given robot joint configurations file. The generated geometries can then be passed to the next cycle of the automatic process.
 
 * **`auto-cfd-mesh-py`**: here the code using the `pyfluent meshing API` is implemented generating a mesh on the iRonCub geometry and returning a `.cas` case file with all the required settings to perform aotomatic CFD simulations changing the attitude of the robot.
 
