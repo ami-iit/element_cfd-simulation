@@ -34,12 +34,12 @@ KinDynModel = iDynTreeWrappers.loadReducedModel(jointNames, 'root_link', modelPa
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%% Set robot state %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % set pitch and yaw angles
-pitchAngle = 45;
+pitchAngle = 90;
 yawAngle   = 0;
 
 % set base Pose according to yaw and pitch angles
 R_yaw      = rotz(yawAngle);
-R_pitch    = roty(pitchAngle - 90);
+R_pitch    = roty(pitchAngle-90);
 basePose   = [R_yaw * R_pitch, zeros(3,1);
                    zeros(1,3),         1];
 
@@ -61,8 +61,9 @@ correctRobotOrigin(KinDynModel, basePose, jointPos, baseVel, jointVel, gravAcc);
 % set surface names from Fluent data and corresponding frame names
 surfaceNames = {'head','torso','torso_pitch','left_back_turbine','right_back_turbine', ...
                 'left_arm','left_turbine','right_arm','right_turbine', ...
-                'root_link','left_leg_upper','left_leg_lower','right_leg_upper','right_leg_lower'};
-surfaceFrames = {'head','chest','torso_pitch','chest_l_jet_turbine','chest_r_jet_turbine', ...
+                'root_link', ...
+                'left_leg_upper','left_leg_lower','right_leg_upper','right_leg_lower'};
+surfaceFrames = {'head','chest','chest','chest_l_jet_turbine','chest_r_jet_turbine', ...
                  'l_upper_arm','l_arm_jet_turbine','r_upper_arm','r_arm_jet_turbine', ...
                  'root_link','l_upper_leg','l_lower_leg','r_upper_leg','r_lower_leg'};
 
@@ -94,12 +95,12 @@ for surfaceIndex = 1 : surfaceNumber  %%% use in place of next line %%%
 
     % Import Fluent Data
     jointConfigName =  'hovering';
-    surfacePressuresFilePath = [pressuresDataPath,jointConfigName,'-',num2str(pitchAngle),'-',num2str(yawAngle),'-ironcub_',surfaceName,'.txt'];
+    surfacePressuresFilePath = [pressuresDataPath,jointConfigName,'-',num2str(pitchAngle),'-',num2str(yawAngle),'-ironcub_',surfaceName,'.prs'];
     data = importFluentData(surfacePressuresFilePath, link_local_H_fluent);
 
     % Display loaded data
     figure(1)
-    pcshow([data.x_fluent data.y_fluent data.z_fluent], data.press);
+    pcshow([data.x_fluent data.y_fluent data.z_fluent], data.press, 'MarkerSize', 18);
 
     %% Generate 2D images
     if surfaceRefAxis == 1

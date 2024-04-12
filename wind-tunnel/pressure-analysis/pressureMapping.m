@@ -116,7 +116,7 @@ end
 
 testNumber = length(testList(:,1));
 
-for testIndex = 70 : testNumber
+for testIndex = 18 : 22
     
     %% Import test data
     testID = testList(testIndex).name(1:end-4);

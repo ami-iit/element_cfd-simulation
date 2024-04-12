@@ -188,7 +188,7 @@ for jointConfigName in jointConfigNames:
                 "CFDSurfaceMeshControls": {
                     "MaxSize": 4,
                     "MinSize": 0.005,
-                    # "SizeFunctions": "Curvature",
+                    "SizeFunctions": "Curvature and Proximity",
                 },
                 "ExecuteShareTopology": "Yes",
             }
