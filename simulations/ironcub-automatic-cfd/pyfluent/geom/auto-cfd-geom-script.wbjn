@@ -13,7 +13,7 @@ robotName = "ironcub-mk3"
 # Set files folder
 rootPath = "C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/pyfluent/geom/"
 srcPath  = rootPath + "src/"
-outPath = rootPath + "out/" + robotName[-3:] + "/"
+geomPath = rootPath + robotName[-3:] + "/"
 geomDMAssPath  = rootPath + "auto_cfd_geom_files/dp0/Geom/DM/"
 geomDMCompPath = rootPath + "auto_cfd_geom_files/dp0/Geom/DM/otherDocs/"
 
@@ -78,7 +78,7 @@ for jointConfig in jointConfigList:
     Save(Overwrite=True)
     
     # Create directory for the current joint config file
-    newGeomDirPath = outPath + jointConfigNames[jointConfigCounter] + "/"
+    newGeomDirPath = geomPath + jointConfigNames[jointConfigCounter] + "/"
     if not os.path.exists(newGeomDirPath):
         os.makedirs(newGeomDirPath)
     
