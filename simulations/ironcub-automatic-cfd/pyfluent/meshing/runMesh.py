@@ -24,14 +24,21 @@ import numpy as np
 import pathlib
 import os
 
-from src.utils import colors, getOutputParameterList, getJointConfigNames, cleanFilesExceptExtension
+from src.utils import colors, getJointConfigNames, cleanFilesExceptExtension
+
+###############################################################################
+# Set the name of the robot
+# ~~~~~~~~~~~~~
+# Set robot model: ironcub-mk1 | ironcub-mk3
+
+robotName = "ironcub-mk3"
 
 ###############################################################################
 # Set the Fluent configuration parameters
 # ~~~~~~~~~~~~~
 # Set the parameters for the Fluent session
 
-core_number = 48    # number of cores (only pre-post if use_gpu=True)
+core_number = 12    # number of cores (only pre-post if use_gpu=True)
 use_gpu = False     # use GPU native solver
 
 # Set the MPI option for the WS
@@ -46,24 +53,24 @@ mpi_option = "-mpi=openmpi" if os.name == "posix" else ""
 
 rootPath = pathlib.Path(__file__).parents[0]
 
-geomDirPath = rootPath / "geom" # geometry directory path
-meshDirPath = rootPath / "mesh" # mesh directory path
-caseDirPath = rootPath / "case" # Fluent case directory path
-dataDirPath = rootPath / "data" # data directory path
+meshDirPath = rootPath / "mesh" / robotName[-3:] # mesh directory path
+caseDirPath = rootPath / "case" / robotName[-3:] # Fluent case directory path
 srcDirPath  = rootPath / "src"  # source directory path
 logDirPath  = rootPath / "log"  # log directory path
 
+parentPath = pathlib.Path(__file__).parents[1]
+
+geomDirPath = parentPath / "geom" / robotName[-3:] # geometry directory path
+
 # Define file paths
 
-jointConfigFilePath = srcDirPath / "jointConfig.csv"  # joint configuration file path
-outputParamFilePath = dataDirPath / "outputParameters.csv"  # output parameters file path
+jointConfigFilePath = srcDirPath / f"jointConfig-{robotName[-3:]}.csv"  # joint configuration file path
 
 ###############################################################################
-# Load parameters from files
+# Load joint configurations from files
 # ~~~~~~~~~~~~~
-# Load the output parameters and the joint configuration names from the files.
+# Load the joint configuration names from the files.
 
-outputParameterList = getOutputParameterList(outputParamFilePath)
 jointConfigNames = getJointConfigNames(jointConfigFilePath)
 
 ###############################################################################
@@ -90,6 +97,7 @@ for jointConfigName in jointConfigNames:
         meshing = pyfluent.launch_fluent(
             mode="meshing",                     # "meshing", "pure-meshing" or "solver"
             precision="double",                 # single or double precision
+            product_version="23.2.0",           # Fluent version
             version="3d",                       # 2d or 3d Fluent version
             processor_count=core_number,        # number of cores (only pre-post if use_gpu=True)
             gpu=use_gpu,                        # use GPU native solver
@@ -131,36 +139,38 @@ for jointConfigName in jointConfigNames:
         # ~~~~~~~~~~~~~~~~
         # Add local sizing controls to the faceted geometry.
 
+        ironcubSurfacesList = [
+            "ironcub_head",
+            "ironcub_left_back_turbine",
+            "ironcub_right_back_turbine",
+            "ironcub_left_arm",
+            "ironcub_left_arm_pitch",
+            "ironcub_left_arm_roll",
+            "ironcub_left_turbine",
+            "ironcub_left_leg_lower",
+            "ironcub_left_leg_pitch",
+            "ironcub_left_leg_roll",
+            "ironcub_left_leg_upper",
+            "ironcub_right_arm",
+            "ironcub_right_arm_pitch",
+            "ironcub_right_arm_roll",
+            "ironcub_right_turbine",
+            "ironcub_right_leg_lower",
+            "ironcub_right_leg_pitch",
+            "ironcub_right_leg_roll",
+            "ironcub_right_leg_upper",
+            "ironcub_root_link",
+            "ironcub_torso",
+            "ironcub_torso_pitch",
+            "ironcub_torso_roll",
+        ]
+        
         addLocalSizing = meshing.workflow.TaskObject["Add Local Sizing"]
         addLocalSizing.Arguments.set_state(
             {
                 "AddChild": "yes",
                 "BOIControlName": "ironcub-sizing",
-                "BOIFaceLabelList": [
-                    "ironcub_head",
-                    "ironcub_left_back_turbine",
-                    "ironcub_right_back_turbine",
-                    "ironcub_left_arm",
-                    "ironcub_left_arm_pitch",
-                    "ironcub_left_arm_roll",
-                    "ironcub_left_turbine",
-                    "ironcub_left_leg_lower",
-                    "ironcub_left_leg_pitch",
-                    "ironcub_left_leg_roll",
-                    "ironcub_left_leg_upper",
-                    "ironcub_right_arm",
-                    "ironcub_right_arm_pitch",
-                    "ironcub_right_arm_roll",
-                    "ironcub_right_turbine",
-                    "ironcub_right_leg_lower",
-                    "ironcub_right_leg_pitch",
-                    "ironcub_right_leg_roll",
-                    "ironcub_right_leg_upper",
-                    "ironcub_root_link",
-                    "ironcub_torso",
-                    "ironcub_torso_pitch",
-                    "ironcub_torso_roll",
-                ],
+                "BOIFaceLabelList": ironcubSurfacesList,
                 "BOISize": 0.02,
             }
         )

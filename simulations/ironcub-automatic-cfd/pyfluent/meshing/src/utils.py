@@ -22,16 +22,6 @@ class colors:
     RESET = "\033[0m"
 
 
-# Function to get the input parameter list from the input parameter file
-def getOutputParameterList(outputParamFilePath):
-    with open(str(outputParamFilePath), "r") as outputParamCSV:
-        outputParameterFile = outputParamCSV.readlines()
-        outputParameterList = outputParameterFile[0][:-1].split(",")
-        outputParameterList = outputParameterList[3:]
-
-    return outputParameterList
-
-
 # Function to get the joint configuration names from the joint configuration file
 def getJointConfigNames(jointConfigFilePath):
     with open(str(jointConfigFilePath), "r") as jointConfigCSV:
