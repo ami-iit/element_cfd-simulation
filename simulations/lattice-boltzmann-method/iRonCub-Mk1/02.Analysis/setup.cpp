@@ -7,11 +7,11 @@ void main_setup() { // iRonCub; required extensions in defines.hpp: FP16C, EQUIL
 	const float beta = -90.0f;	// [deg] base yaw angle
 
 	// ################################################################## define simulation box size, viscosity and volume force ###################################################################
-	const uint3 lbm_N = resolution(float3(0.5f, 1.0f, 0.5f), 1000u); // input: simulation box aspect ratio and VRAM occupation in MB, output: grid resolution1
+	const uint3 lbm_N = resolution(float3(0.5f, 1.0f, 0.5f), 500u); // input: simulation box aspect ratio and VRAM occupation in MB, output: grid resolution1
 	const float si_u = 17.0f;						// [m/s] flow speed
 	const float si_length = 1.0f;					// [m] characteristic length 
 	const float si_T = 198.0f;						// [s] total simulation time 
-	const float video_length = 10.0f;				// [s] video lenght (==si_T -> normal speed, >si_T -> slow motion, <si_T -> fast forward)
+	const float video_length = 198.0f;				// [s] video lenght (==si_T -> normal speed, >si_T -> slow motion, <si_T -> fast forward)
 	const float si_nu = 1.48E-5f;					// [m^2/s] kinematic viscosity 
 	const float si_rho = 1.225f;					// [kg/m^3] density 
 	const float lbm_length = 0.25f*(float)lbm_N.y;	// length of simulation box
@@ -95,11 +95,11 @@ void main_setup() { // iRonCub; required extensions in defines.hpp: FP16C, EQUIL
     // Convert the current time to a struct tm (time information)
     struct std::tm time_info;
 
-	//#ifdef _WIN32
-	//localtime_s(&time_info, &current_time);
-	//#else
-	//localtime_r(&time_info, &current_time);
-	//#endif
+	#ifdef _WIN32
+	localtime_s(&time_info, &current_time);
+	#else
+	localtime_r(&time_info, &current_time);
+	#endif
 	std::string date_str = std::to_string(time_info.tm_year + 1900) + '_' + std::to_string(time_info.tm_mon + 1) + '_' + std::to_string(time_info.tm_mday);
 	std::string time_str = std::to_string(time_info.tm_hour) + '_' + std::to_string(time_info.tm_min) + '_' + std::to_string(time_info.tm_sec);
 	std::string test_name = date_str + "_" + time_str;
@@ -123,13 +123,16 @@ void main_setup() { // iRonCub; required extensions in defines.hpp: FP16C, EQUIL
 
 	// MAIN SIMULATION LOOP
 	while(lbm.get_t()<=units.t(si_T)) {
-		#if defined(GRAPHICS) && !defined(INTERACTIVE_GRAPHICS)
+		//#if defined(GRAPHICS) && !defined(INTERACTIVE_GRAPHICS)
 			if(lbm.graphics.next_frame(units.t(si_T), video_length)) {
 				// set up camera position and write frame to file for 60 Hz video acquisition
-				lbm.graphics.set_camera_centered(-30.0f, 20.0f, 100.0f, 1.25f);	// camera position: (Rx, Ry, FOV, zoom)
+				lbm.graphics.set_camera_centered(-67.0f, 21.0f, 100.0f, 1.25f);	// camera position: (Rx, Ry, FOV, zoom)
 				lbm.graphics.write_frame(get_exe_path()+"export/"+test_name+"/png/");
+				lbm.graphics.set_camera_centered(-90.0f, 0.0f, 100.0f, 1.25f);	// camera position: (Rx, Ry, FOV, zoom)
+				lbm.graphics.write_frame(get_exe_path() + "export/" + test_name + "/png/","front");
 			}
-		#endif // GRAPHICS && !INTERACTIVE_GRAPHICS
+		//#endif // GRAPHICS && !INTERACTIVE_GRAPHICS
+
 		if(lbm.get_t()>=units.t(si_t_start_rot) && lbm.get_t()<units.t(si_t_end_rot)) {
 			// rotate robot mesh and revoxelize it every lbm_dt time steps during rotation
 			lbm.voxelize_mesh_on_device(robot, TYPE_S, pilon->get_center(), float3(0.0f), float3(0.0f, 0.0f, omega_yaw)); // revoxelize mesh on GPU
