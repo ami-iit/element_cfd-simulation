@@ -33,6 +33,11 @@ from src.utils import colors, getJointConfigNames, cleanFilesExceptExtension
 
 robotName = "ironcub-mk3"
 
+if robotName == "ironcub-mk1":
+    import src.mk1 as robot
+elif robotName == "ironcub-mk3":
+    import src.mk3 as robot
+
 ###############################################################################
 # Set the Fluent configuration parameters
 # ~~~~~~~~~~~~~
@@ -139,38 +144,12 @@ for jointConfigName in jointConfigNames:
         # ~~~~~~~~~~~~~~~~
         # Add local sizing controls to the faceted geometry.
 
-        ironcubSurfacesList = [
-            "ironcub_head",
-            "ironcub_left_back_turbine",
-            "ironcub_right_back_turbine",
-            "ironcub_left_arm",
-            "ironcub_left_arm_pitch",
-            "ironcub_left_arm_roll",
-            "ironcub_left_turbine",
-            "ironcub_left_leg_lower",
-            "ironcub_left_leg_pitch",
-            "ironcub_left_leg_roll",
-            "ironcub_left_leg_upper",
-            "ironcub_right_arm",
-            "ironcub_right_arm_pitch",
-            "ironcub_right_arm_roll",
-            "ironcub_right_turbine",
-            "ironcub_right_leg_lower",
-            "ironcub_right_leg_pitch",
-            "ironcub_right_leg_roll",
-            "ironcub_right_leg_upper",
-            "ironcub_root_link",
-            "ironcub_torso",
-            "ironcub_torso_pitch",
-            "ironcub_torso_roll",
-        ]
-        
         addLocalSizing = meshing.workflow.TaskObject["Add Local Sizing"]
         addLocalSizing.Arguments.set_state(
             {
                 "AddChild": "yes",
                 "BOIControlName": "ironcub-sizing",
-                "BOIFaceLabelList": ironcubSurfacesList,
+                "BOIFaceLabelList": robot.ironcubSurfacesList,
                 "BOISize": 0.02,
             }
         )
@@ -198,7 +177,7 @@ for jointConfigName in jointConfigNames:
                 "CFDSurfaceMeshControls": {
                     "MaxSize": 4,
                     "MinSize": 0.005,
-                    "SizeFunctions": "Curvature and Proximity",
+                    "SizeFunctions": robot.surfaceMeshSizeFunction,
                 },
                 "ExecuteShareTopology": "Yes",
             }
@@ -440,12 +419,15 @@ for jointConfigName in jointConfigNames:
 
         # Solver: Pressure-based Coupled
         # Warped Face Gradient Correction: ON
+        # Pseudo-time solver: OFF
 
         solver.solution.methods.p_v_coupling.flow_scheme.set_state("Coupled")
 
         solver.solution.methods.warped_face_gradient_correction.enable(
             enable=True, gradient_correction_mode="memory-saving-mode"
         )
+        
+        solver.solution.methods.pseudo_time_method.formulation.coupled_solver.set_state("off")
 
         # TODO change when upgrading to Fluent 24.1
         solver.tui.solve.monitors.residual.check_convergence(
@@ -492,49 +474,25 @@ for jointConfigName in jointConfigNames:
         # ~~~~~~~~~~~~~~~~~~~~
         # Define the local report defintions for automatic updates of the results.
 
-        # Define the surfaces skiplist (enclosed in the reports of the mergelist)
-
-        surfaceSkipList = [
-            "ironcub_left_arm_pitch",
-            "ironcub_left_arm_roll",
-            "ironcub_right_arm_pitch",
-            "ironcub_right_arm_roll",
-            "ironcub_left_leg_pitch",
-            "ironcub_left_leg_roll",
-            "ironcub_right_leg_pitch",
-            "ironcub_right_leg_roll",
-            "ironcub_torso_pitch",
-            "ironcub_torso_roll",
-        ]
-
-        surfaceMergeList = [
-            "ironcub_left_arm",
-            "ironcub_left_arm",
-            "ironcub_right_arm",
-            "ironcub_right_arm",
-            "ironcub_root_link",
-            "ironcub_left_leg_upper",
-            "ironcub_root_link",
-            "ironcub_right_leg_upper",
-            "ironcub_torso",
-        ]
-
         # define the reports for the surfaces
-        for surfaceName in surfaceList:
+        for surfaceName in robot.ironcubSurfacesList:
 
-            if surfaceName in surfaceSkipList:
+            if surfaceName in robot.surfaceSkipList:
 
                 continue
 
             else:
 
-                reportSurfNames = [surfaceName]
+                reportSurfNames = [surfaceExtendedName for surfaceExtendedName in surfaceList if surfaceName in surfaceExtendedName]
                 reportDefName = surfaceName[8:]
                 reportDefName = reportDefName.replace("_", "-")
 
-                if surfaceName in surfaceMergeList:     # add the skip surfaces to the report surface list
-                    surfaceNamesAdd = [surfaceSkipList[index] for index, value in enumerate(surfaceMergeList) if value == surfaceName]
-                    reportSurfNames.extend(surfaceNamesAdd)
+                if surfaceName in robot.surfaceMergeList:     # add the skip surfaces to the report surface list
+                    surfaceNamesAddList = [robot.surfaceSkipList[index] for index, value in enumerate(robot.surfaceMergeList) if value == surfaceName]
+                    for surfaceNamesAdd in surfaceNamesAddList:
+                        for surfaceExtendedName in surfaceList:
+                            if surfaceNamesAdd in surfaceExtendedName:
+                                reportSurfNames.extend([surfaceExtendedName])
 
                 # define surface cd, cl, cs reports
 
