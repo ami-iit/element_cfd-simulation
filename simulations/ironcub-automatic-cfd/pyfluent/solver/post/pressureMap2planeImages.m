@@ -12,7 +12,7 @@ elseif matches(robotName,'iRonCub-Mk3')
     ironcubSoftwarePath  = getenv('IRONCUB_COMPONENT_SOURCE_DIR');
 end
 
-pressuresDataPath = '../data/pressures/';
+pressuresDataPath = '../data/mk1/pressures/';
 
 %% %%%%%%%%%%%%%%%%%%%%% Robot model initialization %%%%%%%%%%%%%%%%%%%%%%%
 

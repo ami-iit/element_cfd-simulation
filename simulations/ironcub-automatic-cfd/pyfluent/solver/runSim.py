@@ -26,17 +26,29 @@ import os
 from src.utils import colors, getAnglesList, getOutputParameterList, getJointConfigNames
 
 ###############################################################################
+# Set the name of the robot
+# ~~~~~~~~~~~~~
+# Set robot model: ironcub-mk1 | ironcub-mk3
+
+robotName = "ironcub-mk3"
+
+if robotName == "ironcub-mk1":
+    import src.mk1 as robot
+elif robotName == "ironcub-mk3":
+    import src.mk3 as robot
+
+
+###############################################################################
 # Set the Fluent configuration parameters
 # ~~~~~~~~~~~~~
 # Set the parameters for the Fluent session
 
-core_number = 48        # number of cores (only pre-post if use_gpu=True)
-use_gpu = False         # use GPU native solver
+core_number = 12        # number of cores (only pre-post if use_gpu=True)
+use_gpu = True          # use GPU native solver
 iteration_number = 1000 # number of iterations to run in the solver
 
 # Set the MPI option for the WS
 mpi_option = "-mpi=openmpi" if os.name == "posix" else ""
-
 
 ###############################################################################
 # Define directory and file paths
@@ -47,18 +59,21 @@ mpi_option = "-mpi=openmpi" if os.name == "posix" else ""
 
 rootPath = pathlib.Path(__file__).parents[0]
 
-caseDirPath = rootPath / "case"  # Fluent case directory path
-dataDirPath = rootPath / "data"  # data directory path
-srcDirPath = rootPath / "src"  # source directory path
-logDirPath = rootPath / "log"  # log directory path
+dataDirPath = rootPath / "data" / robotName[-3:] # data directory path
+logDirPath = rootPath / "log" # log directory path
+srcDirPath = rootPath / "src" # source directory path
+
+parentPath = pathlib.Path(__file__).parents[1]
+
+caseDirPath = parentPath / "meshing" / "case" / robotName[-3:] # Fluent case directory path
 
 # Define file paths
 
-pitchAnglesFilePath    = srcDirPath / "pitchAngles.csv"         # pitch angles file path
-yawAnglesStartFilePath = srcDirPath / "yawAnglesStart.csv"      # yaw angles start file path
-yawAnglesFilePath      = srcDirPath / "yawAnglesStart.csv"      # yaw angles file path
-jointConfigFilePath    = srcDirPath / "jointConfig.csv"         # joint configuration file path
-outputParamFilePath    = (dataDirPath / "outputParameters.csv") # output parameters file path
+pitchAnglesFilePath = srcDirPath / "pitchAngles.csv" # pitch angles file path
+yawAnglesStartFilePath = srcDirPath / "yawAnglesStart.csv" # yaw angles start file path
+yawAnglesFilePath = srcDirPath / "yawAngles.csv" # yaw angles file path
+outputParamFilePath = (dataDirPath / "outputParameters.csv") # output parameters file path
+jointConfigFilePath = srcDirPath / f"jointConfig-{robotName[-3:]}.csv" # joint configuration file path
 
 # Create data directories if not existing
 
@@ -83,8 +98,23 @@ for directory in dataDirectories:
 # Define residuals, contours and pressures paths
 
 residualsPath = dataDirPath / dataDirectories[0]
-contoursPath  = dataDirPath / dataDirectories[1]
+contoursPath = dataDirPath / dataDirectories[1]
 pressuresPath = dataDirPath / dataDirectories[2]
+
+###############################################################################
+# Create the output parameters file
+# ~~~~~~~~~~~~~
+# Create the output parameters file if not existing.
+
+if not outputParamFilePath.exists():
+    with open(str(outputParamFilePath), 'w') as outputParamCSV:
+        outputParameterHeader = "config,pitchAngle,yawAngle,ironcub-cd,ironcub-cl,ironcub-cs,"
+        for surfaceName in robot.ironcubSurfacesList:
+            if surfaceName not in robot.surfaceSkipList:
+                reportDefName = surfaceName[8:]
+                reportDefName = reportDefName.replace("_", "-")
+                outputParameterHeader = outputParameterHeader + f"{reportDefName}-cd,{reportDefName}-cl,{reportDefName}-cs,"
+        outputParamCSV.writelines(outputParameterHeader + "\n")
 
 ###############################################################################
 # Load parameters from files
@@ -121,6 +151,7 @@ for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
     solver = pyfluent.launch_fluent(
         mode="solver",                      # "meshing", "pure-meshing" or "solver"
         precision="double",                 # single or double precision
+        product_version="23.2.0",           # Fluent version
         version="3d",                       # 2d or 3d Fluent version
         processor_count=core_number,        # number of cores (only pre-post if use_gpu=True)
         gpu=use_gpu,                        # use GPU native solver
@@ -129,7 +160,6 @@ for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
         show_gui=False,                     # show GUI or not
         additional_arguments=mpi_option,    # additional arguments (used for MPI option)
     )
-
 
     ###############################################################################
     # Start the cycle on yaw angles
@@ -226,7 +256,6 @@ for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
             # Plot and save the velocity magnitude contour on the yz plane.
 
             solver.results.graphics.contour["velocity-contour"] = {}
-
             solver.results.graphics.contour["velocity-contour"] = {
                 "field": "velocity-magnitude",
                 "surfaces_list": ["yz_plane"],
@@ -256,7 +285,7 @@ for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
             # Compute and write output parameters
             # ~~~~~~~~~~~~~~~~~~~~~~~~
             # Compute and write the output parameters
-
+            
             outParamValList = solver.solution.report_definitions.compute(
                 report_defs=outParamList
             )
@@ -272,23 +301,35 @@ for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
 
                 outputParamCSV.writelines(outputParameterString + "\n")
 
-
             ###############################################################################
             # Export pressure data
             # ~~~~~~~~~~~~~~~~~~~~~~~~
             # Export the pressure data on each single surface.
 
             cd_report = solver.solution.report_definitions.drag["ironcub-cd"]
-            surfaceNameList = cd_report.thread_names.allowed_values()
+            surfaceList = cd_report.thread_names.allowed_values()
 
-            for surfaceName in surfaceNameList:
-                pressFileName = f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}-{surfaceName}.prs"
+            for surfaceName in robot.ironcubSurfacesList:
+                if surfaceName in robot.surfaceSkipList:
+                    continue
+                else:
+                    reportSurfNames = [surfaceExtendedName for surfaceExtendedName in surfaceList if surfaceName in surfaceExtendedName]
+                    reportDefName = surfaceName[8:]
+                    reportDefName = reportDefName.replace("_", "-")
+                    if surfaceName in robot.surfaceMergeList:     # add the skip surfaces to the report surface list
+                        surfaceNamesAddList = [robot.surfaceSkipList[index] for index, value in enumerate(robot.surfaceMergeList) if value == surfaceName]
+                        for surfaceNamesAdd in surfaceNamesAddList:
+                            for surfaceExtendedName in surfaceList:
+                                if surfaceNamesAdd in surfaceExtendedName:
+                                    reportSurfNames.extend([surfaceExtendedName])
+
+                pressFileName = f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}-{surfaceName}.dtbs"
                 pressFilePath = str( pressuresPath / pressFileName )
                 solver.file.export.ascii(
                     name=pressFilePath,
                     surface_name_list=[surfaceName],
                     delimiter="space",
-                    cell_func_domain=["pressure"],
+                    cell_func_domain=["pressure", "x-wall-shear", "y-wall-shear", "z-wall-shear"],
                     location="node",
                 )
 

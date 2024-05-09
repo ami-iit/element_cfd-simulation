@@ -12,7 +12,9 @@ elseif matches(robotName,'iRonCub-Mk3')
     ironcubSoftwarePath  = getenv('IRONCUB_COMPONENT_SOURCE_DIR');
 end
 
-pressuresDataPath = '../data/pressures/';
+ironcubSoftwarePath = 'C:\Users\apaolino\code\ironcub-mk1-software';
+
+pressuresDataPath = '../data/mk1/pressures/';
 
 %% %%%%%%%%%%%%%%%%%%%%% Robot model initialization %%%%%%%%%%%%%%%%%%%%%%%
 
@@ -133,7 +135,7 @@ for surfaceIndex = 1 : surfaceNumber  %%% use in place of next line %%%
     z_max = max(z) + tol;
     
     % Create a pixelNum x pixelNum image grid
-    pixelNum       = 256;
+    pixelNum       = 128;
     x_img          = linspace(theta_min, theta_max, pixelNum);
     y_img          = linspace(z_min, z_max, pixelNum);
     [X_img, Y_img] = meshgrid(x_img, y_img);
