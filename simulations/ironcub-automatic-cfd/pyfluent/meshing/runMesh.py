@@ -482,17 +482,17 @@ for jointConfigName in jointConfigNames:
                 continue
 
             else:
-
-                reportSurfNames = [surfaceExtendedName for surfaceExtendedName in surfaceList if surfaceName in surfaceExtendedName]
+                
                 reportDefName = surfaceName[8:]
                 reportDefName = reportDefName.replace("_", "-")
-
+                reportSurfNames = [surfaceName]
                 if surfaceName in robot.surfaceMergeList:     # add the skip surfaces to the report surface list
                     surfaceNamesAddList = [robot.surfaceSkipList[index] for index, value in enumerate(robot.surfaceMergeList) if value == surfaceName]
                     for surfaceNamesAdd in surfaceNamesAddList:
                         for surfaceExtendedName in surfaceList:
                             if surfaceNamesAdd in surfaceExtendedName:
                                 reportSurfNames.extend([surfaceExtendedName])
+                print(f"{surfaceName}: {reportSurfNames}")
 
                 # define surface cd, cl, cs reports
 
