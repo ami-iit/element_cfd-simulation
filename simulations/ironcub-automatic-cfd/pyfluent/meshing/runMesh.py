@@ -492,10 +492,8 @@ for jointConfigName in jointConfigNames:
                         for surfaceExtendedName in surfaceList:
                             if surfaceNamesAdd in surfaceExtendedName:
                                 reportSurfNames.extend([surfaceExtendedName])
-                print(f"{surfaceName}: {reportSurfNames}")
 
                 # define surface cd, cl, cs reports
-
                 solver.solution.report_definitions.drag[reportDefName + "-cd"] = {}
                 cd = solver.solution.report_definitions.drag[reportDefName + "-cd"]
                 cd.thread_names.set_state(reportSurfNames)
