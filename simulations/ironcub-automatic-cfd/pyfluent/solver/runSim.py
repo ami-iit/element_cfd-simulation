@@ -72,7 +72,7 @@ caseDirPath = parentPath / "meshing" / "case" / robotName[-3:] # Fluent case dir
 pitchAnglesFilePath = srcDirPath / "pitchAngles.csv" # pitch angles file path
 yawAnglesStartFilePath = srcDirPath / "yawAnglesStart.csv" # yaw angles start file path
 yawAnglesFilePath = srcDirPath / "yawAngles.csv" # yaw angles file path
-outputParamFilePath = (dataDirPath / "outputParameters.csv") # output parameters file path
+outputParamFilePath = dataDirPath / "outputParameters.csv" # output parameters file path
 jointConfigFilePath = srcDirPath / f"jointConfig-{robotName[-3:]}.csv" # joint configuration file path
 
 # Create data directories if not existing
