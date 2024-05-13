@@ -45,7 +45,7 @@ elif robotName == "ironcub-mk3":
 
 core_number = 12        # number of cores (only pre-post if use_gpu=True)
 use_gpu = True          # use GPU native solver
-iteration_number = 1000 # number of iterations to run in the solver
+iteration_number = 10 # number of iterations to run in the solver
 
 # Set the MPI option for the WS
 mpi_option = "-mpi=openmpi" if os.name == "posix" else ""
@@ -313,25 +313,22 @@ for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
                 if surfaceName in robot.surfaceSkipList:
                     continue
                 else:
-                    reportSurfNames = [surfaceExtendedName for surfaceExtendedName in surfaceList if surfaceName in surfaceExtendedName]
-                    reportDefName = surfaceName[8:]
-                    reportDefName = reportDefName.replace("_", "-")
+                    reportSurfNames = [surfaceName]
                     if surfaceName in robot.surfaceMergeList:     # add the skip surfaces to the report surface list
                         surfaceNamesAddList = [robot.surfaceSkipList[index] for index, value in enumerate(robot.surfaceMergeList) if value == surfaceName]
                         for surfaceNamesAdd in surfaceNamesAddList:
-                            for surfaceExtendedName in surfaceList:
-                                if surfaceNamesAdd in surfaceExtendedName:
-                                    reportSurfNames.extend([surfaceExtendedName])
-
-                pressFileName = f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}-{surfaceName}.dtbs"
-                pressFilePath = str( pressuresPath / pressFileName )
-                solver.file.export.ascii(
-                    name=pressFilePath,
-                    surface_name_list=[surfaceName],
-                    delimiter="space",
-                    cell_func_domain=["pressure", "x-wall-shear", "y-wall-shear", "z-wall-shear"],
-                    location="node",
-                )
+                            for surfaceDuplicatedName in surfaceList:
+                                if surfaceNamesAdd in surfaceDuplicatedName:
+                                    reportSurfNames.extend([surfaceDuplicatedName])
+                    pressFileName = f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}-{surfaceName}.dtbs"
+                    pressFilePath = str( pressuresPath / pressFileName )
+                    solver.file.export.ascii(
+                        name=pressFilePath,
+                        surface_name_list=reportSurfNames,
+                        delimiter="space",
+                        cell_func_domain=["pressure", "x-wall-shear", "y-wall-shear", "z-wall-shear"],
+                        location="node",
+                    )
 
 
             ###############################################################################

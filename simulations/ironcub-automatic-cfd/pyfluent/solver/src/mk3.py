@@ -53,7 +53,7 @@ surfaceMergeList = [
     "ironcub_left_leg_upper",
     "ironcub_left_leg_lower",
     "ironcub_right_leg_upper",
-    "ironcub_left_leg_lower",
+    "ironcub_right_leg_lower",
     "ironcub_torso",
     "ironcub_root_link",
 ]
