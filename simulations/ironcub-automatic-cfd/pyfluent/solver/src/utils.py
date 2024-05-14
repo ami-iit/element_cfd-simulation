@@ -37,7 +37,7 @@ def getAnglesList(anglesFilePath):
 def getOutputParameterList(outputParamFilePath):
     with open(str(outputParamFilePath), "r") as outputParamCSV:
         outputParameterFile = outputParamCSV.readlines()
-        outputParameterList = outputParameterFile[0][:-2].split(",")
+        outputParameterList = outputParameterFile[0][:-1].split(",")
         outputParameterList = outputParameterList[3:]
 
     return outputParameterList
