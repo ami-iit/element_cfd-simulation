@@ -475,40 +475,44 @@ for jointConfigName in jointConfigNames:
         # Define the local report defintions for automatic updates of the results.
 
         # define the reports for the surfaces
-        for surfaceName in robot.ironcubSurfacesList:
-
-            if surfaceName in robot.surfaceSkipList:
-
+        for reportSurface in robot.ironcubSurfacesList:
+            if reportSurface in robot.surfaceSkipList:
                 continue
-
             else:
-                
-                reportDefName = surfaceName[8:]
+                reportDefName = reportSurface[8:]
                 reportDefName = reportDefName.replace("_", "-")
-                reportSurfNames = [surfaceName]
-                if surfaceName in robot.surfaceMergeList:     # add the skip surfaces to the report surface list
-                    surfaceNamesAddList = [robot.surfaceSkipList[index] for index, value in enumerate(robot.surfaceMergeList) if value == surfaceName]
-                    for surfaceNamesAdd in surfaceNamesAddList:
-                        for surfaceExtendedName in surfaceList:
-                            if surfaceNamesAdd in surfaceExtendedName:
-                                reportSurfNames.extend([surfaceExtendedName])
-
-                # define surface cd, cl, cs reports
+                reportSurfaceList = [reportSurface]
+                # check for duplicates of the main report surface
+                reportSurfacePrefix = reportSurface+":"
+                for surface in surfaceList:
+                    if reportSurfacePrefix in surface:  
+                        reportSurfaceList.extend([surface])
+                # Add skip surfaces if the main report surface is a merge surface
+                if reportSurface in robot.surfaceMergeList:
+                    addSurfaceList = [robot.surfaceSkipList[index] for index, value in enumerate(robot.surfaceMergeList) if value == reportSurface]
+                    reportSurfaceList.extend(addSurfaceList)
+                    # check for duplicates of the skip surfaces
+                    for addSurface in addSurfaceList:
+                        addSurfacePrefix = addSurface+":"
+                        for surface in surfaceList:
+                            if addSurfacePrefix in surface:  
+                                reportSurfaceList.extend([surface])
+                # define surface cd report
                 solver.solution.report_definitions.drag[reportDefName + "-cd"] = {}
                 cd = solver.solution.report_definitions.drag[reportDefName + "-cd"]
-                cd.thread_names.set_state(reportSurfNames)
+                cd.thread_names.set_state(reportSurfaceList)
                 cd.force_vector.set_state([0, 0, -1])
                 cd.average_over.set_state(100)
-
+                # define surface cl report
                 solver.solution.report_definitions.drag[reportDefName + "-cl"] = {}
                 cl = solver.solution.report_definitions.drag[reportDefName + "-cl"]
-                cl.thread_names.set_state(reportSurfNames)
+                cl.thread_names.set_state(reportSurfaceList)
                 cl.force_vector.set_state([0, 1, 0])
                 cl.average_over.set_state(100)
-
+                # define surface cs report
                 solver.solution.report_definitions.drag[reportDefName + "-cs"] = {}
                 cs = solver.solution.report_definitions.drag[reportDefName + "-cs"]
-                cs.thread_names.set_state(reportSurfNames)
+                cs.thread_names.set_state(reportSurfaceList)
                 cs.force_vector.set_state([-1, 0, 0])
                 cs.average_over.set_state(100)
 

@@ -76,13 +76,11 @@ outputParamFilePath = dataDirPath / "outputParameters.csv" # output parameters f
 jointConfigFilePath = srcDirPath / f"jointConfig-{robotName[-3:]}.csv" # joint configuration file path
 
 # Create data directories if not existing
-
-dataDirectories = ["residuals", "contours", "pressures"]
-
+dataDirectories = ["residuals", "contours", "database", "database-extended"]
 for directory in dataDirectories:
     directoryPath = dataDirPath / directory
     if not directoryPath.exists():
-        directoryPath.mkdir()
+        directoryPath.mkdir(parents=True) # create directory with parents if not existing
         print(
             colors.CYAN,
             f"[Message] Creating {directory} directory: '{directoryPath}'.",
@@ -96,10 +94,10 @@ for directory in dataDirectories:
         )
 
 # Define residuals, contours and pressures paths
-
 residualsPath = dataDirPath / dataDirectories[0]
 contoursPath = dataDirPath / dataDirectories[1]
-pressuresPath = dataDirPath / dataDirectories[2]
+databasePath = dataDirPath / dataDirectories[2]
+databaseExtendedPath = dataDirPath / dataDirectories[3]
 
 ###############################################################################
 # Create the output parameters file
@@ -302,34 +300,60 @@ for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
                 outputParamCSV.writelines(outputParameterString + "\n")
 
             ###############################################################################
-            # Export pressure data
+            # Export surface data
             # ~~~~~~~~~~~~~~~~~~~~~~~~
-            # Export the pressure data on each single surface.
+            # Export the pressure and shear stress data on each single surface.
 
             cd_report = solver.solution.report_definitions.drag["ironcub-cd"]
             surfaceList = cd_report.thread_names.allowed_values()
-
-            for surfaceName in robot.ironcubSurfacesList:
-                if surfaceName in robot.surfaceSkipList:
+            
+            # Export database files for each merge surface
+            for reportSurface in robot.ironcubSurfacesList:
+                if reportSurface in robot.surfaceSkipList:
                     continue
                 else:
-                    reportSurfNames = [surfaceName]
-                    if surfaceName in robot.surfaceMergeList:     # add the skip surfaces to the report surface list
-                        surfaceNamesAddList = [robot.surfaceSkipList[index] for index, value in enumerate(robot.surfaceMergeList) if value == surfaceName]
-                        for surfaceNamesAdd in surfaceNamesAddList:
-                            for surfaceDuplicatedName in surfaceList:
-                                if surfaceNamesAdd in surfaceDuplicatedName:
-                                    reportSurfNames.extend([surfaceDuplicatedName])
-                    pressFileName = f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}-{surfaceName}.dtbs"
-                    pressFilePath = str( pressuresPath / pressFileName )
+                    reportSurfaceList = [reportSurface]
+                    # check for duplicates of the main report surface
+                    reportSurfacePrefix = reportSurface+":"
+                    for surface in surfaceList:
+                        if reportSurfacePrefix in surface:  
+                            reportSurfaceList.extend([surface])
+                    # Add skip surfaces if the main report surface is a merge surface
+                    if reportSurface in robot.surfaceMergeList:
+                        addSurfaceList = [robot.surfaceSkipList[index] for index, value in enumerate(robot.surfaceMergeList) if value == reportSurface]
+                        reportSurfaceList.extend(addSurfaceList)
+                        # check for duplicates of the skip surfaces
+                        for addSurface in addSurfaceList:
+                            addSurfacePrefix = addSurface+":"
+                            for surface in surfaceList:
+                                if addSurfacePrefix in surface:  
+                                    reportSurfaceList.extend([surface])
+                    databaseFileName = f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}-{reportSurface}.dtbs"
+                    databaseFilePath = str( databasePath / databaseFileName )
                     solver.file.export.ascii(
-                        name=pressFilePath,
-                        surface_name_list=reportSurfNames,
+                        name=databaseFilePath,
+                        surface_name_list=reportSurfaceList,
                         delimiter="space",
                         cell_func_domain=["pressure", "x-wall-shear", "y-wall-shear", "z-wall-shear"],
                         location="node",
                     )
-
+        
+            # Export database files for each single surface
+            for reportSurface in robot.ironcubSurfacesList:
+                reportSurfaceList = [reportSurface]
+                reportSurfacePrefix = reportSurface+":"
+                for surface in surfaceList:
+                    if reportSurfacePrefix in surface:  
+                        reportSurfaceList.extend([surface])
+                databaseFileName = f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}-{reportSurface}.dtbs"
+                databaseFilePath = str( databaseExtendedPath / databaseFileName )
+                solver.file.export.ascii(
+                    name=databaseFilePath,
+                    surface_name_list=reportSurfaceList,
+                    delimiter="space",
+                    cell_func_domain=["pressure", "x-wall-shear", "y-wall-shear", "z-wall-shear"],
+                    location="node",
+                )
 
             ###############################################################################
             # Print Iter End message
