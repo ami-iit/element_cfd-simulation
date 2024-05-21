@@ -545,9 +545,9 @@ for jointConfigName in jointConfigNames:
 
 
         ###############################################################################
-        # Close Fluent
+        # Close Fluent and clean up debug files
         # ~~~~~~~~~~~~
-        # Close Fluent and print the end message.
+        # Close Fluent, print the end message and cleanup the debug files.
 
         solver.exit()
 
@@ -557,6 +557,9 @@ for jointConfigName in jointConfigNames:
             f"[{timeJointConfigEnd}] {jointConfigName} mesh generated!",
             colors.RESET,
         )
+        
+        cleanFilesExceptExtension(meshDirPath, ".h5")
+        cleanFilesExceptExtension(logDirPath, [".log", ".trn", ".bat"])
 
 
     except Exception as exceptionMessage:
@@ -580,12 +583,9 @@ for jointConfigName in jointConfigNames:
 
 
 ###############################################################################
-# Cleanup debug files and conclude the process
+# Close the process
 # ~~~~~~~~~~~~
-# Clean files in the mesh and log directories, print the process end message
-
-cleanFilesExceptExtension(meshDirPath, ".h5")
-cleanFilesExceptExtension(logDirPath, [".log", ".trn", ".bat"])
+# Print the process end message
 
 timeProcessEnd = datetime.now().strftime("%H:%M:%S")
 print(
