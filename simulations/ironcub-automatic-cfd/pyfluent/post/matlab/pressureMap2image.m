@@ -37,7 +37,11 @@ KinDynModel = iDynTreeWrappers.loadReducedModel(jointNames, 'root_link', modelPa
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%% Set robot state %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % set pitch and yaw angles
 pitchAngle = 0;
-yawAngle   = -100;
+yawAngle   = 0;
+% set joint configuration
+jointConfigName =  'hovering2';
+jointPos = [0,0,0,0,21.6,40,15,0,21.6,40,15,0,10,7,0,0,0,0,10,7,0,0,0]*pi/180; % hovering2
+
 
 % set base Pose according to yaw and pitch angles
 if matches(robotName,'iRonCub-Mk1')
@@ -53,13 +57,11 @@ elseif matches(robotName,'iRonCub-Mk3')
                                   zeros(1,3),         1];
 end
 
-
-% set joint configuration
-jointPos = [0,0,0,0,16.6,40,15,0,16.6,40,15,0,10,7,0,0,0,0,10,7,0,0,0]*pi/180; % hovering
-
 % set robot state and move root_link to Fluent origin
 iDynTreeWrappers.setRobotState(KinDynModel, basePose, jointPos, baseVel, jointVel, gravAcc);
-% correctRobotOrigin(KinDynModel, basePose, jointPos, baseVel, jointVel, gravAcc);
+if matches(robotName,'iRonCub-Mk1')
+    correctRobotOrigin(KinDynModel, basePose, jointPos, baseVel, jointVel, gravAcc);
+end
 
 % robot visualization
 [viz, objects] = iDynTreeWrappers.prepareVisualization(KinDynModel, meshFilePrefix, 'color', [0.96,0.96,0.96], ...
@@ -69,17 +71,25 @@ iDynTreeWrappers.setRobotState(KinDynModel, basePose, jointPos, baseVel, jointVe
 
 %% %%%%%%%%%%%%%%%%%%% IMPORT AND MODIFY FLUENT DATA %%%%%%%%%%%%%%%%%%%%%%
 
-% set surface names from Fluent data and corresponding frame names
-surfaceNames = {'head','torso','left_back_turbine','right_back_turbine', ...
-                'left_arm','left_turbine','right_arm','right_turbine', ...
-                'root_link', 'left_leg_upper','left_leg_lower','right_leg_upper','right_leg_lower'};
-surfaceFrames = {'head','chest','chest_l_jet_turbine','chest_r_jet_turbine', ...
-                 'l_upper_arm','l_arm_jet_turbine','r_upper_arm','r_arm_jet_turbine', ...
-                 'root_link','l_upper_leg','l_lower_leg','r_upper_leg','r_lower_leg'};
+% set surface names from Fluent data and corresponding frame names (adjust
+% for Mk1 model)
+surfaceNames = {
+    "head","left_back_turbine","right_back_turbine", ...
+    "left_arm","left_arm_pitch","left_arm_roll","left_turbine", ...
+    "left_leg_lower","left_leg_pitch","left_leg_yaw","left_leg_upper", ...
+    "right_arm","right_arm_pitch","right_arm_roll","right_turbine", ...
+    "right_leg_lower","right_leg_pitch","right_leg_yaw","right_leg_upper", ...
+    "root_link","torso","torso_pitch","torso_roll"};
+surfaceFrames = {
+    "head","chest_l_jet_turbine","chest_r_jet_turbine", ...
+    "l_upper_arm","l_shoulder_1","l_shoulder_2","l_arm_jet_turbine", ...
+    "l_lower_leg","l_hip_1","l_upper_leg","l_hip_3", ...
+    "r_upper_arm","r_shoulder_1","r_shoulder_2","r_arm_jet_turbine", ...
+    "r_lower_leg","r_hip_1","r_upper_leg","r_hip_3", ...
+    "root_link","chest","torso_1","torso_2"};
 
 % axes of the symmetric planes used for imaging
-surfaceRefAxes = [2,2,2,3,3,3,3,3,3,2,3,3,3,3];  
-
+surfaceRefAxes = [3, 3, 3, 3, 2, 1, 3, 3, 2, 3, 3, 3, 2, 1, 3, 3, 2, 3, 3, 3, 3, 3, 3];
 
 surfaceNumber = length(surfaceNames);
 
@@ -104,7 +114,6 @@ for surfaceIndex = 1 : surfaceNumber  %%% use in place of next line %%%
         zeros(1,3),                                           1];
 
     % Import Fluent Data
-    jointConfigName =  'hovering';
     surfacePressuresFilePath = [pressuresDataPath,jointConfigName,'-',num2str(pitchAngle),'-',num2str(yawAngle),'-ironcub_',surfaceName,'.dtbs'];
     data = importFluentData(surfacePressuresFilePath, link_H_fluent);
 
@@ -112,78 +121,78 @@ for surfaceIndex = 1 : surfaceNumber  %%% use in place of next line %%%
     figure(1)
     pcshow([data.x_fluent data.y_fluent data.z_fluent], data.press, 'MarkerSize', 18);
 
-    % %% Generate 2D images
-    % if surfaceRefAxis == 1
-    %     x = data.y_local;
-    %     y = data.z_local;
-    %     z = data.x_local;
-    % elseif surfaceRefAxis == 2
-    %     x = data.x_local;
-    %     y = data.z_local;
-    %     z = data.y_local;
-    % elseif surfaceRefAxis == 3
-    %     x = data.x_local;
-    %     y = data.y_local;
-    %     z = data.z_local;
-    % end
-    % 
-    % % To cylindrical coordinates
-    % r = sqrt(x.^2 + y.^2);
-    % r_mean = mean(r);
-    % theta = atan2(y,x)*r_mean;
-    % 
-    % % create scatter interpolation functions of the pressures
-    % F_interp1    = scatteredInterpolant(theta, z, data.press, "linear", "none");
-    % 
-    % % Building the image grid boundaries
-    % tol   = 0.01;
-    % theta_min = min(theta) - tol;
-    % theta_max = max(theta) + tol;
-    % z_min = min(z) - tol;
-    % z_max = max(z) + tol;
-    % 
-    % % Create a pixelNum x pixelNum image grid
-    % pixelNum       = 128;
-    % x_img          = linspace(theta_min, theta_max, pixelNum);
-    % y_img          = linspace(z_min, z_max, pixelNum);
-    % [X_img, Y_img] = meshgrid(x_img, y_img);
-    % 
-    % % interpolate input values over the image grid
-    % press_sampled    = F_interp1(X_img,Y_img);
-    % 
-    % % get the indices of the grid points inside the component polygon
-    % shrinkFactor    = 0.99;
-    % boundaryIndices = boundary(theta,z,shrinkFactor);
-    % maskIndices     = inpolygon(X_img, Y_img, theta(boundaryIndices), z(boundaryIndices));
-    % 
-    % % remove values outside the component polygon
-    % press_sampled(~maskIndices) = NaN;
-    % 
-    % %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Plots %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % 
-    % fig2 = figure('Position',[100 400 1080 480]);
-    % tiledlayout(1,3)
-    % 
-    % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SIDE 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % 
-    % % Plot imported 3D data as 2D
-    % nexttile
-    % pcshow([theta z r], data.press, "ViewPlane","XY");
-    % title("3D-to-2D","Color","w")
-    % 
-    % % Plot 2D interpolated data
-    % nexttile
-    % contourf(X_img, Y_img, press_sampled);
-    % axis([theta_min theta_max z_min z_max])
-    % title('2D contour',"Color","w")
-    % axis equal
-    % 
-    % % Plot 2D images
-    % nexttile
-    % im = image(flipud(press_sampled),'CDataMapping','scaled');
-    % title('2D image',"Color","w")
-    % axis equal
-    % c = colorbar;
+    %% Generate 2D images
+    if surfaceRefAxis == 1
+        x = data.y_local;
+        y = data.z_local;
+        z = data.x_local;
+    elseif surfaceRefAxis == 2
+        x = data.x_local;
+        y = data.z_local;
+        z = data.y_local;
+    elseif surfaceRefAxis == 3
+        x = data.x_local;
+        y = data.y_local;
+        z = data.z_local;
+    end
+
+    % To cylindrical coordinates
+    r = sqrt(x.^2 + y.^2);
+    r_mean = mean(r);
+    theta = atan2(y,x)*r_mean;
+
+    % create scatter interpolation functions of the pressures
+    F_interp1    = scatteredInterpolant(theta, z, data.press, "linear", "none");
+
+    % Building the image grid boundaries
+    tol   = 0.01;
+    theta_min = min(theta) - tol;
+    theta_max = max(theta) + tol;
+    z_min = min(z) - tol;
+    z_max = max(z) + tol;
+
+    % Create a pixelNum x pixelNum image grid
+    pixelNum       = 128;
+    x_img          = linspace(theta_min, theta_max, pixelNum);
+    y_img          = linspace(z_min, z_max, pixelNum);
+    [X_img, Y_img] = meshgrid(x_img, y_img);
+
+    % interpolate input values over the image grid
+    press_sampled    = F_interp1(X_img,Y_img);
+
+    % get the indices of the grid points inside the component polygon
+    shrinkFactor    = 0.99;
+    boundaryIndices = boundary(theta,z,shrinkFactor);
+    maskIndices     = inpolygon(X_img, Y_img, theta(boundaryIndices), z(boundaryIndices));
+
+    % remove values outside the component polygon
+    press_sampled(~maskIndices) = NaN;
+
+    %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Plots %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    fig2 = figure('Position',[100 400 1080 480]);
+    tiledlayout(1,3)
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SIDE 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    % Plot imported 3D data as 2D
+    nexttile
+    pcshow([theta z r], data.press, "ViewPlane","XY");
+    title("3D-to-2D","Color","w")
+
+    % Plot 2D interpolated data
+    nexttile
+    contourf(X_img, Y_img, press_sampled);
+    axis([theta_min theta_max z_min z_max])
+    title('2D contour',"Color","w")
+    axis equal
+
+    % Plot 2D images
+    nexttile
+    im = image(flipud(press_sampled),'CDataMapping','scaled');
+    title('2D image',"Color","w")
+    axis equal
+    c = colorbar;
 
 end
 
