@@ -1,7 +1,7 @@
 # Lattice Boltzmann Method
 
 This is a different methodology to solve fluid flow fields, different to Finite Volume Method as implemented in the commercial software [`ANSYS Fluent`](https://www.ansys.com/products/fluids/ansys-fluent).
-In this directory all the necessary files to simulate iRonCub whole-body geometry using the open-source code [`FluidX3D`](https://github.com/ProjectPhysX/FluidX3D) based on LBM is reported, plus some useful features in the `utility` directory, useful to generate force and torque plots and cool videos from real-time rendered snapshots of the simulation.
+In this directory all the necessary files to simulate iRonCub whole-body geometry using the open-source code [`FluidX3D`](https://github.com/ProjectPhysX/FluidX3D) based on LBM is reported, plus some useful features in the `ironcub-mk1/utility` directory, useful to generate force and torque plots and cool videos from real-time rendered snapshots of the simulation.
 
 ## Installation
 
