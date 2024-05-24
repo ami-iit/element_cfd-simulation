@@ -1,6 +1,7 @@
 from idyntree import bindings as idyntree
 import os
 import pathlib
+import open3d as o3d
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 import toml
@@ -25,8 +26,9 @@ class Robot:
         self.surface_list = self.config["Surfaces"]["List"]
         self.surface_frames = self.config["Surfaces"]["Frames"]
         self.surface_axes = self.config["Surfaces"]["Axes"]
-        self.surface_meshes = self.config["Surfaces"]["Meshes"]
-        self.rotation_angles = self.config["Surfaces"]["Rotation_angles"]
+        self.rotation_angles = self.config["Surfaces"]["Rot"]
+        self.mesh_list = self.config["Meshes"]["List"]
+        self.mesh_frames = self.config["Meshes"]["Frames"]
     
     def _load_kinDyn(self):
         print(f"[loadReducedModel]: loading the following model: {self.model_path}")
@@ -77,6 +79,12 @@ class Robot:
             viz.draw()
         return
     
+    def compute_world_to_link_transform(self, frame_name, rotation_angle):
+        world_H_link = self.kinDyn.getWorldTransform(frame_name).asHomogeneousTransform().toNumPy()
+        frame_rotation_matrix = R.from_euler('z', rotation_angle, degrees=True).as_matrix()
+        world_H_link[:3,:3] = np.dot(world_H_link[0:3,0:3], frame_rotation_matrix)
+        return world_H_link
+    
     def invert_homogeneous_transform(self, a_H_b):
         a_R_b = a_H_b[0:3,0:3]
         a_d_b = a_H_b[0:3,-1]
@@ -85,3 +93,22 @@ class Robot:
             [np.zeros((1, 3)), np.ones((1, 1))]
         ])
         return b_H_a
+    
+    def load_mesh(self):
+        # Iterate over the mesh list
+        meshes = []
+        for mesh_index, mesh_name in enumerate(self.mesh_list):
+            mesh_path = str(self.mesh_path / f"{mesh_name}.stl")
+            mesh = o3d.io.read_triangle_mesh(mesh_path)
+            # Transform the mesh dimensions from m to mm
+            mesh.scale(0.001, center=[0, 0, 0])
+            # Get the world to mesh frame homogeneous transformation
+            mesh_frame = self.mesh_frames[mesh_index]
+            w_H_f = self.compute_world_to_link_transform(frame_name=mesh_frame, rotation_angle=0)
+            mesh.transform(w_H_f)
+            # Compute the vertex normals
+            mesh.compute_vertex_normals()
+            # store the mesh
+            meshes.append({"name": mesh_name, "mesh": mesh})
+        return meshes
+            
