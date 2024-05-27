@@ -26,9 +26,9 @@ def main():
     pitch_angle = 90
     yaw_angle = 0
     joint_config_name = "hovering"
-    joint_positions = np.array([0,0,0,0,16.6,40,15,0,16.6,40,15,0,10,7,0,0,0,0,10,7,0,0,0])*np.pi/180 # 0.0,0.0,0.0,-10.0,25.0,40.0,15.0,-10.0,25.0,40.0,15.0,0.0,10.0,7.0,0.0,0.0,0.0,0.0,10.0,7.0,0.0,0.0,0.0
-    # joiint_config_name = "hovering2"
-    # joint_positions = np.array([0,0,0,0,21.6,40,15,0,21.6,40,15,0,10,7,0,0,0,0,10,7,0,0,0])*np.pi/180 # 0.0,0.0,0.0,-10.0,25.0,40.0,15.0,-10.0,25.0,40.0,15.0,0.0,10.0,7.0,0.0,0.0,0.0,0.0,10.0,7.0,0.0,0.0,0.0
+    joint_positions = np.array([0,0,0,0,16.6,40,15,0,16.6,40,15,0,10,7,0,0,0,0,10,7,0,0,0])*np.pi/180
+    # joint_config_name = "hovering2"
+    # joint_positions = np.array([0,0,0,0,21.6,40,15,0,21.6,40,15,0,10,7,0,0,0,0,10,7,0,0,0])*np.pi/180
 
     # Set robot state
     robot.set_state(pitch_angle, yaw_angle, joint_positions)
@@ -73,17 +73,13 @@ def main():
     
     # plt.show(block=False)
     
-    flow.plot_surface_point_cloud(flow_variable=flow.cp, meshes=robot.load_mesh())
+    # flow.plot_surface_point_cloud(flow_variable=flow.cp, meshes=robot.load_mesh())
+    flow.plot_surface_contour(flow_variable=flow.cp, meshes=robot.load_mesh())
 
     print("fermoooo")
-    
     
     
 
 if __name__ == "__main__":
     main()
-
-
-
-
 

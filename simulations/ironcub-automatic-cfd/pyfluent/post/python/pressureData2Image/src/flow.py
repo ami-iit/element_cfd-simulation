@@ -96,13 +96,23 @@ class Flow:
         point_cloud = o3d.geometry.PointCloud()
         point_cloud.points = o3d.utility.Vector3dVector(points)
         point_cloud.colors = o3d.utility.Vector3dVector(colors)
-        # create trnasparent mesh material
+        # Create the global frame
+        world_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2, origin=[0, 0, 0])
+        # create the relative wind direction vector
+        wind_vector = o3d.geometry.TriangleMesh.create_arrow(cylinder_radius=0.01, cone_radius=0.02, cylinder_height=0.2, cone_height=0.04)
+        wind_vector.paint_uniform_color([0, 0.5, 1]) # green-ish blue
+        wind_vector.rotate(R.from_euler('y', 180, degrees=True).as_matrix(), center=[0, 0, 0])
+        wind_vector.translate([0, 0.2, 0.7])
+        wind_vector.compute_vertex_normals()
+        # Create transparent mesh material
         mesh_material = o3d.visualization.rendering.MaterialRecord()
         mesh_material.shader = "defaultLitTransparency"
         mesh_material.base_color = [0.5, 0.5, 0.5, 0.7]  # RGBA, A is for alpha
         # Assemble the geometries list
         geometries = [
-            {"name": "point_cloud", "geometry": point_cloud}
+            {"name": "point_cloud", "geometry": point_cloud},
+            {"name": "world_frame", "geometry": world_frame},
+            {"name": "wind_vector", "geometry": wind_vector},
         ]
         for mesh_index, mesh in enumerate(meshes):
             geometries.append({"name": f"mesh_{mesh_index}", "geometry": mesh["mesh"], "material": mesh_material})
@@ -143,6 +153,86 @@ class Flow:
         Interpolated_Flow_Variable = np.zeros_like(X)*np.nan
         Interpolated_Flow_Variable[mask_indices] = griddata((theta,z), flow_variable, (X[mask_indices], Y[mask_indices]), method='linear')
         return theta, z, X, Y, Interpolated_Flow_Variable
+
+    def plot_surface_contour(self, flow_variable, meshes):
+        points = np.vstack((self.x,self.y,self.z)).T # 3D points
+        # Normalize the colormap
+        # norm = plt.Normalize(vmin=np.min(flow_variable), vmax=np.max(flow_variable))
+        norm = plt.Normalize(vmin=-2, vmax=1)
+        normalized_flow_variable = norm(flow_variable)
+        colormap = cm.jet
+        colors = colormap(normalized_flow_variable)[:,:3]
+        # Create the point cloud
+        point_cloud = o3d.geometry.PointCloud()
+        point_cloud.points = o3d.utility.Vector3dVector(points)
+        point_cloud.colors = o3d.utility.Vector3dVector(colors)
+        # Create the global frame
+        world_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2, origin=[0, 0, 0])
+        # create the relative wind direction vector
+        wind_vector = o3d.geometry.TriangleMesh.create_arrow(cylinder_radius=0.01, cone_radius=0.02, cylinder_height=0.2, cone_height=0.04)
+        wind_vector.paint_uniform_color([0, 0.5, 1]) # green-ish blue
+        wind_vector.rotate(R.from_euler('y', 180, degrees=True).as_matrix(), center=[0, 0, 0])
+        wind_vector.translate([0, 0.2, 1.0])
+        wind_vector.compute_vertex_normals()
+        # Create trnasparent mesh material
+        # mesh_material = o3d.visualization.rendering.MaterialRecord()
+        # mesh_material.shader = "defaultLitTransparency"
+        # mesh_material.base_color = [0.5, 0.5, 0.5, 0.7]  # RGBA, A is for alpha
+        # Assemble the geometries list
+        geometries = [
+            {"name": "world_frame", "geometry": world_frame},
+            {"name": "wind_vector", "geometry": wind_vector},
+        ]
+        for mesh_index, mesh in enumerate(meshes):
+            #Color meshes with the flow_variable using griddata
+            vertices = np.asarray(mesh["mesh"].vertices)
+            # Interpolate the data
+            mesh_flow_values = griddata((self.x, self.y, self.z), flow_variable, vertices, method="linear")
+            # Extrapolate the data using nearest neighbors
+            outside_indices = np.isnan(mesh_flow_values)
+            mesh_flow_values[outside_indices] = griddata((self.x, self.y, self.z), flow_variable, vertices[outside_indices], method="nearest")
+            normalized_mesh_flow_values = norm(mesh_flow_values)
+            mesh_colors = colormap(normalized_mesh_flow_values)[:,:3]
+            mesh["mesh"].vertex_colors = o3d.utility.Vector3dVector(mesh_colors)
+            # Add meshes to the geometries list
+            geometries.append({"name": f"mesh_{mesh_index}", "geometry": mesh["mesh"]})
+            print(f"Mesh {mesh['name']} added to the scene.")
+        o3d.visualization.draw(geometries,show_skybox=False)
+        return
     
-    def interpolate_pressure_data(self, main_axis, resolution = (128, 128), mask_threshold = 0.1):
-        return self.interpolate_flow_data(self.pressure_coefficient, main_axis, resolution, mask_threshold)
+    def plot_surface_pointcloud(self, flow_variable, meshes):
+        points = np.vstack((self.x,self.y,self.z)).T # 3D points
+        # Normalize the colormap
+        # norm = plt.Normalize(vmin=np.min(flow_variable), vmax=np.max(flow_variable))
+        norm = plt.Normalize(vmin=-2, vmax=1)
+        normalized_flow_variable = norm(flow_variable)
+        colormap = cm.jet
+        colors = colormap(normalized_flow_variable)[:,:3]
+        # Create the point cloud
+        point_cloud = o3d.geometry.PointCloud()
+        point_cloud.points = o3d.utility.Vector3dVector(points)
+        point_cloud.colors = o3d.utility.Vector3dVector(colors)
+        # Create the global frame
+        world_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2, origin=[0, 0, 0])
+        # create the relative wind direction vector
+        wind_vector = o3d.geometry.TriangleMesh.create_arrow(cylinder_radius=0.01, cone_radius=0.02, cylinder_height=0.2, cone_height=0.04)
+        wind_vector.paint_uniform_color([0, 0.5, 1]) # green-ish blue
+        wind_vector.rotate(R.from_euler('y', 180, degrees=True).as_matrix(), center=[0, 0, 0])
+        wind_vector.translate([0, 0.2, 1.0])
+        wind_vector.compute_vertex_normals()
+        # Create trnasparent mesh material
+        # mesh_material = o3d.visualization.rendering.MaterialRecord()
+        # mesh_material.shader = "defaultLitTransparency"
+        # mesh_material.base_color = [0.5, 0.5, 0.5, 0.7]  # RGBA, A is for alpha
+        # Assemble the geometries list
+        geometries = [
+            {"name": "point_cloud", "geometry": point_cloud},
+            {"name": "world_frame", "geometry": world_frame},
+            {"name": "wind_vector", "geometry": wind_vector},
+        ]
+        for mesh_index, mesh in enumerate(meshes):
+            # Add meshes to the geometries list
+            geometries.append({"name": f"mesh_{mesh_index}", "geometry": mesh["mesh"]})
+            print(f"Mesh {mesh['name']} added to the scene.")
+        o3d.visualization.draw(geometries,show_skybox=False)
+        return

@@ -27,8 +27,8 @@ class Robot:
         self.surface_frames = self.config["Surfaces"]["Frames"]
         self.surface_axes = self.config["Surfaces"]["Axes"]
         self.rotation_angles = self.config["Surfaces"]["Rot"]
-        self.mesh_list = self.config["Meshes"]["List"]
-        self.mesh_frames = self.config["Meshes"]["Frames"]
+        # self.mesh_list = self.config["Meshes"]["List"]
+        # self.mesh_frames = self.config["Meshes"]["Frames"]
     
     def _load_kinDyn(self):
         print(f"[loadReducedModel]: loading the following model: {self.model_path}")
@@ -94,18 +94,43 @@ class Robot:
         ])
         return b_H_a
     
+    def get_links_and_meshes(self):
+        self.links_list = []
+        self.meshes_list = []
+        self.link_H_geom = [] 
+        model = self.kinDyn.getRobotModel()
+        visual = model.visualSolidShapes().getLinkSolidShapes()
+        nr_of_links = visual.size()
+        iterator = visual.begin()
+        for link_index in range(nr_of_links):
+            link_name = model.getLinkName(link_index)
+            solidarray = iterator.next()
+            solids_number = len(solidarray)
+            for solid_index in range(solids_number):
+                if solidarray[solid_index].isExternalMesh():
+                    mesh_name = solidarray[solid_index].asExternalMesh().getFilename()
+                    link_H_geom = solidarray[solid_index].getLink_H_geometry().asHomogeneousTransform().toNumPy()
+                    self.links_list.append(link_name)
+                    self.meshes_list.append(mesh_name.split("/")[-1].split(".")[0])
+                    self.link_H_geom.append(link_H_geom)
+        return
+        
+    
     def load_mesh(self):
         # Iterate over the mesh list
+        self.get_links_and_meshes()
         meshes = []
-        for mesh_index, mesh_name in enumerate(self.mesh_list):
+        for mesh_index, mesh_name in enumerate(self.meshes_list):
             mesh_path = str(self.mesh_path / f"{mesh_name}.stl")
             mesh = o3d.io.read_triangle_mesh(mesh_path)
             # Transform the mesh dimensions from m to mm
             mesh.scale(0.001, center=[0, 0, 0])
             # Get the world to mesh frame homogeneous transformation
-            mesh_frame = self.mesh_frames[mesh_index]
-            w_H_f = self.compute_world_to_link_transform(frame_name=mesh_frame, rotation_angle=0)
-            mesh.transform(w_H_f)
+            mesh_frame = self.links_list[mesh_index]
+            world_H_frame = self.compute_world_to_link_transform(frame_name=mesh_frame, rotation_angle=0)
+            frame_H_geom = self.link_H_geom[mesh_index]
+            world_H_geom = np.dot(world_H_frame, frame_H_geom)
+            mesh.transform(world_H_geom)
             # Compute the vertex normals
             mesh.compute_vertex_normals()
             # store the mesh
