@@ -27,8 +27,7 @@ class Robot:
         self.surface_frames = self.config["Surfaces"]["Frames"]
         self.surface_axes = self.config["Surfaces"]["Axes"]
         self.rotation_angles = self.config["Surfaces"]["Rot"]
-        # self.mesh_list = self.config["Meshes"]["List"]
-        # self.mesh_frames = self.config["Meshes"]["Frames"]
+        self.image_resolutions = self.config["Surfaces"]["Resolutions"]
     
     def _load_kinDyn(self):
         print(f"[loadReducedModel]: loading the following model: {self.model_path}")
@@ -114,8 +113,7 @@ class Robot:
                     self.meshes_list.append(mesh_name.split("/")[-1].split(".")[0])
                     self.link_H_geom.append(link_H_geom)
         return
-        
-    
+
     def load_mesh(self):
         # Iterate over the mesh list
         self.get_links_and_meshes()
@@ -136,4 +134,3 @@ class Robot:
             # store the mesh
             meshes.append({"name": mesh_name, "mesh": mesh})
         return meshes
-            

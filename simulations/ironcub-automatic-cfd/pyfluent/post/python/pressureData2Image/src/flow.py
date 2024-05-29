@@ -16,6 +16,7 @@ class Flow:
         self.fx = np.empty(shape=(0,))
         self.fy = np.empty(shape=(0,))
         self.fz = np.empty(shape=(0,))
+        self.images = {}
     
     def import_fluent_data(self,joint_config_name, pitch_angle, yaw_angle, surface_name):
         # load data from the database file
@@ -102,7 +103,7 @@ class Flow:
         wind_vector = o3d.geometry.TriangleMesh.create_arrow(cylinder_radius=0.01, cone_radius=0.02, cylinder_height=0.2, cone_height=0.04)
         wind_vector.paint_uniform_color([0, 0.5, 1]) # green-ish blue
         wind_vector.rotate(R.from_euler('y', 180, degrees=True).as_matrix(), center=[0, 0, 0])
-        wind_vector.translate([0, 0.2, 0.7])
+        wind_vector.translate([0, 0.2, 1.0])
         wind_vector.compute_vertex_normals()
         # Create transparent mesh material
         mesh_material = o3d.visualization.rendering.MaterialRecord()
@@ -119,7 +120,7 @@ class Flow:
         o3d.visualization.draw(geometries,show_skybox=False)
         return
 
-    def interpolate_flow_data(self, flow_variable, main_axis, resolution = 800, mask_threshold = 0.1):
+    def interpolate_flow_data(self, flow_variable, main_axis, resolution, surface_name):
         if main_axis == 0:
             x = self.y_local
             y = self.z_local
@@ -137,22 +138,69 @@ class Flow:
         r_mean = np.mean(r)
         theta = np.arctan2(y,x)*r_mean
         # Create a meshgrid for interpolation
-        pixel_nr_x = int(resolution*(np.max(theta)-np.min(theta)))
-        pixel_nr_y = int(resolution*(np.max(z)-np.min(z)))
+        pixel_nr_x = int(resolution[1])
+        pixel_nr_y = int(resolution[0])
+        # pixel_nr_x_rounded = round(pixel_nr_x 
         x_image = np.linspace(np.min(theta), np.max(theta), pixel_nr_x)
         y_image = np.linspace(np.min(z), np.max(z), pixel_nr_y)
         X, Y = np.meshgrid(x_image, y_image)
-        # create mask for points outside the geometry
-        min_distances = np.zeros(shape=(0,))
-        for x,y in zip(X.flatten(), Y.flatten()):
-            distances = np.sqrt((theta-x)**2 + (z-y)**2)
-            min_distances = np.append(min_distances, np.min(distances))
-        min_distances = min_distances.reshape(X.shape)
-        mask_indices = min_distances < mask_threshold
-        # Interpolate the data
+        # Interpolate and extrapolate the data
         Interpolated_Flow_Variable = np.zeros_like(X)*np.nan
-        Interpolated_Flow_Variable[mask_indices] = griddata((theta,z), flow_variable, (X[mask_indices], Y[mask_indices]), method='linear')
+        Interpolated_Flow_Variable = griddata((theta,z), flow_variable, (X, Y), method="linear")
+        outside_indices = np.isnan(Interpolated_Flow_Variable)
+        Interpolated_Flow_Variable[outside_indices] = griddata((theta,z), flow_variable, (X[outside_indices], Y[outside_indices]), method="nearest")
+        self.images[surface_name] = Interpolated_Flow_Variable
         return theta, z, X, Y, Interpolated_Flow_Variable
+    
+    def create_image_block(self,surface_names):
+        hor_nans = np.nan*np.ones(shape=(1,self.images[surface_names[0]].shape[1]))
+        if len(surface_names) == 1:
+            block = np.vstack((hor_nans, self.images[surface_names[0]], hor_nans))
+        elif len(surface_names) == 2:
+            block = np.vstack((self.images[surface_names[0]], hor_nans, self.images[surface_names[1]], hor_nans))
+        elif len(surface_names) == 3:
+            block = np.vstack((self.images[surface_names[0]], hor_nans, self.images[surface_names[1]], hor_nans, self.images[surface_names[2]]))
+        return block
+    
+    def create_image_blocks(self):
+        # define horizontal nan vector
+        hor_nans = np.nan*np.ones(shape=(3,self.images["ironcub_head"].shape[1]))
+        blocks = []
+        blocks.append(self.create_image_block(["ironcub_head"]))
+        blocks.append(self.create_image_block(["ironcub_root_link","ironcub_torso_pitch","ironcub_torso_roll"]))
+        blocks.append(self.create_image_block(["ironcub_torso"]))
+        blocks.append(self.create_image_block(["ironcub_right_back_turbine"]))
+        blocks.append(self.create_image_block(["ironcub_left_back_turbine"]))
+        blocks.append(self.create_image_block(["ironcub_right_arm_pitch","ironcub_right_arm_roll","ironcub_right_arm"]))
+        blocks.append(self.create_image_block(["ironcub_left_arm_pitch","ironcub_left_arm_roll","ironcub_left_arm"]))
+        blocks.append(self.create_image_block(["ironcub_right_turbine"]))
+        blocks.append(self.create_image_block(["ironcub_left_turbine"]))
+        blocks.append(self.create_image_block(["ironcub_right_leg_pitch","ironcub_right_leg_yaw","ironcub_right_leg_upper"]))
+        blocks.append(self.create_image_block(["ironcub_left_leg_pitch","ironcub_left_leg_yaw","ironcub_left_leg_upper"]))
+        blocks.append(self.create_image_block(["ironcub_right_leg_lower"]))
+        blocks.append(self.create_image_block(["ironcub_left_leg_lower"]))
+        return blocks
+    
+    def assemble_images(self):
+        blocks = self.create_image_blocks()
+        vert_nan = np.nan*np.ones(shape=(blocks[0].shape[0],1))
+        hor_nan = np.nan*np.ones(shape=(1,2*blocks[0].shape[1]+2))
+        image = np.block([
+            [blocks[0], vert_nan, vert_nan, blocks[1]],
+            [hor_nan],
+            [vert_nan, blocks[2], vert_nan],
+            [hor_nan],
+            [blocks[3], vert_nan, vert_nan, blocks[4]],
+            [hor_nan],
+            [blocks[5], vert_nan, vert_nan, blocks[6]],
+            [hor_nan],
+            [blocks[7], vert_nan, vert_nan, blocks[8]],
+            [hor_nan],
+            [blocks[9], vert_nan, vert_nan, blocks[10]],
+            [hor_nan],
+            [blocks[11], vert_nan, vert_nan, blocks[12]]
+        ])
+        return image
 
     def plot_surface_contour(self, flow_variable, meshes):
         points = np.vstack((self.x,self.y,self.z)).T # 3D points
