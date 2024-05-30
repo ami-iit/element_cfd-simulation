@@ -26,8 +26,10 @@ def main():
     pitch_angle = 30
     yaw_angle = 0
     joint_config_name = "flight30"
-    joint_positions = np.array([0,0,0,-30.7,12.9,26.5,58.3,-30.7,12.9,26.5,58.3,0,10,0,0,0,10,0,0])*np.pi/180
-
+    joint_positions = np.array([0,0,0,-10,60,26.5,58.3,-30.7,12.9,26.5,58.3,0,10,0,0,0,10,0,0])*np.pi/180
+    # joint_config_name = "hovering"
+    # joint_positions = np.array([0,0,0,0,16.6,40,15,0,16.6,40,15,0,10,7,0,0,10,7,0,])*np.pi/180
+    
     # Set robot state
     robot.set_state(pitch_angle, yaw_angle, joint_positions)
     
@@ -35,9 +37,12 @@ def main():
     ####################### HERE THERE SHOULD BE THE ALGORITHM TO GENERATE THE LOCAL IMAGES #######################
     ###############################################################################################################
     # Load image data
+    joint_config_name_loading = "flight30"
+    pitch_angle_loading = 30
+    yaw_angle_loading = 0
     project_directory = pathlib.Path(__file__).parents[1]
     image_directory = project_directory / "images"
-    assembled_image = np.load(image_directory / f"{joint_config_name}-{pitch_angle}-{yaw_angle}-pressure.npy")
+    assembled_image = np.load(image_directory / f"{joint_config_name_loading}-{pitch_angle_loading}-{yaw_angle_loading}-pressure.npy")
     # Display the loaded image as vertically flipped
     fig1 = plt.figure("Assembled Image")
     ax1 = fig1.add_subplot(1, 1, 1)
@@ -60,27 +65,42 @@ def main():
     ###############################################################################################################
     ###############################################################################################################
     
+    # Mesh_robot for importing the pointcloud mesh
+    robot_ref = Robot(robot_name)
+    pitch_angle_ref = 30
+    yaw_angle_ref = 0
+    joint_config_name_ref = "flight30"
+    joint_positions_ref = np.array([0,0,0,-30.7,12.9,26.5,58.3,-30.7,12.9,26.5,58.3,0,10,0,0,0,10,0,0])*np.pi/180
+    robot_ref.set_state(pitch_angle_ref, yaw_angle_ref, joint_positions_ref)
+    
     fig3 = plt.figure("2D Pressure Map")
     
     for surface_index in range(len(robot.surface_list)):
-
-        # Compute the transformation from the link frame to the world frame (using zero rotation angles)
+        
+        # Compute the transformation from the reference world frame to the link frame (using zero rotation angles)
+        world_H_link_ref = robot_ref.compute_world_to_link_transform(frame_name=robot.surface_frames[surface_index], rotation_angle=0.0)
+        link_H_world_ref = robot_ref.invert_homogeneous_transform(world_H_link_ref)
+        
+        # Compute the transformation from the link frame to the current world frame (using zero rotation angles)
         world_H_link = robot.compute_world_to_link_transform(frame_name=robot.surface_frames[surface_index], rotation_angle=0.0)
-        link_H_world = robot.invert_homogeneous_transform(world_H_link) # alternative: np.linalg.inv(world_H_link)
 
         # flow.import_fluent_data(joint_config_name=joint_config_name, pitch_angle=pitch_angle, yaw_angle=yaw_angle, surface_name=robot.surface_list[surface_index])
         # flow.transform_fluent_data(link_H_world, flow_velocity=17.0, flow_density=1.225)
-        
         flow.get_surface_mesh_points(
             surface_name=robot.surface_list[surface_index],
-            link_H_world=link_H_world,
-            joint_config_name="flight30"
+            link_H_world_ref=link_H_world_ref,
+            world_H_link_current=world_H_link,
+            joint_config_name_ref=joint_config_name_ref,
+            pitch_angle_ref=pitch_angle_ref,
+            yaw_angle_ref=yaw_angle_ref
             )
         theta, z, pressure_coefficient_local = flow.interpolate_flow_data_2D(
             image=images[robot.surface_list[surface_index]],
             main_axis=robot.surface_axes[surface_index],
             surface_name=robot.surface_list[surface_index]
             )
+        
+        print(f"Surface {robot.surface_list[surface_index]} processed")
         
         # Display the theta, z and CP data in the fig1
         ax3 = fig3.add_subplot(4, 6, surface_index+1)

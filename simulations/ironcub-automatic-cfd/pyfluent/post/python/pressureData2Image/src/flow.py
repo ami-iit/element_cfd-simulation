@@ -353,21 +353,24 @@ class FlowGenerator:
                     blocks.append(sub_sub_block)
         return self.assign_images_to_surfaces(blocks)
     
-    def get_surface_mesh_points(self, surface_name, link_H_world, joint_config_name="flight30"):
+    def transform_points(self, frame_1_H_frame_2, x, y, z):
+        ones = np.ones((len(x),))
+        starting_coordinates = np.vstack((x,y,z,ones)).T
+        ending_coordinates = np.dot(frame_1_H_frame_2,starting_coordinates.T).T
+        return ending_coordinates[:,0], ending_coordinates[:,1], ending_coordinates[:,2]
+
+    def get_surface_mesh_points(self, surface_name, link_H_world_ref, world_H_link_current, joint_config_name_ref="flight30", pitch_angle_ref=30, yaw_angle_ref=0):
         # load data from the database file
-        database_file_path = str(self.database_path / f"{joint_config_name}-30-0-{surface_name}.dtbs")
+        database_file_path = str(self.database_path / f"{joint_config_name_ref}-{pitch_angle_ref}-{yaw_angle_ref}-{surface_name}.dtbs")
         data = np.loadtxt(database_file_path, skiprows=1)
         # get data in the world frame
         self.x_global = data[:,1]
         self.y_global = data[:,2]
         self.z_global = data[:,3]
-        # transform the data from world to link frame
-        ones = np.ones((len(self.x_global),))
-        global_coordinates = np.vstack((self.x_global,self.y_global,self.z_global,ones)).T
-        local_coordinates = np.dot(link_H_world,global_coordinates.T).T
-        self.x_local = local_coordinates[:,0]
-        self.y_local = local_coordinates[:,1]
-        self.z_local = local_coordinates[:,2]
+        # transform the data from world to reference link frame
+        self.x_local, self.y_local, self.z_local = self.transform_points(link_H_world_ref,self.x_global,self.y_global,self.z_global)
+        # compute the transformation from the link frame to the current world frame
+        self.x_global, self.y_global, self.z_global = self.transform_points(world_H_link_current,self.x_local,self.y_local,self.z_local)
         # save link points global coordinates
         self.x = np.append(self.x, self.x_global)
         self.y = np.append(self.y, self.y_global)
