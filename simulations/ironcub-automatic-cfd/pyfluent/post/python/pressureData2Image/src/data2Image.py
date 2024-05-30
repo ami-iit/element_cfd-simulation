@@ -12,15 +12,16 @@ Description:    This code uses the iDynTree package to retrieve the robot status
 
 import numpy as np
 import matplotlib.pyplot as plt
+import pathlib
 
 from robot import Robot
-from flow import Flow
+from flow import FlowImporter
 
 def main():
-    # Set robot
+    # Initialize robot and flow objects
     robot_name = "iRonCub-Mk3"
     robot = Robot(robot_name)
-    flow = Flow(robot_name)
+    flow = FlowImporter(robot_name)
 
     # Define robot state parameters (TODO: get them from outputParameters)
     pitch_angle = 30
@@ -39,8 +40,6 @@ def main():
     
     fig1 = plt.figure("2D Pressure Map")
     fig2 = plt.figure("Interpolated Images")
-    
-    pressure_coefficient_images = {}
     
     for surface_index in range(len(robot.surface_list)):
 
@@ -64,9 +63,6 @@ def main():
             surface_name = robot.surface_list[surface_index]
             )
         print(f"Surface {robot.surface_list[surface_index]} resolution: {pressure_coefficient_interp.shape}")
-        
-        # Create the colormap
-        cmap = plt.cm.jet 
         
         # Display the theta, z and CP data in the fig1
         ax1 = fig1.add_subplot(4, 6, surface_index+1)
@@ -92,7 +88,7 @@ def main():
     plt.show(block=False)
     
     # Display the 3D pressure map
-    # flow.plot_surface_point_cloud(flow_variable=flow.cp, meshes=robot.load_mesh())
+    flow.plot_surface_point_cloud(flow_variable=flow.cp, meshes=robot.load_mesh())
     
     image = flow.assemble_images()
     
@@ -104,12 +100,10 @@ def main():
     plt.show(block=False)
     
     # Save assembled image as npy array
-    np.save("pressure.npy", image)
+    project_directory = pathlib.Path(__file__).parents[1]
+    image_directory = project_directory / "images"
+    np.save(str(image_directory/f"{joint_config_name}-{pitch_angle}-{yaw_angle}-pressure.npy"), image)
 
-    print("fermoooo")
-    
-    
 
 if __name__ == "__main__":
     main()
-
