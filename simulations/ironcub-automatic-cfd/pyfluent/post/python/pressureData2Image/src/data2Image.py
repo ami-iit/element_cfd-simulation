@@ -66,7 +66,7 @@ def main():
     print("Saving image ...")
     project_directory = pathlib.Path(__file__).parents[1]
     image_directory = project_directory / "images"
-    np.save(str(image_directory/f"{joint_config_name}-{pitch_angle}-{yaw_angle}-pressure-reduced.npy"), flow.image)
+    np.save(str(image_directory/f"{joint_config_name}-{pitch_angle}-{yaw_angle}-pressure.npy"), flow.image)
 
     ##############################################################################################
     ################################# Plots and 3D visualization #################################
@@ -74,7 +74,7 @@ def main():
     
     # 3D visualization of the pressure map
     # flow.plot_surface_pointcloud(flow_variable=flow.cp, robot_meshes=robot.load_mesh())
-    flow.plot_surface_contour(flow_variable=flow.cp, robot_meshes=robot.load_mesh())
+    # flow.plot_surface_contour(flow_variable=flow.cp, robot_meshes=robot.load_mesh())
     
     # Enable LaTeX text rendering
     plt.rcParams['text.usetex'] = True

@@ -150,39 +150,36 @@ class FlowImporter:
     
     def create_image_blocks(self):
         blocks = []
+        blocks.append(self.create_image_block(["ironcub_right_turbine"]))
         blocks.append(self.create_image_block(["ironcub_head"]))
         blocks.append(self.create_image_block(["ironcub_root_link","ironcub_torso_pitch","ironcub_torso_roll"]))
-        blocks.append(self.create_image_block(["ironcub_torso"]))
-        blocks.append(self.create_image_block(["ironcub_right_back_turbine"]))
-        blocks.append(self.create_image_block(["ironcub_left_back_turbine"]))
-        blocks.append(self.create_image_block(["ironcub_right_arm_pitch","ironcub_right_arm_roll","ironcub_right_arm"]))
-        blocks.append(self.create_image_block(["ironcub_left_arm_pitch","ironcub_left_arm_roll","ironcub_left_arm"]))
-        blocks.append(self.create_image_block(["ironcub_right_turbine"]))
         blocks.append(self.create_image_block(["ironcub_left_turbine"]))
+        blocks.append(self.create_image_block(["ironcub_right_back_turbine"]))
+        blocks.append(self.create_image_block(["ironcub_torso"]))
+        blocks.append(self.create_image_block(["ironcub_left_back_turbine"]))
+        blocks.append(self.create_image_block(["ironcub_right_leg_lower"]))
         blocks.append(self.create_image_block(["ironcub_right_leg_pitch","ironcub_right_leg_yaw","ironcub_right_leg_upper"]))
         blocks.append(self.create_image_block(["ironcub_left_leg_pitch","ironcub_left_leg_yaw","ironcub_left_leg_upper"]))
-        blocks.append(self.create_image_block(["ironcub_right_leg_lower"]))
         blocks.append(self.create_image_block(["ironcub_left_leg_lower"]))
+        blocks.append(self.create_image_block(["ironcub_right_arm_pitch","ironcub_right_arm_roll"]))
+        blocks.append(self.create_image_block(["ironcub_right_arm"]))
+        blocks.append(self.create_image_block(["ironcub_left_arm"]))
+        blocks.append(self.create_image_block(["ironcub_left_arm_pitch","ironcub_left_arm_roll"]))
         return blocks
     
     def assemble_images(self):
         blocks = self.create_image_blocks()
         vert_nan = np.nan*np.ones(shape=(blocks[0].shape[0],1))
-        hor_nan = np.nan*np.ones(shape=(1,2*blocks[0].shape[1]+2))
+        vert_nan_short = np.nan*np.ones(shape=(blocks[-1].shape[0],1))
+        hor_nan = np.nan*np.ones(shape=(1,4*blocks[0].shape[1]+3))
         self.image = np.block([
-            [blocks[0], vert_nan, vert_nan, blocks[1]],
+            [blocks[0], vert_nan, blocks[1], vert_nan, blocks[2], vert_nan, blocks[3]],
             [hor_nan],
-            [vert_nan, blocks[2], vert_nan],
+            [blocks[4], vert_nan, blocks[5], vert_nan, vert_nan, blocks[6]],
             [hor_nan],
-            [blocks[3], vert_nan, vert_nan, blocks[4]],
+            [blocks[7], vert_nan, blocks[8], vert_nan, blocks[9], vert_nan, blocks[10]],
             [hor_nan],
-            [blocks[5], vert_nan, vert_nan, blocks[6]],
-            [hor_nan],
-            [blocks[7], vert_nan, vert_nan, blocks[8]],
-            [hor_nan],
-            [blocks[9], vert_nan, vert_nan, blocks[10]],
-            [hor_nan],
-            [blocks[11], vert_nan, vert_nan, blocks[12]]
+            [blocks[11], vert_nan_short, blocks[12], vert_nan_short, blocks[13], vert_nan_short, blocks[14]],
         ])
         return
 
@@ -229,9 +226,6 @@ class FlowImporter:
         return
     
     def plot_surface_pointcloud(self, flow_variable, robot_meshes):
-        # # NEEEEW
-        # points = np.vstack((self.surface["ironcub_head"].x_global,self.surface["ironcub_head"].y_global,self.surface["ironcub_head"].z_global)).T # 3D points
-        # flow_variable = self.surface["ironcub_head"].pressure_coefficient
         points = np.vstack((self.x,self.y,self.z)).T # 3D points
         # Normalize the colormap
         # norm = plt.Normalize(vmin=np.min(flow_variable), vmax=np.max(flow_variable))
@@ -306,30 +300,26 @@ class FlowGenerator:
         return vertical_blocks
     
     def assign_images_to_surfaces(self, images):
+        images_order = [
+            "ironcub_right_turbine", 
+            "ironcub_head",
+            "ironcub_root_link","ironcub_torso_pitch","ironcub_torso_roll",
+            "ironcub_left_turbine",
+            "ironcub_right_back_turbine",
+            "ironcub_torso",
+            "ironcub_left_back_turbine",
+            "ironcub_right_leg_lower",
+            "ironcub_right_leg_pitch","ironcub_right_leg_yaw","ironcub_right_leg_upper",
+            "ironcub_left_leg_pitch","ironcub_left_leg_yaw","ironcub_left_leg_upper",
+            "ironcub_left_leg_lower",
+            "ironcub_right_arm_pitch","ironcub_right_arm_roll",
+            "ironcub_right_arm",
+            "ironcub_left_arm",
+            "ironcub_left_arm_pitch","ironcub_left_arm_roll"
+        ]
         blocks_dict = {}
-        blocks_dict["ironcub_head"] = images[0]
-        blocks_dict["ironcub_root_link"] = images[1]
-        blocks_dict["ironcub_torso_pitch"] = images[2]
-        blocks_dict["ironcub_torso_roll"] = images[3]
-        blocks_dict["ironcub_torso"] = images[4]
-        blocks_dict["ironcub_right_back_turbine"] = images[5]
-        blocks_dict["ironcub_left_back_turbine"] = images[6]
-        blocks_dict["ironcub_right_arm_pitch"] = images[7]
-        blocks_dict["ironcub_left_arm_pitch"] = images[8]
-        blocks_dict["ironcub_right_arm_roll"] = images[9]
-        blocks_dict["ironcub_left_arm_roll"] = images[10]
-        blocks_dict["ironcub_right_arm"] = images[11]
-        blocks_dict["ironcub_left_arm"] = images[12]
-        blocks_dict["ironcub_right_turbine"] = images[13]
-        blocks_dict["ironcub_left_turbine"] = images[14]
-        blocks_dict["ironcub_right_leg_pitch"] = images[15]
-        blocks_dict["ironcub_left_leg_pitch"] = images[16]
-        blocks_dict["ironcub_right_leg_yaw"] = images[17]
-        blocks_dict["ironcub_left_leg_yaw"] = images[18]
-        blocks_dict["ironcub_right_leg_upper"] = images[19]
-        blocks_dict["ironcub_left_leg_upper"] = images[20]
-        blocks_dict["ironcub_right_leg_lower"] = images[21]
-        blocks_dict["ironcub_left_leg_lower"] = images[22]
+        for image_index, image_name in enumerate(images_order):
+            blocks_dict[image_name] = images[image_index]
         return blocks_dict
     
     def separate_images(self, image):
@@ -355,7 +345,7 @@ class FlowGenerator:
         return ending_coordinates[:,0], ending_coordinates[:,1], ending_coordinates[:,2]
 
     def get_surface_mesh_points(self, surface_list, link_H_world_ref_dict, world_H_link_dict, joint_config_name_ref="flight30", pitch_angle_ref=30, yaw_angle_ref=0):
-        for surface_index, surface_name in enumerate(surface_list):
+        for surface_name in surface_list:
             database_file_path = str(self.database_path / f"{joint_config_name_ref}-{pitch_angle_ref}-{yaw_angle_ref}-{surface_name}.dtbs")
             data = np.loadtxt(database_file_path, skiprows=1)
             x_global = data[:,1]
@@ -408,8 +398,8 @@ class FlowGenerator:
             self.surface[surface_name].theta = theta
             self.surface[surface_name].z = z
             self.x = np.append(self.x, self.surface[surface_name].x_global)
-            self.y = np.append(self.y, self.surface[surface_name].x_global)
-            self.z = np.append(self.z, self.surface[surface_name].x_global)
+            self.y = np.append(self.y, self.surface[surface_name].y_global)
+            self.z = np.append(self.z, self.surface[surface_name].z_global)
             self.cp = np.append(self.cp,self.surface[surface_name].pressure_coefficient)
         return
 

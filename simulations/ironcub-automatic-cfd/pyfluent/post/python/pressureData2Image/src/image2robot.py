@@ -40,7 +40,7 @@ def main():
     yaw_angle_loading = 0
     project_directory = pathlib.Path(__file__).parents[1]
     image_directory = project_directory / "images"
-    assembled_image = np.load(image_directory / f"{joint_config_name_loading}-{pitch_angle_loading}-{yaw_angle_loading}-pressure-reduced.npy")
+    assembled_image = np.load(image_directory / f"{joint_config_name_loading}-{pitch_angle_loading}-{yaw_angle_loading}-pressure.npy")
     # Separate the image into the 2D images of the surfaces
     flow.separate_images(assembled_image)
     ###############################################################################################################
@@ -97,7 +97,7 @@ def main():
         ax2.set_ylim([-10, flow.surface[surface_name].image.shape[0]+10])
     cbar_ax = fig2.add_subplot(gs[:, -1])  # Span all rows in the last column
     cbar = fig2.colorbar(last_im, cax=cbar_ax)
-    cbar.set_label(r'C_p', )
+    cbar.set_label(r'C_p')
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=0.4, hspace=0.4)
     
     fig3 = plt.figure("2D Reconstructed Pressure Maps")
