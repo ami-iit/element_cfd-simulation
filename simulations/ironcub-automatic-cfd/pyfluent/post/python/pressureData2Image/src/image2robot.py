@@ -5,14 +5,12 @@ Description:    This code uses the iDynTree package to retrieve the robot status
                 then it generates 3D data of flow variables extracted from 2D images
 """
 
-# Perform required imports
-# ~~~~~~~~~~~~~~~~~~~~~~~~
-# Perform required imports.
-
+# Import libraries
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import pathlib
-
+# Import custom classes
 from robot import Robot
 from flow import FlowGenerator
 
@@ -26,7 +24,7 @@ def main():
     pitch_angle = 30
     yaw_angle = 0
     joint_config_name = "flight30"
-    joint_positions = np.array([0,0,0,-10,60,26.5,58.3,-30.7,12.9,26.5,58.3,0,10,0,0,0,10,0,0])*np.pi/180
+    joint_positions = np.array([0,0,0,-30.7,12.9,26.5,58.3,-30.7,12.9,26.5,58.3,0,10,0,0,0,10,0,0])*np.pi/180
     # joint_config_name = "hovering"
     # joint_positions = np.array([0,0,0,0,16.6,40,15,0,16.6,40,15,0,10,7,0,0,10,7,0,])*np.pi/180
     
@@ -42,26 +40,9 @@ def main():
     yaw_angle_loading = 0
     project_directory = pathlib.Path(__file__).parents[1]
     image_directory = project_directory / "images"
-    assembled_image = np.load(image_directory / f"{joint_config_name_loading}-{pitch_angle_loading}-{yaw_angle_loading}-pressure.npy")
-    # Display the loaded image as vertically flipped
-    fig1 = plt.figure("Assembled Image")
-    ax1 = fig1.add_subplot(1, 1, 1)
-    ax1.imshow(assembled_image, origin='upper', cmap='jet', vmax=1, vmin=-2)
-    ax1.axis("off")
-    plt.show(block=False)
+    assembled_image = np.load(image_directory / f"{joint_config_name_loading}-{pitch_angle_loading}-{yaw_angle_loading}-pressure-reduced.npy")
     # Separate the image into the 2D images of the surfaces
-    images = flow.separate_images(assembled_image)
-    # Display the 2D image without borders, with fixed axes limits and aspect ratio
-    fig2 = plt.figure("Interpolated Images")
-    ax_counter = 1
-    for surface_name, image in images.items():
-        ax2 = fig2.add_subplot(4, 6, ax_counter)
-        ax2.imshow(image, origin='lower', cmap='jet', vmax=1, vmin=-2)
-        ax2.set_title(surface_name)
-        ax2.set_xlim([-10, 660])
-        ax2.set_ylim([-10, 300])
-        ax_counter += 1
-    plt.show(block=False)
+    flow.separate_images(assembled_image)
     ###############################################################################################################
     ###############################################################################################################
     
@@ -73,45 +54,75 @@ def main():
     joint_positions_ref = np.array([0,0,0,-30.7,12.9,26.5,58.3,-30.7,12.9,26.5,58.3,0,10,0,0,0,10,0,0])*np.pi/180
     robot_ref.set_state(pitch_angle_ref, yaw_angle_ref, joint_positions_ref)
     
-    fig3 = plt.figure("2D Pressure Map")
-    
+    link_H_world_ref_dict = {}
+    world_H_link_dict = {}
     for surface_index in range(len(robot.surface_list)):
-        
         # Compute the transformation from the reference world frame to the link frame (using zero rotation angles)
-        world_H_link_ref = robot_ref.compute_world_to_link_transform(frame_name=robot.surface_frames[surface_index], rotation_angle=0.0)
-        link_H_world_ref = robot_ref.invert_homogeneous_transform(world_H_link_ref)
-        
+        surface_world_H_link = robot_ref.compute_world_to_link_transform(frame_name=robot.surface_frames[surface_index], rotation_angle=0.0)
+        surface_link_H_world = robot_ref.invert_homogeneous_transform(surface_world_H_link) # alternative: np.linalg.inv(world_H_link)
+        link_H_world_ref_dict[robot.surface_list[surface_index]] = surface_link_H_world
         # Compute the transformation from the link frame to the current world frame (using zero rotation angles)
-        world_H_link = robot.compute_world_to_link_transform(frame_name=robot.surface_frames[surface_index], rotation_angle=0.0)
+        world_H_link_dict[robot.surface_list[surface_index]] = robot.compute_world_to_link_transform(frame_name=robot.surface_frames[surface_index], rotation_angle=0.0)
+    
+    flow.get_surface_mesh_points(robot.surface_list, link_H_world_ref_dict, world_H_link_dict, joint_config_name_ref, pitch_angle_ref, yaw_angle_ref)
+    flow.interpolate_flow_data_2D(robot.surface_list, robot.surface_axes)
+    
+    ##############################################################################################
+    ################################# Plots and 3D visualization #################################
+    ##############################################################################################
+    
+    # Enable LaTeX text rendering
+    plt.rcParams['text.usetex'] = True
 
-        # flow.import_fluent_data(joint_config_name=joint_config_name, pitch_angle=pitch_angle, yaw_angle=yaw_angle, surface_name=robot.surface_list[surface_index])
-        # flow.transform_fluent_data(link_H_world, flow_velocity=17.0, flow_density=1.225)
-        flow.get_surface_mesh_points(
-            surface_name=robot.surface_list[surface_index],
-            link_H_world_ref=link_H_world_ref,
-            world_H_link_current=world_H_link,
-            joint_config_name_ref=joint_config_name_ref,
-            pitch_angle_ref=pitch_angle_ref,
-            yaw_angle_ref=yaw_angle_ref
+    # Display the imported image
+    fig1 = plt.figure("Imported Image")
+    manager = plt.get_current_fig_manager()
+    manager.window.showMaximized()
+    ax1 = fig1.add_subplot(1, 1, 1)
+    image = ax1.imshow(flow.image, origin='upper', cmap='jet', vmax=1, vmin=-2)
+    ax1.axis("off")
+    fig1.colorbar(image, ax=ax1, orientation='vertical', fraction=0.02, pad=0.45)
+    
+    # Display the 2D separated images
+    fig2 = plt.figure("Separated Images")
+    manager = plt.get_current_fig_manager()
+    manager.window.showMaximized()
+    gs = gridspec.GridSpec(4, 7, figure=1, width_ratios=[1, 1, 1, 1, 1, 1, 0.1])  # The last column is for the colorbar
+    last_im = None
+    for surface_index, surface_name in enumerate(robot.surface_list):
+        ax2 = fig2.add_subplot(gs[surface_index // 6, surface_index % 6])
+        last_im = ax2.imshow(flow.surface[surface_name].image, origin='lower', cmap='jet', vmax=1, vmin=-2)
+        ax2.set_title(surface_name[8:])
+        ax2.set_xlim([-10, flow.surface[surface_name].image.shape[1]+10])
+        ax2.set_ylim([-10, flow.surface[surface_name].image.shape[0]+10])
+    cbar_ax = fig2.add_subplot(gs[:, -1])  # Span all rows in the last column
+    cbar = fig2.colorbar(last_im, cax=cbar_ax)
+    cbar.set_label(r'C_p', )
+    plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=0.4, hspace=0.4)
+    
+    fig3 = plt.figure("2D Reconstructed Pressure Maps")
+    manager = plt.get_current_fig_manager()
+    manager.window.showMaximized()
+    gs = gridspec.GridSpec(4, 7, figure=1, width_ratios=[1, 1, 1, 1, 1, 1, 0.1])  # The last column is for the colorbar
+    last_plot = None
+    for surface_index, surface_name in enumerate(robot.surface_list):
+        ax3 = fig3.add_subplot(gs[surface_index // 6, surface_index % 6])
+        last_plot = ax3.scatter(
+            flow.surface[surface_name].theta,
+            flow.surface[surface_name].z,
+            c=flow.surface[surface_name].pressure_coefficient,
+            s=1, cmap="jet", vmax=1, vmin=-2
             )
-        theta, z, pressure_coefficient_local = flow.interpolate_flow_data_2D(
-            image=images[robot.surface_list[surface_index]],
-            main_axis=robot.surface_axes[surface_index],
-            surface_name=robot.surface_list[surface_index]
-            )
-        
-        print(f"Surface {robot.surface_list[surface_index]} processed")
-        
-        # Display the theta, z and CP data in the fig1
-        ax3 = fig3.add_subplot(4, 6, surface_index+1)
-        ax3.scatter(theta, z, c=flow.pressure_coefficient, cmap="jet")
         ax3.set_title(robot.surface_list[surface_index][8:])
         ax3.set_xlabel(r'$\theta r_{mean}$ [m]')
         ax3.set_ylabel(r'$z$ [m]')
         ax3.axis("equal")
-        ax3.set_xlim([np.min(theta), np.max(theta)])
-        ax3.set_ylim([np.min(z), np.max(z)])       
-        # TODO: colorbar
+        ax3.set_xlim([np.min(flow.surface[surface_name].theta), np.max(flow.surface[surface_name].theta)])
+        ax3.set_ylim([np.min(flow.surface[surface_name].z), np.max(flow.surface[surface_name].z)])
+    cbar_ax = fig3.add_subplot(gs[:, -1])  # Span all rows in the last column
+    cbar = fig3.colorbar(last_plot, cax=cbar_ax)
+    cbar.set_label(r'C_p')
+    plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=0.8, hspace=0.6)
     
     plt.show(block=False)
     
