@@ -1,8 +1,14 @@
 name: pyfluent-env
 channels:
   - conda-forge
+  - robotology
+  - open3d-admin
 dependencies:
-  - python #==3.9.0
+  - python
+  - scipy
+  - toml
+  - idyntree
+  - open3d
   - pip
   - pip:
     - ansys-fluent-core
