@@ -27,8 +27,10 @@
 # Pycache
 *.pyc
 
-# Fluent transcript/log/pressure files
+# Fluent files
 *.trn
 *.log
+*.msh.h5
+*.cas.h5
 *.prs
 *.dtbs
