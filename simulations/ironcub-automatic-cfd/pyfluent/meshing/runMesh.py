@@ -318,7 +318,7 @@ for jointConfigName in jointConfigNames:
         inlet.momentum.velocity = 17.0
         inlet.momentum.flow_direction = [0.0, 0.0, -1.0]
         inlet.turbulence.turbulent_specification = "Intensity and Viscosity Ratio"
-        inlet.turbulence.turbulent_intensity = 0.1
+        inlet.turbulence.turbulent_intensity = 0.001
         inlet.turbulence.turbulent_viscosity_ratio_real = 0.01
 
         # Reference values (for non-dimensionalization)
