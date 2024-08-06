@@ -12,7 +12,7 @@ import matplotlib.gridspec as gridspec
 import pathlib
 # Import custom classes
 from robot import Robot
-from flow import FlowGenerator
+from flow import FlowGenerator, FlowVisualizer
 
 def main():
     # Initialize robot and flow objects
@@ -64,12 +64,16 @@ def main():
         # Compute the transformation from the link frame to the current world frame (using zero rotation angles)
         world_H_link_dict[robot.surface_list[surface_index]] = robot.compute_world_to_link_transform(frame_name=robot.surface_frames[surface_index], rotation_angle=0.0)
     
-    flow.get_surface_mesh_points(robot.surface_list, link_H_world_ref_dict, world_H_link_dict, joint_config_name_ref, pitch_angle_ref, yaw_angle_ref)
-    flow.interpolate_flow_data_2D(robot.surface_list, robot.surface_axes)
+    flow.interpolate_flow_data_from_image(robot.surface_list, robot.surface_axes, link_H_world_ref_dict, world_H_link_dict, joint_config_name_ref, pitch_angle_ref, yaw_angle_ref)
     
     ##############################################################################################
     ################################# Plots and 3D visualization #################################
     ##############################################################################################
+    
+    # 3D visualization of the pressure map
+    flowViz = FlowVisualizer(flow)
+    # flowViz.plot_surface_pointcloud(flow_variable=flow.cp, robot_meshes=robot.load_mesh())
+    # flowViz.plot_surface_contour(flow_variable=flow.cp, robot_meshes=robot.load_mesh())
     
     # Enable LaTeX text rendering
     plt.rcParams['text.usetex'] = True
@@ -79,9 +83,10 @@ def main():
     manager = plt.get_current_fig_manager()
     manager.window.showMaximized()
     ax1 = fig1.add_subplot(1, 1, 1)
-    image = ax1.imshow(flow.image, origin='upper', cmap='jet', vmax=1, vmin=-2)
+    image = ax1.imshow(flow.image[0,:,:], origin='upper', cmap='jet', vmax=1, vmin=-2)
     ax1.axis("off")
     fig1.colorbar(image, ax=ax1, orientation='vertical', fraction=0.02, pad=0.45)
+    plt.show(block=False)
     
     # Display the 2D separated images
     fig2 = plt.figure("Separated Images")
@@ -91,15 +96,17 @@ def main():
     last_im = None
     for surface_index, surface_name in enumerate(robot.surface_list):
         ax2 = fig2.add_subplot(gs[surface_index // 6, surface_index % 6])
-        last_im = ax2.imshow(flow.surface[surface_name].image, origin='lower', cmap='jet', vmax=1, vmin=-2)
+        last_im = ax2.imshow(flow.surface[surface_name].image[0,:,:], origin='lower', cmap='jet', vmax=1, vmin=-2)
         ax2.set_title(surface_name[8:])
-        ax2.set_xlim([-10, flow.surface[surface_name].image.shape[1]+10])
-        ax2.set_ylim([-10, flow.surface[surface_name].image.shape[0]+10])
+        ax2.set_xlim([-10, flow.surface[surface_name].image.shape[2]+10])
+        ax2.set_ylim([-10, flow.surface[surface_name].image.shape[1]+10])
     cbar_ax = fig2.add_subplot(gs[:, -1])  # Span all rows in the last column
     cbar = fig2.colorbar(last_im, cax=cbar_ax)
-    cbar.set_label(r'C_p')
+    cbar.set_label(r'$C_p$')
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=0.4, hspace=0.4)
+    plt.show(block=False)
     
+    # Plot 2D pressure map for all surfaces
     fig3 = plt.figure("2D Reconstructed Pressure Maps")
     manager = plt.get_current_fig_manager()
     manager.window.showMaximized()
@@ -121,13 +128,11 @@ def main():
         ax3.set_ylim([np.min(flow.surface[surface_name].z), np.max(flow.surface[surface_name].z)])
     cbar_ax = fig3.add_subplot(gs[:, -1])  # Span all rows in the last column
     cbar = fig3.colorbar(last_plot, cax=cbar_ax)
-    cbar.set_label(r'C_p')
+    cbar.set_label(r'$C_p$')
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=0.8, hspace=0.6)
-    
     plt.show(block=False)
     
-    # Display the 3D pressure pointcloud
-    flow.plot_surface_pointcloud(flow_variable=flow.cp, meshes=robot.load_mesh())
+    input("Press Enter to close all figures...")
 
 
 if __name__ == "__main__":
