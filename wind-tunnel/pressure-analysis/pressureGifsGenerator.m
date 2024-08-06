@@ -4,9 +4,9 @@ clc;
 
 
 %% Test
-experiment    = 'exp_2023_12_11'; % Name of the experiment data folder
+experiment    = 'exp_2022_11_03'; % Name of the experiment data folder
 figFolderName = ['./fig/',experiment,'/'];
-testList      = dir([figFolderName,'*-0001.fig']);  % List of the test files
+testList      = dir([figFolderName,'*-0001.png']);  % List of the test files
 
 %% Create the folder to store the GIF file
 saveFolderName = ['/gifs/',experiment,'/'];
@@ -17,7 +17,7 @@ end
 for testIndex = 1:length(testList(:,1))
 testID     = testList(testIndex).name(1:end-9);
 filename   = [experiment,'-',testID,'.gif'];
-testpointList = dir([figFolderName,testID,'*.fig']);
+testpointList = dir([figFolderName,testID,'*.png']);
 
 
 %% Save each matlab .fig as a frame of the GIF file
@@ -26,7 +26,7 @@ for n = 1 : (length(testpointList(:,1)) - 1)
 
     [~,testPoint,~] = fileparts(testpointList(n,:).name(10:end-4));
     
-    h = openfig([figFolderName,testID,'-',testPoint,'.fig'],'invisible');
+    h = openfig([figFolderName,testID,'-',testPoint,'.png'],'invisible');
     clc;
     disp(['processing ',testID,'-',testPoint,'.fig ...']);
 

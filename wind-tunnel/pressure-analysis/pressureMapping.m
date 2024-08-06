@@ -14,8 +14,8 @@ clc;
 %% Code parameters
 
 % Experiment name: 'exp_2022_03_21' | 'exp_2022_11_03' | 'exp_2023_12_11'
-experiment      = 'exp_2023_12_11';
-robotName       = 'iRonCub-Mk3';
+experiment      = 'exp_2022_11_03';
+robotName       = 'iRonCub-Mk1';
 
 % FLAGS
 SHOW_IMAGES      = false;
@@ -23,7 +23,7 @@ INTERPOLATE_DATA = true;
 SAVE_IMAGES      = true;
 
 % Variables
-deltaAngleInterp = 1; % [deg]
+deltaAngleInterp = 0.2; % [deg]
 
 %% Path management
 
@@ -116,7 +116,7 @@ end
 
 testNumber = length(testList(:,1));
 
-for testIndex = 18 : 22
+for testIndex = 48
     
     %% Import test data
     testID = testList(testIndex).name(1:end-4);
@@ -203,7 +203,11 @@ for testIndex = 18 : 22
         if matches(configSet,'hovering')
             offsetAngle = 90;   % [deg]
         elseif matches(configSet,'flight')
-            offsetAngle = 0;   % [deg]
+            if matches(robotName,'iRonCub-Mk1')
+                offsetAngle = 45;   % [deg]
+            elseif matches(robotName,'iRonCub-Mk3')
+                offsetAngle = 0;   % [deg]
+            end
         end
         
         % robot attitude angles in wind tunnel
@@ -214,14 +218,23 @@ for testIndex = 18 : 22
             yawAngle   = test.(testID).state.betaDes(lowerIndex);
             pitchAngle = test.(testID).state.alphaDes(lowerIndex) + offsetAngle;
         end
-
-        % set base Pose according to yaw and pitch angles
-        R_yaw     = rotz(-yawAngle+180);
-
-        if matches(configSet,'hovering')
-            R_pitch   = roty(pitchAngle - 180);
-        elseif matches(configSet,'flight')
-            R_pitch   = roty(90 - pitchAngle);
+        
+        if matches(robotName,'iRonCub-Mk1')
+            % set base Pose according to yaw and pitch angles
+            R_yaw     = rotz(yawAngle);
+            if matches(configSet,'hovering')
+                R_pitch   = roty(pitchAngle - 90);
+            elseif matches(configSet,'flight')
+                R_pitch   = roty(pitchAngle - 90);
+            end
+        elseif matches(robotName,'iRonCub-Mk3')
+            % set base Pose according to yaw and pitch angles
+            R_yaw     = rotz(-yawAngle+180);
+            if matches(configSet,'hovering')
+                R_pitch   = roty(pitchAngle - 180);
+            elseif matches(configSet,'flight')
+                R_pitch   = roty(90 - pitchAngle);
+            end
         end
 
         basePose  = [R_yaw * R_pitch, [10; 0; 0];
@@ -314,6 +327,7 @@ for testIndex = 18 : 22
         end % end of cover iteration
 
         %% Set figure properties
+        backgroundColor = 'none';
 
         % Set wind vector
         windVector.Position   = [8.9 0 0];
@@ -326,31 +340,24 @@ for testIndex = 18 : 22
         % Display wind velocity vector name
         text(0.35*windVector.Components(1) + windVector.Position(1),0,0.1,'$V_w$','Interpreter','latex','FontSize',48,'Color',windVector.Color);
 
-        % Draw aerodynamic force
-%         arrow3d(basePose(1:3,4), 4*[interpolatedDragForceCoeff(testPointIndex) interpolatedLiftForceCoeff(testPointIndex) interpolatedSideForceCoeff(testPointIndex)], [1 1 0], 0.006);
-
-
+        % Set figure properties
         axis([8.5 11 -1 1 -0.7 0.7])
         set(fig, 'Position', [0 0 3840 2160]);
         grid off;
         title(['Pressure map, ',configSet,'-',configName,', $\alpha=',num2str(round(pitchAngle),'%.0f'),'^\circ$, $\beta=',num2str(round(yawAngle),'%.0f'),'^\circ$'],'FontSize',22,'Interpreter','latex');
-        
-        % Set colors
-        fig.Color = [0,0,0];
+        fig.Color = backgroundColor;
         set(gcf, 'InvertHardCopy', 'off'); 
-
+        
+        % Set robot ax properties
         ax = gca;
         ax.Position = [0.05,-0.2,1,1.4]; % [-0.2,-0.2,1.2,1.4]
-
         ax.XTick = [];
         ax.YTick = [];
         ax.ZTick = [];
-
         ax.XTickLabel = [];
         ax.YTickLabel = [];
         ax.ZTickLabel = [];
-        
-        ax.Color  = [0,0,0];
+        ax.Color  = backgroundColor;
         ax.XColor = [0,0,0];
         ax.YColor = [0,0,0];
         ax.ZColor = [0,0,0];
@@ -398,12 +405,12 @@ for testIndex = 18 : 22
         grid on;
         axis([min(xPlotVariable) max(xPlotVariable) 0.01*floor(min(100*test.(testID).windAxesAero.dragForceCoeff)) 0.01*ceil(max(100*test.(testID).windAxesAero.dragForceCoeff))])
         xlabel(xPlotLabel,'Interpreter','latex','FontSize',20)
-        legend('Interpreter','latex','Location','nw','FontSize',20,'Color',[0,0,0],'TextColor',[1,1,1])
+        legend('Interpreter','latex','Location','sw','FontSize',20,'Color',[0,0,0],'TextColor',[1,1,1])
         legend show
 
         ax2 = gca;
         ax2.Position = [.03 .6 .22 .25];
-        ax2.Color  = [0,0,0];
+        ax2.Color  = backgroundColor;
         ax2.XColor = [1,1,1];
         ax2.YColor = [1,1,1];
         ax2.ZColor = [1,1,1];
@@ -426,12 +433,12 @@ for testIndex = 18 : 22
         axis([min(xPlotVariable) max(xPlotVariable) 0.01*floor(min(100*[test.(testID).windAxesAero.liftForceCoeff; test.(testID).windAxesAero.sideForceCoeff])) ...
             0.01*ceil(max(100*[test.(testID).windAxesAero.liftForceCoeff; test.(testID).windAxesAero.sideForceCoeff]))])
         xlabel(xPlotLabel,'Interpreter','latex','FontSize',20)
-        legend('Interpreter','latex','Location','e','FontSize',20,'Color',[0,0,0],'TextColor',[1,1,1])
+        legend('Interpreter','latex','Location','nw','FontSize',20,'Color',[0,0,0],'TextColor',[1,1,1])
         legend show
 
         ax3 = gca;
         ax3.Position = [.03 .2 .22 .25];
-        ax3.Color  = [0,0,0];
+        ax3.Color  = backgroundColor;
         ax3.XColor = [1,1,1];
         ax3.YColor = [1,1,1];
         ax3.ZColor = [1,1,1];
@@ -440,9 +447,9 @@ for testIndex = 18 : 22
 
         %% Save image
         if SAVE_IMAGES
-            saveas(fig,[pressFigPath,testID,'-',num2str(testPointIndex,'%04.f'),'.fig']);
+            saveas(fig,[pressFigPath,testID,'-',num2str(testPointIndex,'%04.f'),'.png']);
             clc;
-            disp([testID,'-',num2str(testPointIndex,'%04.f'),'.fig saved']);
+            disp([testID,'-',num2str(testPointIndex,'%04.f'),'.png saved']);
         end
 
         %% Report additional data

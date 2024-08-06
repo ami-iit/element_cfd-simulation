@@ -4,12 +4,12 @@ clc;
 
 %% Set Experiment Path
 
-experiment = 'exp_2023_12_11';    % Name of the experiment data folder: exp_2022_03_21 | exp_2022_11_03 | exp_2023_12_11
+experiment = 'exp_2022_11_03';    % Name of the experiment data folder: exp_2022_03_21 | exp_2022_11_03 | exp_2023_12_11
 experimentPath = ['../',experiment,'/data_Matlab/'];
 
 %% Load test variables
 
-testIDs = {'TID_0033','TID_0032','TID_0034'};   % testIDs to be loaded in the script
+testIDs = {'TID_0001','TID_0002'};   % testIDs to be loaded in the script
 
 for i = 1: length(testIDs)
     test.(testIDs{i}) = load([experimentPath,testIDs{i},'/aerodynamicForces.mat']);
@@ -29,6 +29,7 @@ displayNames = {'flight30: V=12 m/s', ...
                 'flight30: V=21 m/s', ...
                 'flight30: V=30 m/s', ...
                 };
+
 
 % set the plot lines appeareance
 colors = {[0, 0, 0],[0, 0.4470, 0.7410], [0.8500, 0.3250, 0.0980], ...
@@ -98,7 +99,7 @@ for varIndex = 1:length(yVariable)
     grid on;
 
     ax.FontSize = 24;
-    xlim([25 65])
+    xlim([0 90])
     ylabel(yLabel{varIndex},'Interpreter','latex','FontSize',24)
     xlabel(xLabel,'Interpreter','latex','FontSize',24)
     legend('Interpreter','latex','Location','best','FontSize',12)
