@@ -16,7 +16,6 @@ class SurfaceData:
     y_local: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
     z_local: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
     theta: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
-    theta_r: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
     z: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
     pressure: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
     x_shear_stress: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
@@ -270,7 +269,7 @@ class FlowGenerator:
                     separation_rows = [ref_block_height, ref_block_height*3, sub_block.shape[1]]
                 elif hor_block_number == 2 and (sub_block_number == 1 or sub_block_number == 2):
                     ref_block_height = int(sub_block.shape[1]/10)
-                    separation_rows = [ref_block_height, ref_block_height*3, sub_block.shape[1]]
+                    separation_rows = [ref_block_height*2, ref_block_height*3, sub_block.shape[1]]
                 elif hor_block_number == 3 and (sub_block_number == 0 or sub_block_number == 3):
                     ref_block_height = int(sub_block.shape[1]/3)
                     separation_rows = [ref_block_height, sub_block.shape[1]]
@@ -309,6 +308,10 @@ class FlowGenerator:
                 self.surface[surface_name].y_local,
                 self.surface[surface_name].z_local
                 )
+            # assign global coordinates
+            self.x = np.append(self.x, self.surface[surface_name].x_global)
+            self.y = np.append(self.y, self.surface[surface_name].y_global)
+            self.z = np.append(self.z, self.surface[surface_name].z_global)
         return
     
     def interpolate_2D_flow_variable(self, flow_variable, theta, z, points):
@@ -350,9 +353,6 @@ class FlowGenerator:
             # Assign data
             self.surface[surface_name].theta = theta
             self.surface[surface_name].z = z
-            self.x = np.append(self.x, self.surface[surface_name].x_global)
-            self.y = np.append(self.y, self.surface[surface_name].y_global)
-            self.z = np.append(self.z, self.surface[surface_name].z_global)
             self.cp = np.append(self.cp,self.surface[surface_name].pressure_coefficient)
             self.fx = np.append(self.fx,self.surface[surface_name].x_friction_coefficient)
             self.fy = np.append(self.fy,self.surface[surface_name].y_friction_coefficient)
