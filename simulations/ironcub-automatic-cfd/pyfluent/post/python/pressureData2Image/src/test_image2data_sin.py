@@ -107,7 +107,7 @@ def main():
             flow.surface[surface_name].theta,
             flow.surface[surface_name].z,
             c=flow.surface[surface_name].pressure_coefficient,
-            s=1, cmap="jet", vmax=1, vmin=-1
+            s=5, cmap="jet", vmax=1, vmin=-1
             )
         ax3.set_title(robot.surface_list[surface_index][8:])
         ax3.set_xlabel(r'$\theta r_{mean}$ [m]')
@@ -128,8 +128,8 @@ def main():
         last_plot = ax3.scatter(
             flow.surface[surface_name].theta,
             flow.surface[surface_name].z,
-            c=np.divide(np.abs(flow.surface[surface_name].pressure_coefficient-np.sin(flow.surface[surface_name].theta)),np.sin(flow.surface[surface_name].theta)),
-            s=2, cmap="jet", vmax=0.05, vmin=0
+            c=np.abs(np.divide(flow.surface[surface_name].pressure_coefficient-np.sin(flow.surface[surface_name].theta),np.sin(flow.surface[surface_name].theta))),
+            s=5, cmap="jet", vmax=0.05, vmin=0
             )
         ax3.set_title(robot.surface_list[surface_index][8:])
         ax3.set_xlabel(r'$\theta r_{mean}$ [m]')
@@ -141,6 +141,24 @@ def main():
     cbar = fig3.colorbar(last_plot, cax=cbar_ax)
     cbar.set_label(r'$\Delta\sin\theta$')
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=0.8, hspace=0.6)
+    
+    fig4, (ax4, ax5) = plt.subplots(1, 2)
+    plt.get_current_fig_manager().window.showMaximized()
+    error = np.empty_like(flow.surface["ironcub_head"].pressure_coefficient)
+    # plt.hist(data, bins=20, range=(0, 1), edgecolor='black')
+    for surface_index, surface_name in enumerate(robot.surface_list):
+        error = np.append(error, np.abs(np.divide(flow.surface[surface_name].pressure_coefficient-np.sin(flow.surface[surface_name].theta),np.sin(flow.surface[surface_name].theta))))
+    ax4.hist(error, bins=20, range=(0, 1.0), edgecolor='black')
+    ax4.set_title('Relative reconstruction error histogram')
+    ax4.set_xlabel('Relative reconstruction error')
+    ax4.set_ylabel('Number of gridpoints')
+    ax4.yaxis.grid()
+    ax5.hist(error, bins=20, range=(0, 1.0), edgecolor='black')
+    ax5.set_title('Relative reconstruction error histogram (zoom)')
+    ax5.set_xlabel('Relative reconstruction error')
+    ax5.set_ylabel('Number of gridpoints')
+    ax5.set_ylim([0, 100])
+    ax5.yaxis.grid()
     
     plt.show(block=False)
     

@@ -161,7 +161,7 @@ class FlowImporter:
         return
     
     # TODO: remove this method after reconstruction error quantification
-    def interpolate_global_sinusoid_flow_data(self, image_resolution_list, surface_list, main_axes):
+    def interpolate_global_sinusoid_flow_data(self, field_direction, image_resolution_list, surface_list, main_axes):
         for surface_index, surface_name in enumerate(surface_list):
             image_resolution = image_resolution_list[surface_index]
             if main_axes[surface_index] == 0:
@@ -177,7 +177,12 @@ class FlowImporter:
                 y = self.surface[surface_name].y_local
                 z = self.surface[surface_name].z_local
             # Assign global sinusoid field function
-            scaled_sinusoid_direction = self.surface[surface_name].z_global/np.max(np.abs(self.z))*np.pi
+            if field_direction == "x":
+                scaled_sinusoid_direction = self.surface[surface_name].x_global/np.max(np.abs(self.x))*np.pi
+            elif field_direction == "y":
+                scaled_sinusoid_direction = self.surface[surface_name].y_global/np.max(np.abs(self.y))*np.pi
+            elif field_direction == "z":
+                scaled_sinusoid_direction = self.surface[surface_name].z_global/np.max(np.abs(self.z))*np.pi
             self.surface[surface_name].field_function = np.sin(scaled_sinusoid_direction)
             # Trasform to cylindrical coordinates
             r = np.sqrt(x**2 + y**2)
@@ -467,9 +472,6 @@ class FlowGenerator:
             # Assign data
             self.surface[surface_name].theta = theta/r_mean
             self.surface[surface_name].z = z
-            self.x = np.append(self.x, self.surface[surface_name].x_global)
-            self.y = np.append(self.y, self.surface[surface_name].y_global)
-            self.z = np.append(self.z, self.surface[surface_name].z_global)
             self.cp = np.append(self.cp,self.surface[surface_name].pressure_coefficient)
             self.fx = np.append(self.fx,self.surface[surface_name].x_friction_coefficient)
             self.fy = np.append(self.fy,self.surface[surface_name].y_friction_coefficient)
@@ -477,7 +479,7 @@ class FlowGenerator:
         return
     
     # TODO: remove this method after reconstruction error quantification
-    def interpolate_global_sinusoid_data_from_image(self, surface_list, main_axes, link_H_world_ref_dict, world_H_link_dict, reference_joint_config_name="flight30", reference_pitch_angle=30, reference_yaw_angle=0):
+    def interpolate_global_sinusoid_data_from_image(self, field_direction, surface_list, main_axes, link_H_world_ref_dict, world_H_link_dict, reference_joint_config_name="flight30", reference_pitch_angle=30, reference_yaw_angle=0):
         self.get_surface_mesh_points(surface_list, link_H_world_ref_dict, world_H_link_dict, reference_joint_config_name, reference_pitch_angle, reference_yaw_angle)
         for surface_index, surface_name in enumerate(surface_list):
             if main_axes[surface_index] == 0:
@@ -493,7 +495,12 @@ class FlowGenerator:
                 y = self.surface[surface_name].y_local
                 z = self.surface[surface_name].z_local
             # Assign global sinusoid field function
-            scaled_sinusoid_direction = self.surface[surface_name].z_global/np.max(np.abs(self.z))*np.pi
+            if field_direction == "x":
+                scaled_sinusoid_direction = self.surface[surface_name].x_global/np.max(np.abs(self.x))*np.pi
+            elif field_direction == "y":
+                scaled_sinusoid_direction = self.surface[surface_name].y_global/np.max(np.abs(self.y))*np.pi
+            elif field_direction == "z":
+                scaled_sinusoid_direction = self.surface[surface_name].z_global/np.max(np.abs(self.z))*np.pi
             self.surface[surface_name].field_function = np.sin(scaled_sinusoid_direction)
             # Trasform to cylindrical coordinates
             r = np.sqrt(x**2 + y**2)
@@ -506,19 +513,16 @@ class FlowGenerator:
             points = np.vstack((X.ravel(),Y.ravel())).T
             # Interpolate and extrapolate the data from the image
             self.surface[surface_name].pressure_coefficient = self.interpolate_2D_flow_variable(self.surface[surface_name].image[0,:,:].ravel(), theta, z, points)
-            self.surface[surface_name].x_friction_coefficient = np.sin(theta/r_mean)
+            self.surface[surface_name].x_friction_coefficient = self.interpolate_2D_flow_variable(self.surface[surface_name].image[1,:,:].ravel(), theta, z, points)
             self.surface[surface_name].y_friction_coefficient = self.interpolate_2D_flow_variable(self.surface[surface_name].image[2,:,:].ravel(), theta, z, points)
             self.surface[surface_name].z_friction_coefficient = self.interpolate_2D_flow_variable(self.surface[surface_name].image[3,:,:].ravel(), theta, z, points)
             # Assign data
             self.surface[surface_name].theta = theta/r_mean
             self.surface[surface_name].z = z
-            self.x = np.append(self.x, self.surface[surface_name].x_global)
-            self.y = np.append(self.y, self.surface[surface_name].y_global)
-            self.z = np.append(self.z, self.surface[surface_name].z_global)
-            self.cp = np.append(self.cp,self.surface[surface_name].pressure_coefficient)
-            self.fx = np.append(self.fx,self.surface[surface_name].x_friction_coefficient)
-            self.fy = np.append(self.fy,self.surface[surface_name].y_friction_coefficient)
-            self.fz = np.append(self.fz,self.surface[surface_name].z_friction_coefficient)
+            self.cp = np.append(self.cp, self.surface[surface_name].pressure_coefficient)
+            self.fx = np.append(self.fx, self.surface[surface_name].x_friction_coefficient)
+            self.fy = np.append(self.fy, self.surface[surface_name].y_friction_coefficient)
+            self.fz = np.append(self.fz, self.surface[surface_name].z_friction_coefficient)
         return
     
     # TODO: remove this method after reconstruction error quantification
@@ -555,9 +559,6 @@ class FlowGenerator:
             self.surface[surface_name].theta = theta/r_mean
             self.surface[surface_name].r = r
             self.surface[surface_name].z = z
-            self.x = np.append(self.x, self.surface[surface_name].x_global)
-            self.y = np.append(self.y, self.surface[surface_name].y_global)
-            self.z = np.append(self.z, self.surface[surface_name].z_global)
             self.cp = np.append(self.cp,self.surface[surface_name].pressure_coefficient)
             self.fx = np.append(self.fx,self.surface[surface_name].x_friction_coefficient)
             self.fy = np.append(self.fy,self.surface[surface_name].y_friction_coefficient)
@@ -593,7 +594,7 @@ class FlowVisualizer:
     def plot_surface_pointcloud(self, flow_variable, robot_meshes):
         points = np.vstack((self.flow_properties.x,self.flow_properties.y,self.flow_properties.z)).T # 3D points
         # Normalize the colormap
-        norm = plt.Normalize(vmin=0, vmax=0.1)
+        norm = plt.Normalize()
         normalized_flow_variable = norm(flow_variable)
         colormap = cm.jet
         colors = colormap(normalized_flow_variable)[:,:3]

@@ -62,17 +62,21 @@ def main():
         # Compute the transformation from the link frame to the current world frame (using zero rotation angles)
         world_H_link_dict[robot.surface_list[surface_index]] = robot.compute_world_to_link_transform(frame_name=robot.surface_frames[surface_index], rotation_angle=0.0)
     
-    flow.interpolate_global_sinusoid_data_from_image(robot.surface_list, robot.surface_axes, link_H_world_ref_dict, world_H_link_dict)
+    field_direction = "z"
+    flow.interpolate_global_sinusoid_data_from_image(field_direction, robot.surface_list, robot.surface_axes, link_H_world_ref_dict, world_H_link_dict)
     
     ##############################################################################################
     ################################# Plots and 3D visualization #################################
     ##############################################################################################
     
     flowViz = FlowVisualizer(flow)
+    flowViz.plot_surface_pointcloud(flow_variable=flow.cp, robot_meshes=robot.load_mesh())
     
     # Enable LaTeX text rendering
     plt.rcParams['text.usetex'] = True
     plt.rcParams['font.size'] = 24
+    
+    cbar_label = r'$\sin (^{G[I]}' + field_direction + r')$'
 
     # Display the imported image
     fig1, ax1 = plt.subplots()
@@ -81,7 +85,7 @@ def main():
     ax1.axis("off")
     ax1.set_title("Assembled Image")
     cbar = fig1.colorbar(ax1.images[0], ax=ax1, orientation='vertical', fraction=0.02, pad=0.45)
-    cbar.set_label(r'$\sin (^{G[I]}z)$')
+    cbar.set_label(cbar_label)
     
     # Display the 2D separated images
     fig2 = plt.figure("Separated Images")
@@ -95,7 +99,7 @@ def main():
         ax2.set_ylim([-10, flow.surface[surface_name].image.shape[1]+10])
     cbar_ax = fig2.add_subplot(gs[:, -1])  # Span all rows in the last column
     cbar = fig2.colorbar(last_im, cax=cbar_ax)
-    cbar.set_label(r'$\sin (^{G[I]}z)$')
+    cbar.set_label(cbar_label)
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=0.4, hspace=0.4)
     
     fig3 = plt.figure("2D Reconstructed Sinusoid")
@@ -107,7 +111,7 @@ def main():
             flow.surface[surface_name].theta,
             flow.surface[surface_name].z,
             c=flow.surface[surface_name].pressure_coefficient,
-            s=1, cmap="jet", vmax=1, vmin=-1
+            s=5, cmap="jet", vmax=1, vmin=-1
             )
         ax3.set_title(robot.surface_list[surface_index][8:])
         ax3.set_xlabel(r'$\theta r_{mean}$ [m]')
@@ -117,7 +121,7 @@ def main():
         ax3.set_ylim([np.min(flow.surface[surface_name].z), np.max(flow.surface[surface_name].z)])
     cbar_ax = fig3.add_subplot(gs[:, -1])  # Span all rows in the last column
     cbar = fig3.colorbar(last_plot, cax=cbar_ax)
-    cbar.set_label(r'$\sin (^{G[I]}z)$')
+    cbar.set_label(cbar_label)
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=0.8, hspace=0.6)
     
     fig4 = plt.figure("2D Reconstructed Sinusoid Relative Error")
@@ -128,8 +132,8 @@ def main():
         last_plot = ax4.scatter(
             flow.surface[surface_name].theta,
             flow.surface[surface_name].z,
-            c=np.divide(np.abs(flow.surface[surface_name].pressure_coefficient-flow.surface[surface_name].field_function),flow.surface[surface_name].field_function),
-            s=2, cmap="jet", vmax=1.0, vmin=0
+            c=np.abs(np.divide(flow.surface[surface_name].pressure_coefficient-flow.surface[surface_name].field_function,flow.surface[surface_name].field_function)),
+            s=5, cmap="jet", vmax=1.0, vmin=0
             )
         ax4.set_title(robot.surface_list[surface_index][8:])
         ax4.set_xlabel(r'$\theta r_{mean}$ [m]')
@@ -139,13 +143,28 @@ def main():
         ax4.set_ylim([np.min(flow.surface[surface_name].z), np.max(flow.surface[surface_name].z)])
     cbar_ax = fig4.add_subplot(gs[:, -1])  # Span all rows in the last column
     cbar = fig4.colorbar(last_plot, cax=cbar_ax)
-    cbar.set_label(r'$\Delta \sin (^{G[I]}y)$')
+    cbar.set_label(r'$\Delta $'+cbar_label)
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=0.8, hspace=0.6)
     
-    plt.show(block=False)
+    fig5, (ax5, ax6) = plt.subplots(1, 2)
+    plt.get_current_fig_manager().window.showMaximized()
+    error = np.empty_like(flow.surface["ironcub_head"].pressure_coefficient)
+    # plt.hist(data, bins=20, range=(0, 1), edgecolor='black')
+    for surface_index, surface_name in enumerate(robot.surface_list):
+        error = np.append(error, np.abs(np.divide(flow.surface[surface_name].pressure_coefficient-flow.surface[surface_name].field_function,flow.surface[surface_name].field_function)))
+    ax5.hist(error, bins=20, range=(0, 1.0), edgecolor='black')
+    ax5.set_title('Relative reconstruction error histogram')
+    ax5.set_xlabel('Relative reconstruction error')
+    ax5.set_ylabel('Number of gridpoints')
+    ax5.yaxis.grid()
+    ax6.hist(error, bins=20, range=(0, 1.0), edgecolor='black')
+    ax6.set_title('Relative reconstruction error histogram (zoom)')
+    ax6.set_xlabel('Relative reconstruction error')
+    ax6.set_ylabel('Number of gridpoints')
+    ax6.set_ylim([0, 5000])
+    ax6.yaxis.grid()
     
-    # Display the 3D pressure pointcloud error
-    # flowViz.plot_surface_pointcloud(flow_variable=abs(flow.cp-flow.fx), robot_meshes=robot.load_mesh())
+    plt.show(block=False)
     
     input("Press Enter to close the figures...")
 

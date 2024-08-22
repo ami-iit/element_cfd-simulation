@@ -13,7 +13,7 @@ import matplotlib.gridspec as gridspec
 import pathlib
 # Import custom classes
 from robot import Robot
-from flow import FlowImporter
+from flow import FlowImporter, FlowVisualizer
 
 def main():
     # Initialize robot and flow objects
@@ -39,7 +39,7 @@ def main():
     
     # Import fluent data from all surfaces
     print(f"Importing and transforming data ...")
-    flow.import_raw_fluent_data(joint_config_name, pitch_angle, yaw_angle, robot.surface_list)        
+    flow.import_raw_fluent_data(joint_config_name, pitch_angle, yaw_angle, robot.surface_list)
     flow.transform_local_fluent_data(link_H_world_dict, flow_velocity=17.0, flow_density=1.225)
     flow.assign_global_fluent_data()
     
@@ -49,7 +49,8 @@ def main():
     image_resolution_scaled = (surface_resolution * resolution_scaling_factor).astype(int) # scale to apply to the image resolution
     
     print("Interpolating and generating images ...")
-    flow.interpolate_global_sinusoid_flow_data(image_resolution_scaled, robot.surface_list, robot.surface_axes)
+    field_direction = "z"
+    flow.interpolate_global_sinusoid_flow_data(field_direction, image_resolution_scaled, robot.surface_list, robot.surface_axes)
     flow.assemble_images()
     
     print("Saving image ...")
@@ -61,9 +62,14 @@ def main():
     ################################# Plots and 3D visualization #################################
     ##############################################################################################
     
+    flowViz = FlowVisualizer(flow)
+    flowViz.plot_surface_pointcloud(flow_variable=flow.cp, robot_meshes=robot.load_mesh())
+    
     # Enable LaTeX text rendering
     plt.rcParams['text.usetex'] = True
     plt.rcParams['font.size'] = 24
+    
+    cbar_label = r'$\sin (^{G[I]}' + field_direction + r')$'
     
     fig3 = plt.figure("2D sinusoid data")
     plt.get_current_fig_manager().window.showMaximized()
@@ -74,7 +80,7 @@ def main():
             flow.surface[surface_name].theta,
             flow.surface[surface_name].z,
             c=flow.surface[surface_name].field_function,
-            s=1, cmap="jet", vmax=1, vmin=-1
+            s=5, cmap="jet", vmax=1, vmin=-1
             )
         ax3.set_title(robot.surface_list[surface_index][8:])
         ax3.set_xlabel(r'$\theta$ [rad]')
@@ -84,7 +90,7 @@ def main():
         ax3.set_ylim([np.min(flow.surface[surface_name].z), np.max(flow.surface[surface_name].z)])
     cbar_ax = fig3.add_subplot(gs[:, -1])  # Span all rows in the last column
     cbar = fig3.colorbar(last_plot, cax=cbar_ax)
-    cbar.set_label(r'$\sin (^{G[I]}z)$')
+    cbar.set_label(cbar_label)
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=0.8, hspace=0.6)
     
     fig4 = plt.figure("Interpolated Images")
@@ -98,7 +104,7 @@ def main():
         ax4.set_ylim([-10, image_resolution_scaled[surface_index,0]+10])
     cbar_ax = fig4.add_subplot(gs[:, -1])  # Span all rows in the last column
     cbar = fig4.colorbar(last_im, cax=cbar_ax)
-    cbar.set_label(r'$\sin (^{G[I]}z)$')
+    cbar.set_label(cbar_label)
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=0.4, hspace=0.4)
     
     # Display the assembled image as vertically flipped
@@ -108,7 +114,7 @@ def main():
     ax5.axis("off")
     ax5.set_title("Assembled Image")
     cbar = fig5.colorbar(ax5.images[0], ax=ax5)
-    cbar.set_label(r'$\sin (^{G[I]}z)$')
+    cbar.set_label(cbar_label)
     
     plt.show(block=False)
     
