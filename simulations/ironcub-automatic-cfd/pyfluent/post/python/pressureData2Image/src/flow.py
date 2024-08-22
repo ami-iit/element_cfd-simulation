@@ -16,7 +16,7 @@ class SurfaceData:
     y_local: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
     z_local: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
     theta: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
-    theta_r: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
+    r: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
     z: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
     pressure: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
     x_shear_stress: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
@@ -177,8 +177,8 @@ class FlowImporter:
                 z = self.surface[surface_name].z_local
             # Trasform to cylindrical coordinates
             r = np.sqrt(x**2 + y**2)
-            r_mean = np.mean(r)
-            theta = np.arctan2(y,x)*r_mean
+            self.surface[surface_name].r = r
+            theta = np.arctan2(y,x)*np.mean(r)
             # Create a meshgrid for interpolation over the (theta,z) domain
             x_image = np.linspace(np.min(theta), np.max(theta), int(image_resolution[1]))
             y_image = np.linspace(np.min(z), np.max(z), int(image_resolution[0]))
@@ -467,7 +467,8 @@ class FlowGenerator:
             self.surface[surface_name].y_friction_coefficient = self.interpolate_2D_flow_variable(self.surface[surface_name].image[2,:,:].ravel(), theta, z, points)
             self.surface[surface_name].z_friction_coefficient = self.interpolate_2D_flow_variable(self.surface[surface_name].image[3,:,:].ravel(), theta, z, points)
             # Assign data
-            self.surface[surface_name].theta = theta
+            self.surface[surface_name].theta = theta/r_mean
+            self.surface[surface_name].r = r
             self.surface[surface_name].z = z
             self.x = np.append(self.x, self.surface[surface_name].x_global)
             self.y = np.append(self.y, self.surface[surface_name].y_global)
