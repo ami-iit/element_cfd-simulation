@@ -16,6 +16,7 @@ class SurfaceData:
     y_local: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
     z_local: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
     theta: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
+    theta_r: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
     z: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
     pressure: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
     x_shear_stress: np.ndarray = field(default_factory=lambda: np.empty(shape=(0,)))
@@ -107,55 +108,22 @@ class FlowImporter:
             # Trasform to cylindrical coordinates
             r = np.sqrt(x**2 + y**2)
             r_mean = np.mean(r)
-            theta = np.arctan2(y,x)*r_mean
-            # Create a meshgrid for interpolation over the (theta,z) domain
-            x_image = np.linspace(np.min(theta), np.max(theta), int(image_resolution[1]))
+            theta = np.arctan2(y,x)
+            theta_r = theta*r_mean
+            # Create a meshgrid for interpolation over the (theta_r,z) domain
+            x_image = np.linspace(np.min(theta_r), np.max(theta_r), int(image_resolution[1]))
             y_image = np.linspace(np.min(z), np.max(z), int(image_resolution[0]))
             X, Y = np.meshgrid(x_image, y_image)
             # Interpolate and extrapolate the pressure coefficient data
-            interp_press_coeff = self.interpolate_2D_flow_variable(self.surface[surface_name].pressure_coefficient, theta, z, X, Y)
-            interp_x_friction_coeff = self.interpolate_2D_flow_variable(self.surface[surface_name].x_friction_coefficient, theta, z, X, Y)
-            interp_y_friction_coeff = self.interpolate_2D_flow_variable(self.surface[surface_name].y_friction_coefficient, theta, z, X, Y)
-            interp_z_friction_coeff = self.interpolate_2D_flow_variable(self.surface[surface_name].z_friction_coefficient, theta, z, X, Y)
+            interp_press_coeff = self.interpolate_2D_flow_variable(self.surface[surface_name].pressure_coefficient, theta_r, z, X, Y)
+            interp_x_friction_coeff = self.interpolate_2D_flow_variable(self.surface[surface_name].x_friction_coefficient, theta_r, z, X, Y)
+            interp_y_friction_coeff = self.interpolate_2D_flow_variable(self.surface[surface_name].y_friction_coefficient, theta_r, z, X, Y)
+            interp_z_friction_coeff = self.interpolate_2D_flow_variable(self.surface[surface_name].z_friction_coefficient, theta_r, z, X, Y)
             # Assign data
-            self.surface[surface_name].theta = theta
             self.surface[surface_name].z = z
+            self.surface[surface_name].theta = theta
+            self.surface[surface_name].theta_r = theta_r
             self.surface[surface_name].image = np.array([interp_press_coeff,interp_x_friction_coeff,interp_y_friction_coeff,interp_z_friction_coeff])
-        return
-    
-    # TODO: remove this method after reconstruction error quantification
-    def interpolate_sinusoid_flow_data(self, image_resolution_list, surface_list, main_axes):
-        for surface_index, surface_name in enumerate(surface_list):
-            image_resolution = image_resolution_list[surface_index]
-            if main_axes[surface_index] == 0:
-                x = self.surface[surface_name].y_local
-                y = self.surface[surface_name].z_local
-                z = self.surface[surface_name].x_local
-            elif main_axes[surface_index] == 1:
-                x = self.surface[surface_name].x_local
-                y = self.surface[surface_name].z_local
-                z = self.surface[surface_name].y_local
-            elif main_axes[surface_index] == 2:
-                x = self.surface[surface_name].x_local
-                y = self.surface[surface_name].y_local
-                z = self.surface[surface_name].z_local
-            # Trasform to cylindrical coordinates
-            r = np.sqrt(x**2 + y**2)
-            r_mean = np.mean(r)
-            theta = np.arctan2(y,x)*r_mean
-            # Create a meshgrid for interpolation over the (theta,z) domain
-            x_image = np.linspace(np.min(theta), np.max(theta), int(image_resolution[1]))
-            y_image = np.linspace(np.min(z), np.max(z), int(image_resolution[0]))
-            X, Y = np.meshgrid(x_image, y_image)
-            # Interpolate and extrapolate the pressure coefficient data
-            interp_sin_constructed = self.interpolate_2D_flow_variable(np.sin(theta), theta, z, X, Y)
-            interp_sin_true = np.sin(X)
-            interp_y_friction_coeff = self.interpolate_2D_flow_variable(self.surface[surface_name].y_friction_coefficient, theta, z, X, Y)
-            interp_z_friction_coeff = self.interpolate_2D_flow_variable(self.surface[surface_name].z_friction_coefficient, theta, z, X, Y)
-            # Assign data
-            self.surface[surface_name].theta = theta
-            self.surface[surface_name].z = z
-            self.surface[surface_name].image = np.array([interp_sin_constructed,interp_sin_true,interp_y_friction_coeff,interp_z_friction_coeff])
         return
 
     def create_image_block(self,surface_names):
@@ -339,20 +307,22 @@ class FlowGenerator:
             # Trasform to cylindrical coordinates
             r = np.sqrt(x**2 + y**2)
             r_mean = np.mean(r)
-            theta = np.arctan2(y,x)*r_mean
+            theta = np.arctan2(y,x)
+            theta_r = theta*r_mean
             # Create a meshgrid for interpolation
-            x_image = np.linspace(np.min(theta), np.max(theta), self.surface[surface_name].image.shape[2])
+            x_image = np.linspace(np.min(theta_r), np.max(theta_r), self.surface[surface_name].image.shape[2])
             y_image = np.linspace(np.min(z), np.max(z), self.surface[surface_name].image.shape[1])
             X, Y = np.meshgrid(x_image, y_image)
             points = np.vstack((X.ravel(),Y.ravel())).T
             # Interpolate and extrapolate the data from the image
-            self.surface[surface_name].pressure_coefficient = self.interpolate_2D_flow_variable(self.surface[surface_name].image[0,:,:].ravel(), theta, z, points)
-            self.surface[surface_name].x_friction_coefficient = self.interpolate_2D_flow_variable(self.surface[surface_name].image[1,:,:].ravel(), theta, z, points)
-            self.surface[surface_name].y_friction_coefficient = self.interpolate_2D_flow_variable(self.surface[surface_name].image[2,:,:].ravel(), theta, z, points)
-            self.surface[surface_name].z_friction_coefficient = self.interpolate_2D_flow_variable(self.surface[surface_name].image[3,:,:].ravel(), theta, z, points)
+            self.surface[surface_name].pressure_coefficient = self.interpolate_2D_flow_variable(self.surface[surface_name].image[0,:,:].ravel(), theta_r, z, points)
+            self.surface[surface_name].x_friction_coefficient = self.interpolate_2D_flow_variable(self.surface[surface_name].image[1,:,:].ravel(), theta_r, z, points)
+            self.surface[surface_name].y_friction_coefficient = self.interpolate_2D_flow_variable(self.surface[surface_name].image[2,:,:].ravel(), theta_r, z, points)
+            self.surface[surface_name].z_friction_coefficient = self.interpolate_2D_flow_variable(self.surface[surface_name].image[3,:,:].ravel(), theta_r, z, points)
             # Assign data
-            self.surface[surface_name].theta = theta
             self.surface[surface_name].z = z
+            self.surface[surface_name].theta = theta
+            self.surface[surface_name].theta_r = theta_r
             self.cp = np.append(self.cp,self.surface[surface_name].pressure_coefficient)
             self.fx = np.append(self.fx,self.surface[surface_name].x_friction_coefficient)
             self.fy = np.append(self.fy,self.surface[surface_name].y_friction_coefficient)
