@@ -89,7 +89,7 @@ def main():
         }
 
         # Save dataset
-        with open(str(dataset_dir / f"{surface_name}_{joint_config_name}.npy"), "wb") as f:
+        with open(str(dataset_dir / f"{surface_name}-{joint_config_name}.npy"), "wb") as f:
             pickle.dump(dataset[joint_config_name], f, protocol=4)
         print(f"{joint_config_name} {surface_name} configuration dataset saved. \n")
 
