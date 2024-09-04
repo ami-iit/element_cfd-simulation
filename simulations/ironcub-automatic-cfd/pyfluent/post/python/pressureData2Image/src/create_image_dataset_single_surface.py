@@ -23,18 +23,18 @@ def main():
     robot_name = "iRonCub-Mk3"
     robot = Robot(robot_name)
     # Dataset directory
-    data_dir = pathlib.Path(__file__).parents[4] / "solver" / "data" / robot_name[-3:] / "database-extended"
+    data_dir = pathlib.Path(__file__).parents[4] / "solver" / "data" / robot_name[-3:] / "database"
     # Images directory
     dataset_dir = pathlib.Path(__file__).parents[1] / "dataset"
     # Get the file name list
     file_names = [pathlib.Path(file).name for file in glob.glob(str(data_dir / "*.dtbs"))]
     # Group the files by the joint configuration
-    joint_configs = list(set([file_name.split("-")[0] for file_name in file_names]))
+    joint_configs = sorted(list(set([file_name.split("-")[0] for file_name in file_names])))
     # Load csv file
     joint_config_file_path = pathlib.Path(__file__).parents[4] / "meshing" / "src" / "jointConfigFull-mk3.csv"
     joint_configurations = np.genfromtxt(joint_config_file_path, delimiter=",", dtype=str)
     dataset = {}
-    for joint_config_name in ["hovering"]:        
+    for joint_config_name in joint_configs:        
         # Get the joint positions
         joint_positions = joint_configurations[joint_configurations[:,0] == joint_config_name][0,1:].astype(float)
         # Get the pitch and yaw angles list
@@ -89,7 +89,7 @@ def main():
         }
 
         # Save dataset
-        with open(str(dataset_dir / f"{surface_name}_{joint_config_name}_4_channels.npy"), "wb") as f:
+        with open(str(dataset_dir / f"{surface_name}_{joint_config_name}.npy"), "wb") as f:
             pickle.dump(dataset[joint_config_name], f, protocol=4)
         print(f"{joint_config_name} {surface_name} configuration dataset saved. \n")
 

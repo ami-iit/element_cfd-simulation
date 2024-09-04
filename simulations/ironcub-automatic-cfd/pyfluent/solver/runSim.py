@@ -38,9 +38,9 @@ elif robotName == "ironcub-mk3":
 # ~~~~~~~~~~~~~
 # Set the parameters for the Fluent session
 
-core_number = 12 # number of cores (only pre-post if use_gpu=True)
-use_gpu = True # use GPU native solver
-iteration_number = 10 # number of iterations to run in the solver
+core_number = 48 # number of cores (only pre-post if use_gpu=True)
+use_gpu = False # use GPU native solver
+iteration_number = 1000 # number of iterations to run in the solver
 
 # Set the MPI option for the WS
 mpi_option = "-mpi=openmpi" if os.name == "posix" else ""
@@ -66,7 +66,7 @@ outputParamFilePath = dataDirPath / "outputParameters.csv" # output parameters f
 jointConfigFilePath = srcDirPath / f"jointConfig-{robotName[-3:]}.csv" # joint configuration file path
 
 # Create data directories if not existing
-dataDirectories = ["residuals", "contours", "database", "database-extended"]
+dataDirectories = ["residuals", "contours", "database"]
 for directory in dataDirectories:
     directoryPath = dataDirPath / directory
     if not directoryPath.exists():
@@ -87,7 +87,6 @@ for directory in dataDirectories:
 residualsPath = dataDirPath / dataDirectories[0]
 contoursPath = dataDirPath / dataDirectories[1]
 databasePath = dataDirPath / dataDirectories[2]
-databaseExtendedPath = dataDirPath / dataDirectories[3]
 
 # Create the output parameters file if not existing.
 if not outputParamFilePath.exists():
@@ -245,37 +244,6 @@ for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
 
             cd_report = solver.solution.report_definitions.drag["ironcub-cd"]
             surfaceList = cd_report.zones.allowed_values()
-            
-            # Export database files for each merge surface
-            for reportSurface in robot.ironcubSurfacesList:
-                if reportSurface in robot.surfaceSkipList:
-                    continue
-                else:
-                    reportSurfaceList = [reportSurface]
-                    # check for duplicates of the main report surface
-                    reportSurfacePrefix = reportSurface+":"
-                    for surface in surfaceList:
-                        if reportSurfacePrefix in surface:  
-                            reportSurfaceList.extend([surface])
-                    # Add skip surfaces if the main report surface is a merge surface
-                    if reportSurface in robot.surfaceMergeList:
-                        addSurfaceList = [robot.surfaceSkipList[index] for index, value in enumerate(robot.surfaceMergeList) if value == reportSurface]
-                        reportSurfaceList.extend(addSurfaceList)
-                        # check for duplicates of the skip surfaces
-                        for addSurface in addSurfaceList:
-                            addSurfacePrefix = addSurface+":"
-                            for surface in surfaceList:
-                                if addSurfacePrefix in surface:  
-                                    reportSurfaceList.extend([surface])
-                    databaseFileName = f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}-{reportSurface}.dtbs"
-                    databaseFilePath = str( databasePath / databaseFileName )
-                    solver.file.export.ascii(
-                        file_name=databaseFilePath,
-                        surface_name_list=reportSurfaceList,
-                        delimiter="space",
-                        cell_func_domain=["pressure", "x-wall-shear", "y-wall-shear", "z-wall-shear"],
-                        location="node",
-                    )
 
             # Export database files for each single surface
             for reportSurface in robot.ironcubSurfacesList:
@@ -285,7 +253,7 @@ for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
                     if reportSurfacePrefix in surface:  
                         reportSurfaceList.extend([surface])
                 databaseFileName = f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}-{reportSurface}.dtbs"
-                databaseFilePath = str( databaseExtendedPath / databaseFileName )
+                databaseFilePath = str( databasePath / databaseFileName )
                 solver.file.export.ascii(
                     file_name=databaseFilePath,
                     surface_name_list=reportSurfaceList,
