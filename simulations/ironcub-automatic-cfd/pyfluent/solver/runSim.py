@@ -133,7 +133,7 @@ for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
         mode="solver",                      # "meshing", "pure-meshing" or "solver"
         precision="double",                 # single or double precision
         product_version="24.1.0",           # Fluent version
-        dimension=3,                       # 2d or 3d Fluent version
+        dimension=3,                        # 2d or 3d Fluent version
         processor_count=core_number,        # number of cores (only pre-post if use_gpu=True)
         gpu=use_gpu,                        # use GPU native solver
         start_transcript=False,             # start transcript file
@@ -196,9 +196,9 @@ for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
             # ~~~~~~~~~~~~~~~~~~~~~~~~
             # Plot and save the residuals for the current joint configuration and angles.
 
-            solver.results.graphics.picture.use_window_resolution = False
-            solver.results.graphics.picture.x_resolution = 1920
-            solver.results.graphics.picture.y_resolution = 1440
+            solver.results.graphics.picture.use_window_resolution = True
+            # solver.results.graphics.picture.x_resolution = 1920 # commented for ws067
+            # solver.results.graphics.picture.y_resolution = 1440 # commented for ws067
             solver.results.graphics.picture.save_picture(
                 file_name = str( residualsPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}")
                 )
@@ -289,11 +289,9 @@ for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
 
 
 ###############################################################################
-# Cleanup debug files and conclude the process
+# Close the process
 # ~~~~~~~~~~~~
-# Clean files in the mesh and log directories, print the process end message
-
-# TODO: add debug files cleanup
+# Print the process end message
 
 timeProcessEnd = datetime.now().strftime("%H:%M:%S")
 print(
