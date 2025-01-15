@@ -53,7 +53,8 @@ mpi_option = "-mpi=openmpi" if os.name == "posix" else ""
 # Define dir paths
 rootPath = pathlib.Path(__file__).parents[0]
 parentPath = pathlib.Path(__file__).parents[1]
-meshDirPath = rootPath / "mesh" / robotName[-3:] # mesh directory path
+meshDirPath = rootPath / "mesh" / robotName[-3:] / "msh" # mesh directory path
+dtbsDirPath = rootPath / "mesh" / robotName[-3:] / "dtbs" # mesh database directory path
 caseDirPath = rootPath / "case" / robotName[-3:] # Fluent case directory path
 srcDirPath  = rootPath / "src"  # source directory path
 logDirPath  = rootPath / "log"  # log directory path
@@ -89,7 +90,7 @@ for jointConfigName in jointConfigNames:
             mode="meshing",                     # "meshing", "pure-meshing" or "solver"
             precision="double",                 # single or double precision
             product_version="24.1.0",           # Fluent version
-            version="3d",                       # 2d or 3d Fluent version
+            dimension=3,                        # 2d or 3d Fluent version
             processor_count=core_number,        # number of cores (only pre-post if use_gpu=True)
             gpu=use_gpu,                        # use GPU native solver
             start_transcript=False,             # start transcript file
@@ -269,10 +270,10 @@ for jointConfigName in jointConfigNames:
         print(f"[{timeFluentStart}] Starting pyFluent session...")
 
         solver = pyfluent.launch_fluent(
-            mode="solver",                     # "meshing", "pure-meshing" or "solver"
+            mode="solver",                      # "meshing", "pure-meshing" or "solver"
             precision="double",                 # single or double precision
             product_version="24.1.0",           # Fluent version
-            version="3d",                       # 2d or 3d Fluent version
+            dimension=3,                        # 2d or 3d Fluent version
             processor_count=core_number,        # number of cores (only pre-post if use_gpu=True)
             gpu=use_gpu,                        # use GPU native solver
             start_transcript=False,             # start transcript file
@@ -362,46 +363,32 @@ for jointConfigName in jointConfigNames:
 
         # define the reports for the ironcub surfaces
         for reportSurface in robot.ironcubSurfacesList:
-            if reportSurface in robot.surfaceSkipList:
-                continue
-            else:
-                reportDefName = reportSurface[8:]
-                reportDefName = reportDefName.replace("_", "-")
-                reportSurfaceList = [reportSurface]
-                # check for duplicates of the main report surface
-                reportSurfacePrefix = reportSurface+":"
-                for surface in surfaceList:
-                    if reportSurfacePrefix in surface:  
-                        reportSurfaceList.extend([surface])
-                # Add skip surfaces if the main report surface is a merge surface
-                if reportSurface in robot.surfaceMergeList:
-                    addSurfaceList = [robot.surfaceSkipList[index] for index, value in enumerate(robot.surfaceMergeList) if value == reportSurface]
-                    reportSurfaceList.extend(addSurfaceList)
-                    # check for duplicates of the skip surfaces
-                    for addSurface in addSurfaceList:
-                        addSurfacePrefix = addSurface+":"
-                        for surface in surfaceList:
-                            if addSurfacePrefix in surface:  
-                                reportSurfaceList.extend([surface])
-                # define surface cd report
-                solver.solution.report_definitions.drag[reportDefName + "-cd"] = {}
-                cd = solver.solution.report_definitions.drag[reportDefName + "-cd"]
-                cd.zones = reportSurfaceList
-                cd.force_vector = [0, 0, -1]
-                cd.average_over = 100
-                # define surface cl report
-                solver.solution.report_definitions.drag[reportDefName + "-cl"] = {}
-                cl = solver.solution.report_definitions.drag[reportDefName + "-cl"]
-                cl.zones = reportSurfaceList
-                cl.force_vector = [0, 1, 0]
-                cl.average_over = 100
-                # define surface cs report
-                solver.solution.report_definitions.drag[reportDefName + "-cs"] = {}
-                cs = solver.solution.report_definitions.drag[reportDefName + "-cs"]
-                cs.zones = reportSurfaceList
-                cs.force_vector = [-1, 0, 0]
-                cs.average_over = 100
-
+            reportDefName = reportSurface[8:]
+            reportDefName = reportDefName.replace("_", "-")
+            reportSurfaceList = [reportSurface]
+            # check for duplicates of the main report surface
+            reportSurfacePrefix = reportSurface+":"
+            for surface in surfaceList:
+                if reportSurfacePrefix in surface:  
+                    reportSurfaceList.extend([surface])
+            # define surface cd report
+            solver.solution.report_definitions.drag[reportDefName + "-cd"] = {}
+            cd = solver.solution.report_definitions.drag[reportDefName + "-cd"]
+            cd.zones = reportSurfaceList
+            cd.force_vector = [0, 0, -1]
+            cd.average_over = 100
+            # define surface cl report
+            solver.solution.report_definitions.drag[reportDefName + "-cl"] = {}
+            cl = solver.solution.report_definitions.drag[reportDefName + "-cl"]
+            cl.zones = reportSurfaceList
+            cl.force_vector = [0, 1, 0]
+            cl.average_over = 100
+            # define surface cs report
+            solver.solution.report_definitions.drag[reportDefName + "-cs"] = {}
+            cs = solver.solution.report_definitions.drag[reportDefName + "-cs"]
+            cs.zones = reportSurfaceList
+            cs.force_vector = [-1, 0, 0]
+            cs.average_over = 100
 
         ###############################################################################
         # Contour Plane Defintions
@@ -423,6 +410,31 @@ for jointConfigName in jointConfigNames:
         caseFileName = jointConfigName + ".cas.h5"
         caseFilePath = (caseDirPath / caseFileName)
         solver.file.write(file_name=str(caseFilePath), file_type="case")
+        
+        ###############################################################################
+        # Export mesh dtbs files
+        # ~~~~~~~~~~~~~~~~~~~~~
+        # Export surface nodes locations
+        
+        cd_report = solver.solution.report_definitions.drag["ironcub-cd"]
+        surfaceList = cd_report.zones.allowed_values()
+
+        # Export database files for each single surface
+        for reportSurface in robot.ironcubSurfacesList:
+            reportSurfaceList = [reportSurface]
+            reportSurfacePrefix = reportSurface+":"
+            for surface in surfaceList:
+                if reportSurfacePrefix in surface:  
+                    reportSurfaceList.extend([surface])
+            databaseFileName = f"{jointConfigName}-0-0-{reportSurface}.dtbs"
+            databaseFilePath = str( dtbsDirPath / databaseFileName )
+            solver.file.export.ascii(
+                file_name=databaseFilePath,
+                surface_name_list=reportSurfaceList,
+                delimiter="space",
+                cell_func_domain=["x-face-area","y-face-area","z-face-area"],
+                location="cell-center",
+            )
 
         ###############################################################################
         # Close Fluent and clean up debug files
