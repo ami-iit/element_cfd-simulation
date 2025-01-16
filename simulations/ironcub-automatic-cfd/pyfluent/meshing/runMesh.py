@@ -426,7 +426,7 @@ for jointConfigName in jointConfigNames:
             for surface in surfaceList:
                 if reportSurfacePrefix in surface:  
                     reportSurfaceList.extend([surface])
-            databaseFileName = f"{jointConfigName}-0-0-{reportSurface}.dtbs"
+            databaseFileName = f"mesh-{jointConfigName}-0-0-{reportSurface}.dtbs"
             databaseFilePath = str( dtbsDirPath / databaseFileName )
             solver.file.export.ascii(
                 file_name=databaseFilePath,
