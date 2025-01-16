@@ -93,10 +93,9 @@ if not outputParamFilePath.exists():
     with open(str(outputParamFilePath), 'w') as outputParamCSV:
         outputParameterHeader = "config,pitchAngle,yawAngle,ironcub-cd,ironcub-cl,ironcub-cs"
         for surfaceName in robot.ironcubSurfacesList:
-            if surfaceName not in robot.surfaceSkipList:
-                reportDefName = surfaceName[8:]
-                reportDefName = reportDefName.replace("_", "-")
-                outputParameterHeader = outputParameterHeader + f",{reportDefName}-cd,{reportDefName}-cl,{reportDefName}-cs"
+            reportDefName = surfaceName[8:]
+            reportDefName = reportDefName.replace("_", "-")
+            outputParameterHeader = outputParameterHeader + f",{reportDefName}-cd,{reportDefName}-cl,{reportDefName}-cs"
         outputParamCSV.writelines(outputParameterHeader + "\n")
 
 ###############################################################################
