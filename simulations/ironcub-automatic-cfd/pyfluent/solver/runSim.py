@@ -107,15 +107,15 @@ def main():
         print(f"[{time}] Starting pyFluent session...")
 
         solver = pyfluent.launch_fluent(
-            mode="solver",  # "meshing", "pure-meshing" or "solver"
-            precision="double",  # single or double precision
-            product_version="24.1.0",  # Fluent version
-            dimension=3,  # 2d or 3d Fluent version
-            processor_count=CORE_NUM,  # number of cores (only pre-post if use_gpu=True)
-            gpu=USE_GPU,  # use GPU native solver
-            start_transcript=False,  # start transcript file
-            cwd=str(log_dir),  # working directory
-            additional_arguments=mpi_option,  # additional arguments (used for MPI option)
+            mode="solver",
+            precision="double",
+            product_version="24.1.0",
+            dimension=3,
+            processor_count=CORE_NUM,
+            gpu=USE_GPU,
+            start_transcript=False,
+            cwd=str(log_dir),
+            additional_arguments=mpi_option,
         )
 
         # Start the cycle on yaw angles
@@ -270,14 +270,8 @@ def main():
                     f"[{end_time}] Iter for {joint_config_name}, alpha={pitch_angle}, beta={yaw_angle}: Success!"
                 )
 
-        ###############################################################################
         # Close Fluent Solver Session
-        # ~~~~~~~~~~~~
-        # Close Fluent solver session and print the end message for the current
-        # configuration.
-
         solver.exit()
-
         time = datetime.now().strftime("%H:%M:%S")
         print(
             colors.GREEN,
