@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - robotology
 dependencies:
-  - python
+  - python==3.11.0
   - numpy
   - pip
   - pip:
