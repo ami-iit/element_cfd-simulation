@@ -1,10 +1,10 @@
 # This file contains the iRonCub-Mk1 specific parameters for the meshing process
 
 # Surface Mesh Size Function
-surfaceMeshSizeFunction = "Curvature"
+surf_mesh_size_fun = "Curvature"
 
 # Define the list of ironcub surfaces
-ironcubSurfacesList = [
+surface_list = [
     "ironcub_head",
     "ironcub_left_back_turbine",
     "ironcub_right_back_turbine",
@@ -29,31 +29,3 @@ ironcubSurfacesList = [
     "ironcub_torso_pitch",
     "ironcub_torso_roll",
 ]
-
-# Define the surfaces skiplist (enclosed in the reports of the mergelist)
-surfaceSkipList = [
-    "ironcub_left_arm_pitch",
-    "ironcub_left_arm_roll",
-    "ironcub_right_arm_pitch",
-    "ironcub_right_arm_roll",
-    "ironcub_left_leg_pitch",
-    "ironcub_left_leg_roll",
-    "ironcub_right_leg_pitch",
-    "ironcub_right_leg_roll",
-    "ironcub_torso_pitch",
-    "ironcub_torso_roll",
-]
-
-# Define the surfaces mergelist
-surfaceMergeList = [
-    "ironcub_left_arm",
-    "ironcub_left_arm",
-    "ironcub_right_arm",
-    "ironcub_right_arm",
-    "ironcub_root_link",
-    "ironcub_left_leg_upper",
-    "ironcub_root_link",
-    "ironcub_right_leg_upper",
-    "ironcub_torso",
-]
-

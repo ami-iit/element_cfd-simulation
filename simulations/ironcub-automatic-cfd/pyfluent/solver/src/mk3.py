@@ -1,10 +1,10 @@
 # This file contains the iRonCub-Mk3 specific parameters for the meshing process
 
 # Surface Mesh Size Function
-surfaceMeshSizeFunction = "Curvature & Proximity"
+surf_mesh_size_fun = "Curvature & Proximity"
 
 # Define the list of ironcub surfaces
-ironcubSurfacesList = [
+surface_list = [
     "ironcub_head",
     "ironcub_left_back_turbine",
     "ironcub_right_back_turbine",
