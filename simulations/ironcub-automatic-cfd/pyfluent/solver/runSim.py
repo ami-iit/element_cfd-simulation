@@ -62,11 +62,10 @@ caseDirPath = parentPath / "meshing" / "case" / robotName[-3:] # Fluent case dir
 pitchAnglesFilePath = srcDirPath / "pitchAngles.csv" # pitch angles file path
 yawAnglesStartFilePath = srcDirPath / "yawAnglesStart.csv" # yaw angles start file path
 yawAnglesFilePath = srcDirPath / "yawAngles.csv" # yaw angles file path
-outputParamFilePath = dataDirPath / "outputParameters.csv" # output parameters file path
 jointConfigFilePath = srcDirPath / f"jointConfig-{robotName[-3:]}.csv" # joint configuration file path
 
 # Create data directories if not existing
-dataDirectories = ["residuals", "contours", "database"]
+dataDirectories = ["residuals", "contours", "node-dtbs", 'cell-center-dtbs']
 for directory in dataDirectories:
     directoryPath = dataDirPath / directory
     if not directoryPath.exists():
@@ -86,17 +85,8 @@ for directory in dataDirectories:
 # Define residuals, contours and pressures paths
 residualsPath = dataDirPath / dataDirectories[0]
 contoursPath = dataDirPath / dataDirectories[1]
-databasePath = dataDirPath / dataDirectories[2]
-
-# Create the output parameters file if not existing.
-if not outputParamFilePath.exists():
-    with open(str(outputParamFilePath), 'w') as outputParamCSV:
-        outputParameterHeader = "config,pitchAngle,yawAngle,ironcub-cd,ironcub-cl,ironcub-cs"
-        for surfaceName in robot.ironcubSurfacesList:
-            reportDefName = surfaceName[8:]
-            reportDefName = reportDefName.replace("_", "-")
-            outputParameterHeader = outputParameterHeader + f",{reportDefName}-cd,{reportDefName}-cl,{reportDefName}-cs"
-        outputParamCSV.writelines(outputParameterHeader + "\n")
+nodeDataPath = dataDirPath / dataDirectories[2]
+cellDataPath = dataDirPath / dataDirectories[3]
 
 ###############################################################################
 # Load parameters from files
@@ -106,7 +96,6 @@ if not outputParamFilePath.exists():
 pitchAngleList = getAnglesList(pitchAnglesFilePath)
 yawAngleStartList = getAnglesList(yawAnglesStartFilePath)
 yawAngleList = getAnglesList(yawAnglesFilePath)
-outParamList = getOutputParameterList(outputParamFilePath)
 jointConfigNames = getJointConfigNames(jointConfigFilePath)
 
 ###############################################################################
@@ -116,6 +105,19 @@ jointConfigNames = getJointConfigNames(jointConfigFilePath)
 # each of the loaded pitch and yaw angles.
 
 for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
+    
+    outputParamFilePath = dataDirPath / f"outputParameters-{jointConfigName}.csv" # output parameters file path
+    # Create the output parameters file if not existing.
+    if not outputParamFilePath.exists():
+        with open(str(outputParamFilePath), 'w') as outputParamCSV:
+            outputParameterHeader = "config,pitchAngle,yawAngle,ironcub-cd,ironcub-cl,ironcub-cs"
+            for surfaceName in robot.ironcubSurfacesList:
+                reportDefName = surfaceName[8:]
+                reportDefName = reportDefName.replace("_", "-")
+                outputParameterHeader = outputParameterHeader + f",{reportDefName}-cd,{reportDefName}-cl,{reportDefName}-cs"
+            outputParamCSV.writelines(outputParameterHeader + "\n")
+    # Get the output parameters
+    outParamList = getOutputParameterList(outputParamFilePath)
 
     # Define list of yaw angles (different for first config to restart a crushed process)
     yawAngleCycleList = yawAngleStartList if jointConfigIndex == 0 else yawAngleList
@@ -129,15 +131,15 @@ for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
     print(f"[{timeFluentStart}] Starting pyFluent session...")
 
     solver = pyfluent.launch_fluent(
-        mode="solver",                      # "meshing", "pure-meshing" or "solver"
-        precision="double",                 # single or double precision
-        product_version="24.1.0",           # Fluent version
-        dimension=3,                        # 2d or 3d Fluent version
-        processor_count=core_number,        # number of cores (only pre-post if use_gpu=True)
-        gpu=use_gpu,                        # use GPU native solver
-        start_transcript=False,             # start transcript file
-        cwd=str(logDirPath),                # working directory
-        additional_arguments=mpi_option,    # additional arguments (used for MPI option)
+        mode="solver", # "meshing", "pure-meshing" or "solver"
+        precision="double", # single or double precision
+        product_version="24.1.0", # Fluent version
+        dimension=3, # 2d or 3d Fluent version
+        processor_count=core_number, # number of cores (only pre-post if use_gpu=True)
+        gpu=use_gpu, # use GPU native solver
+        start_transcript=False, # start transcript file
+        cwd=str(logDirPath), # working directory
+        additional_arguments=mpi_option, # additional arguments (used for MPI option)
     )
 
     ###############################################################################
@@ -195,33 +197,33 @@ for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
             # ~~~~~~~~~~~~~~~~~~~~~~~~
             # Plot and save the residuals for the current joint configuration and angles.
 
-            solver.results.graphics.picture.use_window_resolution = True
+            # solver.results.graphics.picture.use_window_resolution = True
             # solver.results.graphics.picture.x_resolution = 1920 # commented for ws067
             # solver.results.graphics.picture.y_resolution = 1440 # commented for ws067
-            solver.results.graphics.picture.save_picture(
-                file_name = str( residualsPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}")
-                )
+            # solver.results.graphics.picture.save_picture(
+            #     file_name = str( residualsPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}")
+            #     )
 
             ###############################################################################
             # Plot and save contours
             # ~~~~~~~~~~~~~~~~~~~~~~~~
             # Plot and save the velocity magnitude contour on the yz plane.
 
-            solver.results.graphics.contour["velocity-contour"] = {}
-            solver.results.graphics.contour["velocity-contour"] = {
-                "field": "velocity-magnitude",
-                "surfaces_list": ["yz-plane"],
-                "node_values": True,
-                "range_option": {
-                    "option": "auto-range-on",
-                    "auto_range_on": {"global_range": False},
-                },
-            }
-            solver.results.graphics.contour.display(object_name="velocity-contour")
-            solver.results.graphics.views.restore_view(view_name="right")
-            solver.results.graphics.picture.save_picture(
-                file_name = str( contoursPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}")
-                )
+            # solver.results.graphics.contour["velocity-contour"] = {}
+            # solver.results.graphics.contour["velocity-contour"] = {
+            #     "field": "velocity-magnitude",
+            #     "surfaces_list": ["yz-plane"],
+            #     "node_values": True,
+            #     "range_option": {
+            #         "option": "auto-range-on",
+            #         "auto_range_on": {"global_range": False},
+            #     },
+            # }
+            # solver.results.graphics.contour.display(object_name="velocity-contour")
+            # solver.results.graphics.views.restore_view(view_name="right")
+            # solver.results.graphics.picture.save_picture(
+            #     file_name = str( contoursPath / f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}")
+            #     )
 
             ###############################################################################
             # Compute and write output parameters
@@ -252,14 +254,49 @@ for jointConfigIndex, jointConfigName in enumerate(jointConfigNames):
                     if reportSurfacePrefix in surface:  
                         reportSurfaceList.extend([surface])
                 databaseFileName = f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}-{reportSurface}.dtbs"
-                databaseFilePath = str( databasePath / databaseFileName )
+                nodeDataFilePath = str( nodeDataPath / databaseFileName )
                 solver.file.export.ascii(
-                    file_name=databaseFilePath,
+                    file_name=nodeDataFilePath,
                     surface_name_list=reportSurfaceList,
                     delimiter="space",
-                    cell_func_domain=["pressure", "x-wall-shear", "y-wall-shear", "z-wall-shear"],
+                    cell_func_domain=["pressure", "x-wall-shear", "y-wall-shear", "z-wall-shear", "cell-id", "x-face-area","y-face-area","z-face-area"],
                     location="node",
                 )
+                cellDataFilePath = str( cellDataPath / databaseFileName )
+                solver.file.export.ascii(
+                    file_name=cellDataFilePath,
+                    surface_name_list=reportSurfaceList,
+                    delimiter="space",
+                    cell_func_domain=["pressure", "x-wall-shear", "y-wall-shear", "z-wall-shear", "cell-id", "x-face-area","y-face-area","z-face-area"],
+                    location="cell-center",
+                )
+            
+            # Export database files for all surfaces
+            reportSurfaceList = []
+            for reportSurface in robot.ironcubSurfacesList:
+                reportSurfaceList.append(reportSurface)
+                reportSurfacePrefix = reportSurface+":"
+                for surface in surfaceList:
+                    if reportSurfacePrefix in surface:  
+                        reportSurfaceList.append(surface)
+            databaseFileName = f"{jointConfigName}-{int(pitchAngle)}-{int(yawAngle)}-robot.dtbs"
+            nodeDataFilePath = str( nodeDataPath / databaseFileName )
+            solver.file.export.ascii(
+                file_name=nodeDataFilePath,
+                surface_name_list=reportSurfaceList,
+                delimiter="space",
+                cell_func_domain=["pressure", "x-wall-shear", "y-wall-shear", "z-wall-shear", "cell-id", "x-face-area","y-face-area","z-face-area"],
+                location="node",
+            )
+            cellDataFilePath = str( cellDataPath / databaseFileName )
+            solver.file.export.ascii(
+                file_name=cellDataFilePath,
+                surface_name_list=reportSurfaceList,
+                delimiter="space",
+                cell_func_domain=["pressure", "x-wall-shear", "y-wall-shear", "z-wall-shear", "cell-id", "x-face-area","y-face-area","z-face-area"],
+                location="cell-center",
+            )
+                
 
             ###############################################################################
             # Print Iter End message
