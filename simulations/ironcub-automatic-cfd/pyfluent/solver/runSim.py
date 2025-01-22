@@ -240,7 +240,7 @@ def main():
 
                 # Export database files for all surfaces in the same file
                 report_surface_list = []
-                for report_surface in robot.ironcubSurfacesList:
+                for report_surface in robot.surface_list:
                     report_surface_list.append(report_surface)
                     report_surface_pref = report_surface + ":"
                     for surface in surface_list:
