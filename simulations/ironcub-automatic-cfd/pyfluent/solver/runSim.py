@@ -286,3 +286,7 @@ def main():
         f"[{time}] Automatic CFD process completed successfully!",
         colors.RESET,
     )
+
+
+if __name__ == "__main__":
+    main()
