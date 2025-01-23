@@ -16,11 +16,10 @@ import pathlib
 import os
 
 from src.utils import (
-    colors,
+    print_log,
     get_angles_list,
     get_output_param_list,
     get_joint_config_names,
-    print_log,
     write_data,
 )
 
