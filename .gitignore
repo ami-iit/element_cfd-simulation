@@ -1,7 +1,5 @@
 # Matlab figures
 *.fig
-!flight-controllers/controlAndDataGui/*.fig
-!flight-controllers/wind-tunnel-control/src/static-gui/*.fig
 
 # Matlab temp files
 *.asv
@@ -30,7 +28,8 @@
 # Fluent files
 *.trn
 *.log
+*.err
 *.msh.h5
 *.cas.h5
-*.prs
 *.dtbs
+*.csv
