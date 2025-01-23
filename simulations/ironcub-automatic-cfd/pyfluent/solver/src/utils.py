@@ -74,16 +74,16 @@ def clean_files_with_exception(directory, allowed_ext):
 # Function to print and log messages
 def print_log(type, message, log_file):
     if type == "info":
-        prefix = (colors.CYAN, "[Info] ")
+        pref = (colors.CYAN, "[Info] ")
     elif type == "error":
-        prefix = (colors.RED, "[Error] ")
+        pref = (colors.RED, "[Error] ")
     elif type == "warning":
-        prefix = (colors.YELLOW, "[Warning] ")
+        pref = (colors.YELLOW, "[Warning] ")
     elif type == "success":
-        prefix = (colors.GREEN, "[Success] ")
-    print(prefix, message, colors.RESET)
+        pref = (colors.GREEN, "[Success] ")
+    print(pref[0], pref[1], message, colors.RESET)
     with open(str(log_file), "a") as f:
-        f.writelines(prefix[1] + message + "\n")
+        f.writelines(pref[1] + message + "\n")
 
 
 # Function for saving data
