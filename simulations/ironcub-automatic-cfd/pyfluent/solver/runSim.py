@@ -20,11 +20,13 @@ from src.utils import (
     get_angles_list,
     get_output_param_list,
     get_joint_config_names,
+    print_log,
+    write_data,
 )
 
 
 ROBOT_NAME = "ironcub-mk3"
-CORE_NUM = 48
+CORE_NUM = 64
 USE_GPU = False
 ITER_NUM = 1000
 
@@ -39,11 +41,9 @@ def main():
     # Set the MPI option for the WS
     mpi_option = "-mpi=openmpi" if os.name == "posix" else ""
 
-    # Define directory paths
+    # Define code and sources directory paths
     root_dir = pathlib.Path(__file__).parents[0]
     parent_dir = pathlib.Path(__file__).parents[1]
-    data_dir = root_dir / "data" / ROBOT_NAME[-3:]
-    log_dir = root_dir / "log"
     src_dir = root_dir / "src"
     cas_dir = parent_dir / "meshing" / "case" / ROBOT_NAME[-3:]
 
@@ -53,59 +53,59 @@ def main():
     yaw_angles_file = src_dir / "yaw-angles.csv"
     joint_config_file = src_dir / f"joint-config-{ROBOT_NAME[-3:]}.csv"
 
-    # Create data directories if not existing
+    # Load parameters from files
+    pitch_angle_list = get_angles_list(pitch_angles_file)
+    yaw_angle_start_list = get_angles_list(yaw_angles_start_file)
+    yaw_angle_list = get_angles_list(yaw_angles_file)
+    config_names = get_joint_config_names(joint_config_file)
+
+    # Create the log directory and files
+    log_dir = root_dir / "log"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    datetime_str = datetime.now().strftime(r"%Y%m%d-%H%M%S")
+    log_file = log_dir / f"{datetime_str}.log"
+    log_file.touch(exist_ok=True)
+    err_file = log_dir / f"{datetime_str}.err"
+    err_file.touch(exist_ok=True)
+
+    # Create output data directories if not existing
+    data_dir = root_dir / "data" / ROBOT_NAME[-3:]
+    data_dir.mkdir(parents=True, exist_ok=True)
     data_subdirs = ["residuals", "contours", "node-dtbs", "cell-center-dtbs"]
     for directory in data_subdirs:
         dir_path = data_dir / directory
-        if not dir_path.exists():
-            dir_path.mkdir(parents=True)
-            print(
-                colors.CYAN,
-                f"[Message] Creating {directory} directory: '{dir_path}'.",
-                colors.RESET,
-            )
-
-    # Define residuals, contours and pressures paths
+        dir_path.mkdir(parents=True, exist_ok=True)
+        print_log("info", f"{directory} path: {dir_path}", log_file)
     residuals_dir = data_dir / data_subdirs[0]
     contours_dir = data_dir / data_subdirs[1]
     node_dtbs_dir = data_dir / data_subdirs[2]
     cell_dtbs_dir = data_dir / data_subdirs[3]
 
-    # Load parameters from files
-    pitch_angle_list = get_angles_list(pitch_angles_file)
-    yaw_angle_start_list = get_angles_list(yaw_angles_start_file)
-    yaw_angle_list = get_angles_list(yaw_angles_file)
-    joint_config_names = get_joint_config_names(joint_config_file)
-
     # Start the automatic process
-    for joint_config_idx, joint_config_name in enumerate(joint_config_names):
-
+    for config_id, config_name in enumerate(config_names):
         # Create the output parameters file if not existing.
-        out_file = data_dir / f"out-{joint_config_name}.csv"
+        out_file = data_dir / f"out-{config_name}.csv"
         if not out_file.exists():
-            with open(str(out_file), "w") as out_csv:
+            with open(str(out_file), "w") as f:
                 out_header = (
                     "config,pitch_angle,yaw_angle,ironcub-cd,ironcub-cl,ironcub-cs"
                 )
                 for surface in robot.surface_list:
-                    report_def = surface[8:]
-                    report_def = report_def.replace("_", "-")
-                    out_header = (
-                        out_header + f",{report_def}-cd,{report_def}-cl,{report_def}-cs"
-                    )
-                out_csv.writelines(out_header + "\n")
+                    report = surface[8:].replace("_", "-")
+                    out_header = out_header + f",{report}-cd,{report}-cl,{report}-cs"
+                f.writelines(out_header + "\n")
+        else:
+            with open(str(out_file), "w") as f:
+                f.writelines("#### Restarting the process ####\n")
         # Get the output parameters
         out_list = get_output_param_list(out_file)
 
         # Define list of yaw angles (different for first config to restart a crushed process)
-        yaw_angle_list = (
-            yaw_angle_start_list if joint_config_idx == 0 else yaw_angle_list
-        )
+        yaw_angle_list = yaw_angle_start_list if config_id == 0 else yaw_angle_list
 
         # Launch Fluent
         time = datetime.now().strftime("%H:%M:%S")
-        print(f"[{time}] Starting pyFluent session...")
-
+        print_log("info", f"[{time}] Starting pyfluent session.", log_file)
         solver = pyfluent.launch_fluent(
             mode="solver",
             precision="double",
@@ -120,18 +120,15 @@ def main():
 
         # Start the cycle on yaw angles
         for yaw_angle in yaw_angle_list:
-
             # Singular configuration check:
             # |yaw_angle| == 90 => wind direction not changing with pitch angle
             pitch_angle_list = (
                 pitch_angle_list if (abs(abs(yaw_angle) - 90) > 1e-4) else [0.0]
             )
-
             # Start the cycle on pitch angles
             for pitch_angle in pitch_angle_list:
-
                 # Read the case file for the current joint configuration
-                cas_file = joint_config_name + ".cas.h5"
+                cas_file = config_name + ".cas.h5"
                 cas_path = cas_dir / cas_file
                 solver.file.read_case(file_name=str(cas_path))
 
@@ -150,7 +147,6 @@ def main():
                 # Set Boundary Conditions
                 inlet = solver.setup.boundary_conditions.velocity_inlet["inlet"]
                 inlet.turbulence.turbulent_intensity = 0.001
-
                 solver.mesh.modify_zones.sep_face_zone_mark(
                     face_zone_name="inlet", register_name="region_in"
                 )
@@ -167,7 +163,7 @@ def main():
                 # solver.results.graphics.picture.x_resolution = 1920
                 # solver.results.graphics.picture.y_resolution = 1440
                 # solver.results.graphics.picture.save_picture(
-                #     file_name = str( residuals_dir / f"{joint_config_name}-{int(pitch_angle)}-{int(yaw_angle)}")
+                #     file_name = str( residuals_dir / f"{config_name}-{int(pitch_angle)}-{int(yaw_angle)}")
                 #     )
 
                 # Plot and save contours (TODO: currently not working on srv and ws)
@@ -184,25 +180,25 @@ def main():
                 # solver.results.graphics.contour.display(object_name="velocity-contour")
                 # solver.results.graphics.views.restore_view(view_name="right")
                 # solver.results.graphics.picture.save_picture(
-                #     file_name = str( contours_dir / f"{joint_config_name}-{int(pitch_angle)}-{int(yaw_angle)}")
+                #     file_name = str( contours_dir / f"{config_name}-{int(pitch_angle)}-{int(yaw_angle)}")
                 #     )
 
                 # Compute and write output parameters
                 out_val_list = solver.solution.report_definitions.compute(
                     report_defs=out_list
                 )
-                with open(str(out_file), "a") as out_csv:
-                    out_str = f"{joint_config_name},{pitch_angle},{yaw_angle}"
+                with open(str(out_file), "a") as f:
+                    out_str = f"{config_name},{pitch_angle},{yaw_angle}"
                     for out_idx, _ in enumerate(out_list):
                         out_val = out_val_list[out_idx][out_list[out_idx]][0]
                         out_str = out_str + f",{out_val}"
-                    out_csv.writelines(out_str + "\n")
+                    f.writelines(out_str + "\n")
 
                 # Export surface data
                 cd_report = solver.solution.report_definitions.drag["ironcub-cd"]
                 surface_list = cd_report.zones.allowed_values()
 
-                export_vars = [
+                exp_vars = [
                     "pressure",
                     "x-wall-shear",
                     "y-wall-shear",
@@ -214,78 +210,68 @@ def main():
                 ]
 
                 # Export database files for each single surface
-                for report_surface in robot.surface_list:
-                    report_surface_list = [report_surface]
-                    report_surface_pref = report_surface + ":"
+                max_trials = 5
+                for rep_surf in robot.surface_list:
+                    rep_surf_list = [rep_surf]
+                    rep_surf_pref = rep_surf + ":"
                     for surface in surface_list:
-                        if report_surface_pref in surface:
-                            report_surface_list.extend([surface])
-                    dtbs_file = f"{joint_config_name}-{int(pitch_angle)}-{int(yaw_angle)}-{report_surface}.dtbs"
-                    node_dtbs_path = str(node_dtbs_dir / dtbs_file)
-                    solver.file.export.ascii(
-                        file_name=node_dtbs_path,
-                        surface_name_list=report_surface_list,
-                        delimiter="space",
-                        cell_func_domain=export_vars,
-                        location="node",
+                        if rep_surf_pref in surface:
+                            rep_surf_list.extend([surface])
+                    dtbs_file = f"{config_name}-{int(pitch_angle)}-{int(yaw_angle)}-{rep_surf}.dtbs"
+                    # Save node data
+                    dtbs_path = str(node_dtbs_dir / dtbs_file)
+                    success1 = write_data(
+                        solver, "node", dtbs_path, rep_surf_list, exp_vars
                     )
-                    cell_dtbs_path = str(cell_dtbs_dir / dtbs_file)
-                    solver.file.export.ascii(
-                        file_name=cell_dtbs_path,
-                        surface_name_list=report_surface_list,
-                        delimiter="space",
-                        cell_func_domain=export_vars,
-                        location="cell-center",
+                    # Save cell data
+                    dtbs_path = str(cell_dtbs_dir / dtbs_file)
+                    success2 = write_data(
+                        solver, "cell-center", dtbs_path, rep_surf_list, exp_vars
                     )
 
                 # Export database files for all surfaces in the same file
-                report_surface_list = []
-                for report_surface in robot.surface_list:
-                    report_surface_list.append(report_surface)
-                    report_surface_pref = report_surface + ":"
+                rep_surf_list = []
+                for rep_surf in robot.surface_list:
+                    rep_surf_list.append(rep_surf)
+                    rep_surf_pref = rep_surf + ":"
                     for surface in surface_list:
-                        if report_surface_pref in surface:
-                            report_surface_list.append(surface)
-                dtbs_file = f"{joint_config_name}-{int(pitch_angle)}-{int(yaw_angle)}-robot.dtbs"
-                node_dtbs_path = str(node_dtbs_dir / dtbs_file)
-                solver.file.export.ascii(
-                    file_name=node_dtbs_path,
-                    surface_name_list=report_surface_list,
-                    delimiter="space",
-                    cell_func_domain=export_vars,
-                    location="node",
+                        if rep_surf_pref in surface:
+                            rep_surf_list.append(surface)
+                dtbs_file = (
+                    f"{config_name}-{int(pitch_angle)}-{int(yaw_angle)}-robot.dtbs"
                 )
-                cell_dtbs_path = str(cell_dtbs_dir / dtbs_file)
-                solver.file.export.ascii(
-                    file_name=cell_dtbs_path,
-                    surface_name_list=report_surface_list,
-                    delimiter="space",
-                    cell_func_domain=export_vars,
-                    location="cell-center",
+                # Save node data
+                dtbs_path = str(node_dtbs_dir / dtbs_file)
+                success3 = write_data(
+                    solver, "node", dtbs_path, rep_surf_list, exp_vars
+                )
+                # Save cell data
+                dtbs_path = str(cell_dtbs_dir / dtbs_file)
+                success4 = write_data(
+                    solver, "cell-center", dtbs_path, rep_surf_list, exp_vars
                 )
 
                 # Print Iter End message
+                success = success1 and success2 and success3 and success4
+                iter_result = "Success!" if success else "Error!"
+                message_type = "info" if success else "error"
                 end_time = datetime.now().strftime("%H:%M:%S")
-                print(
-                    f"[{end_time}] Iter for {joint_config_name}, alpha={pitch_angle}, beta={yaw_angle}: Success!"
-                )
+                message = f"[{end_time}] {config_name}, alpha={pitch_angle}, beta={yaw_angle}: {iter_result}"
+                print_log(message_type, message, log_file)
+                if not success:
+                    with open(str(err_file), "a") as f:
+                        f.writelines(message + "\n")
 
         # Close Fluent Solver Session
         solver.exit()
         time = datetime.now().strftime("%H:%M:%S")
-        print(
-            colors.GREEN,
-            f"[{time}] {joint_config_name} iterations completed!",
-            colors.RESET,
-        )
+        string = f"[{time}] {config_name} iterations completed!"
+        print_log("success", string, log_file)
 
     # Close the process
     time = datetime.now().strftime("%H:%M:%S")
-    print(
-        colors.GREEN,
-        f"[{time}] Automatic CFD process completed successfully!",
-        colors.RESET,
-    )
+    string = f"[{time}] Automatic CFD process completed successfully!"
+    print_log("success", string, log_file)
 
 
 if __name__ == "__main__":

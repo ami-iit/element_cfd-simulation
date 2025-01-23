@@ -69,3 +69,38 @@ def clean_files_with_exception(directory, allowed_ext):
                 print(f"Deleted directory and its contents: {item}")
             except Exception as e:
                 print(f"Failed to delete directory: {item}: {e}")
+
+
+# Function to print and log messages
+def print_log(type, message, log_file):
+    if type == "info":
+        prefix = (colors.CYAN, "[Info] ")
+    elif type == "error":
+        prefix = (colors.RED, "[Error] ")
+    elif type == "warning":
+        prefix = (colors.YELLOW, "[Warning] ")
+    elif type == "success":
+        prefix = (colors.GREEN, "[Success] ")
+    print(prefix, message, colors.RESET)
+    with open(str(log_file), "a") as f:
+        f.writelines(prefix[1] + message + "\n")
+
+
+# Function for saving data
+def write_data(solver, location, file_path, surface_list, export_vars, max_trials=5):
+    trials = 0
+    success = False
+    while trials < max_trials:
+        try:
+            solver.file.export.ascii(
+                file_name=file_path,
+                surface_name_list=surface_list,
+                delimiter="space",
+                cell_func_domain=export_vars,
+                location=location,
+            )
+            success = True
+            break
+        except Exception as e:
+            trials += 1
+    return success
