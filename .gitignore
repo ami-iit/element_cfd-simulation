@@ -29,6 +29,7 @@
 *.trn
 *.log
 *.err
+*.out
 *.msh.h5
 *.cas.h5
 *.dtbs
