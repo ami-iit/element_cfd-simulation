@@ -23,26 +23,24 @@ class colors:
 
 
 # Function to get the joint configuration names from the joint configuration file
-def getJointConfigNames(jointConfigFilePath):
-    with open(str(jointConfigFilePath), "r") as jointConfigCSV:
-        jointConfigFile = jointConfigCSV.readlines()
-        jointConfigNames = []
-        for jointConfig in jointConfigFile:
-            temp = jointConfig[:-1].split(",")
-            jointConfigNames.append(temp[0])
+def get_config_names(joint_config_file):
+    with open(str(joint_config_file), "r") as f:
+        config_file = f.readlines()
+        config_names = []
+        for config_name in config_file:
+            temp = config_name[:-1].split(",")
+            config_names.append(temp[0])
 
-    return jointConfigNames
+    return config_names
 
 
 # Function to clean files and directories in a directory except the ones with the allowed extensions
-def cleanFilesExceptExtension(directory, allowedExtensions):
-    if isinstance(
-        allowedExtensions, str
-    ):  # Convert to list if single string is provided
-        allowedExtensions = [allowedExtensions]
-    directoryPath = pathlib.Path(directory)
-    for item in directoryPath.glob("**/*"):
-        if item.is_file() and item.suffix not in allowedExtensions:
+def clean_files_except_ext(directory, allowed_ext):
+    if isinstance(allowed_ext, str):
+        allowed_ext = [allowed_ext]
+    dir_path = pathlib.Path(directory)
+    for item in dir_path.glob("**/*"):
+        if item.is_file() and item.suffix not in allowed_ext:
             try:
                 item.unlink()
                 print(f"Deleted file: {item}")
