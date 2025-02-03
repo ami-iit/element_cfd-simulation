@@ -7,7 +7,7 @@ dependencies:
   - numpy
   - pip
   - pip:
-    - ansys-fluent-core==0.21.3
+    - ansys-fluent-core==0.28.2
     - ansys-fluent-parametric
     - ansys-fluent-visualization
     - vtk #==9.1.0
