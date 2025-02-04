@@ -70,23 +70,3 @@ def clean_files_with_exception(directory, allowed_ext):
                 print(f"Deleted directory and its contents: {item}")
             except Exception as e:
                 print(f"Failed to delete directory: {item}: {e}")
-
-
-# Function for saving data
-def write_data(solver, location, file_path, surface_list, export_vars, max_trials=5):
-    trials = 0
-    success = False
-    while trials < max_trials:
-        try:
-            solver.file.export.ascii(
-                file_name=file_path,
-                surface_name_list=surface_list,
-                delimiter="space",
-                cell_func_domain=export_vars,
-                location=location,
-            )
-            success = True
-            break
-        except Exception as e:
-            trials += 1
-    return success
