@@ -1,6 +1,0 @@
-# encoding: utf-8
-# 2023 R2
-SetScriptVersion(Version="23.2.142")
-fileReference1 = GetFileReference(Name="F1")
-fileReference1.Repair(FilePath="C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/workbench/auto-cfd-model/geom/ironcub-model-share.scdoc")
-Save(Overwrite=True)
