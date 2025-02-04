@@ -6,6 +6,7 @@
 
 # numpy dataset
 *.npy
+*.npz
 
 # GIFs
 *.gif
@@ -30,6 +31,8 @@
 *.log
 *.err
 *.out
+*.scdoc
+*.msh
 *.msh.h5
 *.cas.h5
 *.dtbs

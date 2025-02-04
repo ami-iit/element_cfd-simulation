@@ -4,7 +4,6 @@ Date: 2024-02-28
 Description:    This file encloses some utility functions used in the main script.
 """
 
-# Import libraries
 import pathlib
 import shutil
 
@@ -43,14 +42,14 @@ def get_output_param_list(out_param_path):
 
 
 # Function to get the joint configuration names from the joint configuration file
-def get_joint_config_names(joint_config_path):
-    with open(str(joint_config_path), "r") as joint_config_csv:
-        joint_config_file = joint_config_csv.readlines()
-        joint_config_names = []
-        for joint_config in joint_config_file:
-            temp = joint_config[:-1].split(",")
-            joint_config_names.append(temp[0])
-    return joint_config_names
+def get_config_names(joint_config_file):
+    with open(str(joint_config_file), "r") as f:
+        config_file = f.readlines()
+        config_names = []
+        for config_name in config_file:
+            temp = config_name[:-1].split(",")
+            config_names.append(temp[0])
+    return config_names
 
 
 # Function to clean files and directories in a directory except the ones with the allowed extensions

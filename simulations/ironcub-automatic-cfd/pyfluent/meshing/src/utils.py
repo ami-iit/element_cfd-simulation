@@ -4,22 +4,23 @@ Date: 2024-02-28
 Description:    This file encloses some utility functions used in the main script.
 """
 
-# Import libraries
-import os
 import pathlib
 import shutil
 
 
-# ANSI color codes class
-class colors:
-    RED = "\033[91m"
-    GREEN = "\033[92m"
-    YELLOW = "\033[93m"
-    BLUE = "\033[94m"
-    PURPLE = "\033[95m"
-    CYAN = "\033[96m"
-    WHITE = "\033[97m"
-    RESET = "\033[0m"
+# Function to print and log messages
+def print_log(type, message, log_file):
+    if type == "info":
+        pref = ("\033[96m", "[Info] ")
+    elif type == "error":
+        pref = ("\033[91m", "[Error] ")
+    elif type == "warning":
+        pref = ("\033[93m", "[Warning] ")
+    elif type == "success":
+        pref = ("\033[92m", "[Success] ")
+    print(pref[0], pref[1], message, "\033[0m")
+    with open(str(log_file), "a") as f:
+        f.writelines(pref[1] + message + "\n")
 
 
 # Function to get the joint configuration names from the joint configuration file
@@ -30,7 +31,6 @@ def get_config_names(joint_config_file):
         for config_name in config_file:
             temp = config_name[:-1].split(",")
             config_names.append(temp[0])
-
     return config_names
 
 

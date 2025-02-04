@@ -10,18 +10,12 @@ This code is based on the example provided at the following link:
 https://github.com/ansys/pyfluent/tree/v0.19.2/examples/00-fluent
 """
 
-# Perform required imports
-# ~~~~~~~~~~~~~~~~~~~~~~~~
-# Perform required imports.
-
 import ansys.fluent.core as pyfluent
 from datetime import datetime
-
 import pathlib
 import os
 
-from src.utils import colors, get_config_names, clean_files_except_ext
-
+from src.utils import print_log, get_config_names, clean_files_except_ext
 
 ROBOT_NAME = "ironcub-mk3"
 CORE_NUM = 64
@@ -41,14 +35,32 @@ def main():
     # Define code and sources directory paths
     root_dir = pathlib.Path(__file__).parents[0]
     parent_dir = pathlib.Path(__file__).parents[1]
+    geom_dir = parent_dir / "geom" / ROBOT_NAME[-3:]
+    src_dir = root_dir / "src"
+
+    # Create the log directory and files
+    log_dir = root_dir / "log"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    datetime_str = datetime.now().strftime(r"%Y%m%d-%H%M%S")
+    log_file = log_dir / f"{datetime_str}.log"
+    log_file.touch(exist_ok=True)
+    err_file = log_dir / f"{datetime_str}.err"
+    err_file.touch(exist_ok=True)
+
+    # Define output directories
     msh_dir = root_dir / "mesh" / ROBOT_NAME[-3:] / "msh"
     dtbs_dir = root_dir / "mesh" / ROBOT_NAME[-3:] / "dtbs"
     cas_dir = root_dir / "case" / ROBOT_NAME[-3:]
-    src_dir = root_dir / "src"
-    log_dir = root_dir / "log"
-    geom_dir = parent_dir / "geom" / ROBOT_NAME[-3:]
 
-    # Define file paths
+    # Create output directories if they do not exist
+    msh_dir.mkdir(parents=True, exist_ok=True)
+    print_log("info", f"{msh_dir.stem} path: {msh_dir}", log_file)
+    dtbs_dir.mkdir(parents=True, exist_ok=True)
+    print_log("info", f"{dtbs_dir.stem} path: {dtbs_dir}", log_file)
+    cas_dir.mkdir(parents=True, exist_ok=True)
+    print_log("info", f"{cas_dir.stem} path: {cas_dir}", log_file)
+
+    # Define input file path
     joint_config_file = src_dir / f"joint-config-{ROBOT_NAME[-3:]}.csv"
 
     # Load the joint configuration names from the files.
@@ -63,7 +75,7 @@ def main():
         try:
             # Launch Fluent
             time = datetime.now().strftime("%H:%M:%S")
-            print(f"[{time}] Starting pyFluent session...")
+            print_log("info", f"[{time}] Starting pyfluent session (1/3).", log_file)
             meshing = pyfluent.launch_fluent(
                 mode="meshing",
                 precision="double",
@@ -197,23 +209,49 @@ def main():
             # Check mesh, save mesh file and exit meshing mode
             meshing.tui.mesh.check_mesh()
             msh_file_name = config_name + ".msh.h5"
-            msh_file_path = msh_dir / msh_file_name
+            msh_file_path = msh_dir.parent / msh_file_name
             meshing.tui.file.write_mesh(str(msh_file_path))
+            meshing.exit()
+
+            # Re-launch Fluent in meshing mode to write boundaries
+            time = datetime.now().strftime("%H:%M:%S")
+            print_log("info", f"[{time}] Starting pyfluent session (2/3).", log_file)
+            meshing = pyfluent.launch_fluent(
+                mode="meshing",
+                precision="double",
+                product_version="24.1.0",
+                dimension=3,
+                processor_count=CORE_NUM,
+                gpu=USE_GPU,
+                start_transcript=False,
+                cwd=str(log_dir),
+                additional_arguments=mpi_option,
+            )
+
+            # Read generated mesh
+            meshing.tui.file.read_mesh(str(msh_file_path))
+
+            # Export boundary mesh files
+            for surface in robot.surfaces_list:
+                filename = msh_dir / f"{config_name}-{surface}.msh"
+                meshing.tui.file.write_boundaries(str(filename), surface)
+
+            # exit meshing mode
             meshing.exit()
 
             # Re-launch Fluent in solver mode
             time = datetime.now().strftime("%H:%M:%S")
-            print(f"[{time}] Starting pyFluent session...")
+            print_log("info", f"[{time}] Starting pyfluent session (3/3).", log_file)
             solver = pyfluent.launch_fluent(
-                mode="solver",  # "meshing", "pure-meshing" or "solver"
-                precision="double",  # single or double precision
-                product_version="24.1.0",  # Fluent version
-                dimension=3,  # 2d or 3d Fluent version
-                processor_count=CORE_NUM,  # number of cores (only pre-post if USE_GPU=True)
-                gpu=USE_GPU,  # use GPU native solver
-                start_transcript=False,  # start transcript file
-                cwd=str(log_dir),  # working directory
-                additional_arguments=mpi_option,  # additional arguments (used for MPI option)
+                mode="solver",
+                precision="double",
+                product_version="24.1.0",
+                dimension=3,
+                processor_count=CORE_NUM,
+                gpu=USE_GPU,
+                start_transcript=False,
+                cwd=str(log_dir),
+                additional_arguments=mpi_option,
             )
 
             # Load and check the mesh
@@ -355,36 +393,23 @@ def main():
             # Close Fluent and clean up debug files
             solver.exit()
             time = datetime.now().strftime("%H:%M:%S")
-            print(
-                colors.GREEN,
-                f"[{time}] {config_name} mesh generated!",
-                colors.RESET,
-            )
-            clean_files_except_ext(msh_dir, ".h5")
-            clean_files_except_ext(log_dir, [".log", ".trn", ".bat"])
+            print_log("success", f"[{time}] {config_name} mesh generated!", log_file)
 
-        except Exception as message:
-            # Manage Fluent errors
+        except Exception as error:
             meshing.exit()
             time = datetime.now().strftime("%H:%M:%S")
-            print(
-                colors.RED,
-                f"[{time}] {config_name} mesh failed with the following error: \n",
-                message,
-                colors.RESET,
-            )
-            clean_files_except_ext(msh_dir, ".h5")
-            clean_files_except_ext(log_dir, [".log", ".trn", ".bat"])
-
+            message = f"[{time}] {config_name} mesh generation failed!"
+            print_log("error", message, log_file)
+            with open(str(err_file), "a") as f:
+                f.writelines(message + "\n" + str(error) + "\n")
             pass
+
+        clean_files_except_ext(msh_dir, [".h5", ".dtbs", ".msh"])
+        clean_files_except_ext(log_dir, [".log", ".err", ".trn", ".bat"])
 
     # Close the process
     time = datetime.now().strftime("%H:%M:%S")
-    print(
-        colors.GREEN,
-        f"[{time}] Automatic meshing process completed!",
-        colors.RESET,
-    )
+    print_log("success", f"[{time}] Meshing routine completed!", log_file)
 
 
 if __name__ == "__main__":

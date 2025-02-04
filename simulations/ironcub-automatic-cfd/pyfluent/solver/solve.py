@@ -19,7 +19,7 @@ from src.utils import (
     print_log,
     get_angles_list,
     get_output_param_list,
-    get_joint_config_names,
+    get_config_names,
     write_data,
 )
 
@@ -56,7 +56,7 @@ def main():
     pitch_angle_list = get_angles_list(pitch_angles_file)
     yaw_angle_start_list = get_angles_list(yaw_angles_start_file)
     yaw_angle_list = get_angles_list(yaw_angles_file)
-    config_names = get_joint_config_names(joint_config_file)
+    config_names = get_config_names(joint_config_file)
 
     # Create the log directory and files
     log_dir = root_dir / "log"
@@ -209,7 +209,6 @@ def main():
                 ]
 
                 # Export database files for each single surface
-                max_trials = 5
                 for rep_surf in robot.surface_list:
                     rep_surf_list = [rep_surf]
                     rep_surf_pref = rep_surf + ":"
