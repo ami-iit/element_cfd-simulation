@@ -11,3 +11,5 @@ dependencies:
     - ansys-fluent-parametric
     - ansys-fluent-visualization
     - vtk #==9.1.0
+variables:
+  AWP_ROOT241: /usr/ansys_inc/v241
