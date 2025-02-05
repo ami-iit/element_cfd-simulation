@@ -49,11 +49,14 @@ def main():
 
     # Define output directories
     msh_dir = root_dir / "mesh" / ROBOT_NAME[-3:] / "msh"
+    dlm_dir = root_dir / "mesh" / ROBOT_NAME[-3:] / "dlm"
     cas_dir = root_dir / "case" / ROBOT_NAME[-3:]
 
     # Create output directories if they do not exist
     msh_dir.mkdir(parents=True, exist_ok=True)
     print_log("info", f"{msh_dir.stem} path: {msh_dir}", log_file)
+    dlm_dir.mkdir(parents=True, exist_ok=True)
+    print_log("info", f"{dlm_dir.stem} path: {dlm_dir}", log_file)
     cas_dir.mkdir(parents=True, exist_ok=True)
     print_log("info", f"{cas_dir.stem} path: {cas_dir}", log_file)
 
@@ -365,6 +368,25 @@ def main():
             cas_file_name = config_name + ".cas.h5"
             cas_file_path = cas_dir / cas_file_name
             solver.file.write(file_name=str(cas_file_path), file_type="case")
+
+            # Export dual mesh dlm files
+            cd_report = solver.solution.report_definitions.drag["ironcub-cd"]
+            surface_list = cd_report.zones.allowed_values()
+            for rep_surf in robot.surfaces_list:
+                rep_surf_list = [rep_surf]
+                rep_surf_pref = rep_surf + ":"
+                for surface in surface_list:
+                    if rep_surf_pref in surface:
+                        rep_surf_list.extend([surface])
+                dtbs_file_name = f"mesh-{config_name}-0-0-{rep_surf}.dlm"
+                dtbs_file_path = str(dlm_dir / dtbs_file_name)
+                solver.file.export.ascii(
+                    file_name=dtbs_file_path,
+                    surface_name_list=rep_surf_list,
+                    delimiter="space",
+                    cell_func_domain=["x-face-area", "y-face-area", "z-face-area"],
+                    location="cell-center",
+                )
 
             # Close Fluent and clean up debug files
             solver.exit()
