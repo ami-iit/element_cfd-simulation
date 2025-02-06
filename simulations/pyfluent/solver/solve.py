@@ -217,23 +217,23 @@ def main():
                             if rep_surf_pref in surface:
                                 rep_surf_list.extend([surface])
                         dtbs_file = f"{config_name}-{int(pitch_angle)}-{int(yaw_angle)}-{rep_surf}.dtbs"
-                        # Save node data
-                        dtbs_path = str(node_dtbs_dir / dtbs_file)
-                        solver.file.export.ascii(
-                            file_name=dtbs_path,
-                            surface_name_list=surface_list,
-                            delimiter="space",
-                            cell_func_domain=exp_vars,
-                            location="node",
-                        )
                         # Save cell data
                         dtbs_path = str(cell_dtbs_dir / dtbs_file)
                         solver.file.export.ascii(
                             file_name=dtbs_path,
-                            surface_name_list=surface_list,
+                            surface_name_list=rep_surf_list,
                             delimiter="space",
                             cell_func_domain=exp_vars,
                             location="cell-center",
+                        )
+                        # Save node data
+                        dtbs_path = str(node_dtbs_dir / dtbs_file)
+                        solver.file.export.ascii(
+                            file_name=dtbs_path,
+                            surface_name_list=rep_surf_list,
+                            delimiter="space",
+                            cell_func_domain=exp_vars,
+                            location="node",
                         )
 
                     # Export database files for all surfaces in the same file
@@ -247,23 +247,23 @@ def main():
                     dtbs_file = (
                         f"{config_name}-{int(pitch_angle)}-{int(yaw_angle)}-robot.dtbs"
                     )
-                    # Save node data
-                    dtbs_path = str(node_dtbs_dir / dtbs_file)
-                    solver.file.export.ascii(
-                        file_name=dtbs_path,
-                        surface_name_list=surface_list,
-                        delimiter="space",
-                        cell_func_domain=exp_vars,
-                        location="node",
-                    )
                     # Save cell data
                     dtbs_path = str(cell_dtbs_dir / dtbs_file)
                     solver.file.export.ascii(
                         file_name=dtbs_path,
-                        surface_name_list=surface_list,
+                        surface_name_list=rep_surf_list,
                         delimiter="space",
                         cell_func_domain=exp_vars,
                         location="cell-center",
+                    )
+                    # Save node data
+                    dtbs_path = str(node_dtbs_dir / dtbs_file)
+                    solver.file.export.ascii(
+                        file_name=dtbs_path,
+                        surface_name_list=rep_surf_list,
+                        delimiter="space",
+                        cell_func_domain=exp_vars,
+                        location="node",
                     )
 
                     # Print Iter End message
