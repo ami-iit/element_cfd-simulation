@@ -4,7 +4,7 @@
 surface_mesh_size_function = "Curvature & Proximity"
 
 # Define the list of ironcub surfaces
-surfaces_list = [
+surface_list = [
     "ironcub_head",
     "ironcub_left_back_turbine",
     "ironcub_right_back_turbine",

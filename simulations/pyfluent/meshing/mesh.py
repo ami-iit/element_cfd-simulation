@@ -107,7 +107,7 @@ def main():
                 {
                     "AddChild": "yes",
                     "BOIControlName": "ironcub-sizing",
-                    "BOIFaceLabelList": robot.surfaces_list,
+                    "BOIFaceLabelList": robot.surface_list,
                     "BOISize": 20,
                 }
             )
@@ -232,7 +232,7 @@ def main():
             meshing.tui.file.read_mesh(str(msh_file_path))
 
             # Export boundary mesh files
-            for surface in robot.surfaces_list:
+            for surface in robot.surface_list:
                 filename = msh_dir / f"{config_name}-{surface}.msh"
                 meshing.tui.file.write_boundaries(str(filename), surface)
 
@@ -329,7 +329,7 @@ def main():
             cs.average_over = 100
 
             # define the reports for the ironcub surfaces
-            for rep_surf in robot.surfaces_list:
+            for rep_surf in robot.surface_list:
                 rep_def_name = rep_surf[8:]
                 rep_def_name = rep_def_name.replace("_", "-")
                 rep_surf_list = [rep_surf]
@@ -372,7 +372,7 @@ def main():
             # Export dual mesh dlm files
             cd_report = solver.solution.report_definitions.drag["ironcub-cd"]
             surface_list = cd_report.zones.allowed_values()
-            for rep_surf in robot.surfaces_list:
+            for rep_surf in robot.surface_list:
                 rep_surf_list = [rep_surf]
                 rep_surf_pref = rep_surf + ":"
                 for surface in surface_list:
