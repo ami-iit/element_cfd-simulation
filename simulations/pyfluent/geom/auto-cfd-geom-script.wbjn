@@ -8,96 +8,87 @@ import sys
 
 ########## INPUT DATA ##########
 # Set robot model: ironcub-mk1 | ironcub-mk3
-robotName = "ironcub-mk3"
+robot_name = "ironcub-mk3"
 
 # Set files folder
-rootPath = "C:/Users/apaolino/code/element_cfd-simulation/simulations/ironcub-automatic-cfd/pyfluent/geom/"
-srcPath  = rootPath + "src/"
-geomPath = rootPath + robotName[-3:] + "/"
-geomDMAssPath  = rootPath + "auto_cfd_geom_files/dp0/Geom/DM/"
-geomDMCompPath = rootPath + "auto_cfd_geom_files/dp0/Geom/DM/otherDocs/"
+root_path = os.path.dirname(__file__) + "/"
+src_path  = root_path + "src/"
+geom_path = root_path + robot_name[-3:] + "/"
+geom_DM_ass_path  = root_path + "auto_cfd_geom_files/dp0/Geom/DM/"
+geom_DM_comp_path = root_path + "auto_cfd_geom_files/dp0/Geom/DM/otherDocs/"
 
 # File names
-assFileName         = 'Geom.scdoc'
-if robotName == "ironcub-mk1":
-    geometrySrcFile     = "ironcub-geom.scdoc"
-    compFileName        = 'iRonCub-share.scdoc'
-    geomScriptFile      = "ironcub-geom-script.scscript"
-    jointConfigFileName = "jointConfig.csv"
-elif robotName == "ironcub-mk3":
-    geometrySrcFile     = "ironcub-mk3-fluid.scdoc"
-    compFileName        = 'ironcub-mk3.scdoc'
-    geomScriptFile      = "automatic_robot_configuration.scscript"
-    jointConfigFileName = "jointConfig-mk3.csv"
+ass_file = 'Geom.scdoc'
+if robot_name == "ironcub-mk1":
+    geom_src_file = "ironcub-geom.scdoc"
+    comp_file = 'iRonCub-share.scdoc'
+    script_file = "ironcub-geom-script.scscript"
+    joint_config_file = "jointConfig.csv"
+elif robot_name == "ironcub-mk3":
+    geom_src_file = "ironcub-mk3-fluid.scdoc"
+    comp_file = 'ironcub-mk3.scdoc'
+    script_file = "automatic_robot_configuration.scscript"
+    joint_config_file = "jointConfig-mk3.csv"
 
 # Load robot joint config
-with open(srcPath + jointConfigFileName, 'r') as jointConfigCSV:
-    jointConfigFile  = jointConfigCSV.readlines()
-    jointConfigList  = []
-    jointConfigNames = []
-    for jointConfig in jointConfigFile:
-        temp = jointConfig[:-1].split(',')
-        jointConfigList.append(temp[1:]) #splitting values by comma
-        jointConfigNames.append(temp[0])
+with open(src_path + joint_config_file, 'r') as csv:
+    configs  = csv.readlines()
+    config_list  = []
+    config_names = []
+    for config in configs:
+        temp = config[:-1].split(',')
+        config_list.append(temp[1:]) #splitting values by comma
+        config_names.append(temp[0])
     
 
 # Cycle on the joint config to generate the robot geometry in SpaceClaim
-jointConfigCounter = 0
-for jointConfig in jointConfigList:
+for config_idx, config in enumerate(config_list):
     
-    defaultPitchAngle = "0";
-    defaultYawAngle = "0";
+    def_pitch = "0"
+    def_yaw = "0"
         
     # Load and open SC geometry
-    geomSystem    = GetSystem(Name="Geom")
-    geomComponent = geomSystem.GetContainer(ComponentName="Geometry")
-    geomComponent.SetFile(FilePath = srcPath + geometrySrcFile)
-    geomComponent.Edit(IsSpaceClaimGeometry=True)
+    geom_sys = GetSystem(Name="Geom")
+    geom_comp = geom_sys.GetContainer(ComponentName="Geometry")
+    geom_comp.SetFile(FilePath = src_path + geom_src_file)
+    geom_comp.Edit(IsSpaceClaimGeometry=True)
 
     # Edit Parameters and refresh geometry
-    designPoint = Parameters.GetDesignPoint(Name="0")
-    designPoint.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P1"),Expression=defaultPitchAngle+" [degree]")
-    designPoint.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P2"),Expression=defaultYawAngle+" [degree]")
+    design_point = Parameters.GetDesignPoint(Name="0")
+    design_point.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P1"),Expression=def_pitch+" [degree]")
+    design_point.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P2"),Expression=def_yaw+" [degree]")
+
+    for idx, joint_angle in enumerate(config):
+        design_point.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P"+str(idx+3)),Expression=joint_angle+" [degree]")
     
-    jointCounter = 0
-    for jointAngle in jointConfig:
-        designPoint.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P"+str(jointCounter+3)),Expression=jointAngle+" [degree]")
-        jointCounter += 1
-        
-    # designPoint.SetParameterExpression(Parameter=Parameters.GetParameter(Name="P"+str(jointCounter+3)),Expression=str(jointConfigCounter))
-    
-    geomComponent.Refresh()
+    geom_comp.Refresh()
     
     # Run the geometry script
-    geomComponent.RunScript(ScriptFile = srcPath + geomScriptFile)
+    geom_comp.RunScript(ScriptFile = src_path + script_file)
     
     # Close SC
-    geomComponent.Exit()
+    geom_comp.Exit()
     
     # Save project after cycle end
     Save(Overwrite=True)
     
     # Create directory for the current joint config file
-    newGeomDirPath = geomPath + jointConfigNames[jointConfigCounter] + "/"
-    if not os.path.exists(newGeomDirPath):
-        os.makedirs(newGeomDirPath)
+    new_geom_dir = geom_path + config_names[config_idx] + "/"
+    if not os.path.exists(new_geom_dir):
+        os.makedirs(new_geom_dir)
     
     # Copy and move the generated assembly file
-    srcAssPath = geomDMAssPath + assFileName
-    destAssPath = newGeomDirPath + assFileName
-    if not os.path.exists(destAssPath):
-        with open(srcAssPath, 'rb') as source_file:
-            with open(destAssPath, 'wb') as destination_file:
+    src_ass_path = geom_DM_ass_path + ass_file
+    dest_ass_path = new_geom_dir + ass_file
+    if not os.path.exists(dest_ass_path):
+        with open(src_ass_path, 'rb') as source_file:
+            with open(dest_ass_path, 'wb') as destination_file:
                 destination_file.write(source_file.read())
                 
     # Copy and move the generated component file
-    srcCompPath = geomDMCompPath + compFileName
-    destCompPath = newGeomDirPath + compFileName
-    if not os.path.exists(destCompPath):
-        with open(srcCompPath, 'rb') as source_file:
-            with open(destCompPath, 'wb') as destination_file:
+    src_comp_path = geom_DM_comp_path + comp_file
+    dest_comp_path = new_geom_dir + comp_file
+    if not os.path.exists(dest_comp_path):
+        with open(src_comp_path, 'rb') as source_file:
+            with open(dest_comp_path, 'wb') as destination_file:
                 destination_file.write(source_file.read())
-                
-    # Increment joint config counter
-    jointConfigCounter +=1
-
