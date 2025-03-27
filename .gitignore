@@ -32,7 +32,9 @@
 *.err
 *.out
 *.scdoc
+*.pmdb
 *.msh
+*.cas
 *.msh.h5
 *.cas.h5
 *.dtbs
