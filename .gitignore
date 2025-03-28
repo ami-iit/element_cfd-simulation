@@ -34,6 +34,7 @@
 *.scdoc
 *.pmdb
 *.msh
+*.dlm
 *.cas
 *.msh.h5
 *.cas.h5
