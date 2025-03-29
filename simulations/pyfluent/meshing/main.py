@@ -48,9 +48,10 @@ def main():
     err_file.touch(exist_ok=True)
 
     # Define output directories
-    msh_dir = root_dir / "mesh" / ROBOT_NAME[-3:] / "msh"
-    dlm_dir = root_dir / "mesh" / ROBOT_NAME[-3:] / "dlm"
-    cas_dir = root_dir / "case" / ROBOT_NAME[-3:]
+    out_dir = root_dir / "out" / ROBOT_NAME[-3:]
+    msh_dir = out_dir / "msh"
+    dlm_dir = out_dir / "dlm"
+    cas_dir = out_dir / "cas"
 
     # Create output directories if they do not exist
     msh_dir.mkdir(parents=True, exist_ok=True)
@@ -212,7 +213,7 @@ def main():
             # Check mesh, save mesh file and exit meshing mode
             meshing.tui.mesh.check_mesh()
             msh_file_name = config_name + ".msh.h5"
-            msh_file_path = msh_dir.parent / msh_file_name
+            msh_file_path = msh_dir / msh_file_name
             meshing.tui.file.write_mesh(str(msh_file_path))
             meshing.exit()
 
@@ -380,7 +381,7 @@ def main():
                 f.writelines(message + "\n" + str(error) + "\n")
             pass
 
-        clean_files_except_ext(msh_dir, [".h5", ".dtbs", ".msh"])
+        clean_files_except_ext(out_dir, [".h5", ".dtbs", ".msh", ".cas", ".dlm"])
         clean_files_except_ext(log_dir, [".log", ".err", ".trn", ".bat"])
 
     # Close the process
