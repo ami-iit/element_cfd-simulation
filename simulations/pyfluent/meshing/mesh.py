@@ -1,12 +1,12 @@
 """
 Author: Antonello Paolino
 Date: 2024-02-28
-Description:    This code uses the pyFluent packages to generate a mesh and set up 
-                simulation parameters to perfom automatic CFD simulations starting 
+Description:    This code uses the pyFluent packages to generate a mesh and set up
+                simulation parameters to perfom automatic CFD simulations starting
                 from a given iRonCub CAD model.
 
-This code is based on the example provided at the following link: 
-                
+This code is based on the example provided at the following link:
+
 https://github.com/ansys/pyfluent/tree/v0.19.2/examples/00-fluent
 """
 
@@ -70,7 +70,10 @@ def main():
     for config_name in config_names:
 
         # Define geometry file and path for current configuration
-        geom_file = geom_dir / config_name / "Geom.scdoc"
+        geom_file = "Geom.scdoc.pmdb" if os.name == "posix" else "Geom.scdoc"
+        geom_path = geom_dir / config_name / geom_file
+        if not geom_path.exists():
+            print_log("error", f"{geom_file} not found!")
 
         try:
             # Launch Fluent
@@ -95,7 +98,7 @@ def main():
             import_geom = meshing.workflow.TaskObject["Import Geometry"]
             import_geom.Arguments.set_state(
                 {
-                    "FileName": str(geom_file),
+                    "FileName": str(geom_path),
                     "LengthUnit": "mm",
                 }
             )
@@ -305,30 +308,17 @@ def main():
                 ].check_convergence = False
 
             # Report Definitions
-            # initialize ironcub cd, cl, cs reports
-            solver.solution.report_definitions.drag["ironcub-cd"] = {}
-            solver.solution.report_definitions.drag["ironcub-cl"] = {}
-            solver.solution.report_definitions.drag["ironcub-cs"] = {}
-            # define ironcub cd, cl, cs reports
-            cd = solver.solution.report_definitions.drag["ironcub-cd"]
-            cl = solver.solution.report_definitions.drag["ironcub-cl"]
-            cs = solver.solution.report_definitions.drag["ironcub-cs"]
-            # get the complete list of surfaces from cd report
-            surface_list = cd.zones.allowed_values()
-            # set ironcub-cd report
-            cd.zones = surface_list
-            cd.force_vector = [0, 0, -1]
-            cd.average_over = 100
-            # set ironcub-cl report
-            cl.zones = surface_list
-            cl.force_vector = [0, 1, 0]
-            cl.average_over = 100
-            # set ironcub-cs report
-            cs.zones = surface_list
-            cs.force_vector = [-1, 0, 0]
-            cs.average_over = 100
-
-            # define the reports for the ironcub surfaces
+            coeff_names = ["-C_D", "-C_L", "-C_S"]
+            force_vectors = [[0, 0, -1], [0, 1, 0], [-1, 0, 0]]
+            # define the global reports for the ironcub force coefficients
+            for coeff_name, force_vector in zip(coeff_names, force_vectors):
+                solver.solution.report_definitions.drag["ironcub" + coeff_name] = {}
+                rd = solver.solution.report_definitions.drag["ironcub" + coeff_name]
+                surface_list = rd.zones.allowed_values()
+                rd.zones = surface_list
+                rd.force_vector = force_vector
+                rd.average_over = 100
+            # define the local reports for the ironcub force coefficients
             for rep_surf in robot.surface_list:
                 rep_def_name = rep_surf[8:]
                 rep_def_name = rep_def_name.replace("_", "-")
@@ -338,24 +328,14 @@ def main():
                 for surface in surface_list:
                     if rep_surf_pref in surface:
                         rep_surf_list.extend([surface])
-                # define surface cd report
-                solver.solution.report_definitions.drag[rep_def_name + "-cd"] = {}
-                cd = solver.solution.report_definitions.drag[rep_def_name + "-cd"]
-                cd.zones = rep_surf_list
-                cd.force_vector = [0, 0, -1]
-                cd.average_over = 100
-                # define surface cl report
-                solver.solution.report_definitions.drag[rep_def_name + "-cl"] = {}
-                cl = solver.solution.report_definitions.drag[rep_def_name + "-cl"]
-                cl.zones = rep_surf_list
-                cl.force_vector = [0, 1, 0]
-                cl.average_over = 100
-                # define surface cs report
-                solver.solution.report_definitions.drag[rep_def_name + "-cs"] = {}
-                cs = solver.solution.report_definitions.drag[rep_def_name + "-cs"]
-                cs.zones = rep_surf_list
-                cs.force_vector = [-1, 0, 0]
-                cs.average_over = 100
+                # define surface reports
+                for coeff_name, force_vector in zip(coeff_names, force_vectors):
+                    rep_def_coeff_name = rep_def_name + coeff_name
+                    solver.solution.report_definitions.drag[rep_def_coeff_name] = {}
+                    rd = solver.solution.report_definitions.drag[rep_def_coeff_name]
+                    rd.zones = rep_surf_list
+                    rd.force_vector = force_vector
+                    rd.average_over = 100
 
             # Contour Plane Defintions
             solver.results.surfaces.plane_surface.create("yz-plane")
@@ -370,8 +350,6 @@ def main():
             solver.file.write(file_name=str(cas_file_path), file_type="case")
 
             # Export dual mesh dlm files
-            cd_report = solver.solution.report_definitions.drag["ironcub-cd"]
-            surface_list = cd_report.zones.allowed_values()
             for rep_surf in robot.surface_list:
                 rep_surf_list = [rep_surf]
                 rep_surf_pref = rep_surf + ":"
