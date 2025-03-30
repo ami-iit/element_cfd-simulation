@@ -5,11 +5,12 @@ channels:
 dependencies:
   - python==3.11.0
   - numpy
+  - tabulate
   - pip
   - pip:
     - ansys-fluent-core==0.28.2
     - ansys-fluent-parametric
     - ansys-fluent-visualization
     - vtk #==9.1.0
-variables:
+variables: # Change according to your installation
   AWP_ROOT241: /usr/ansys_inc/v241
