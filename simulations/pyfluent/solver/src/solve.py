@@ -45,12 +45,12 @@ class Solver:
     def rotate_mesh(self, pitch_angle, yaw_angle):
         # Rotate the mesh according to pitch and yaw angles
         self.solver.mesh.rotate(
-            angle=np.deg2rad(pitch_angle),
+            angle=np.deg2rad(np.float64(pitch_angle)),
             origin=[0, 0, 0],
             axis_components=[-1, 0, 0],
         )
         self.solver.mesh.rotate(
-            angle=np.deg2rad(yaw_angle),
+            angle=np.deg2rad(np.float64(yaw_angle)),
             origin=[0, 0, 0],
             axis_components=[0, 1, 0],
         )
