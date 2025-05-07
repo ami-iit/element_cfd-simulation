@@ -7,7 +7,6 @@ Description:    This code uses the pyFluent packages to generate a mesh and set 
 """
 
 from pathlib import Path
-import os
 import sys
 
 from src import log
@@ -15,10 +14,6 @@ from src import init
 from src.mesh import Mesh
 from src.solve import Solver
 from src.constants import Const
-
-ROBOT_NAME = "ironcub-mk3"
-CORE_NUM = 64
-USE_GPU = False
 
 
 def main():
@@ -122,7 +117,7 @@ def main():
                 log.print_err(f"Error closing solver: {e}")
 
             # Print error and pass to next iteration
-            log.print_err(f"{config_name} mesh generation failed")
+            log.print_err(f"{config_name} mesh generation failed: {error}")
             pass
 
         log.clean_files_except_ext(Const.msh_dir, [".h5", ".msh"])
