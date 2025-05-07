@@ -116,7 +116,7 @@ class Solver:
     def export_surface_data(
         self, config_name, pitch_angle, yaw_angle, def_surface_list
     ):
-        cd_report = self.solver.solution.report_definitions.drag["ironcub-cd"]
+        cd_report = self.solver.solution.report_definitions.drag["ironcub-C_D"]
         surface_list = cd_report.zones.allowed_values()
         exp_vars = [
             "pressure",

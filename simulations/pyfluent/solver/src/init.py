@@ -125,7 +125,7 @@ def initialize_output_coefficients_file(config_name, surface_list):
                 out_header = out_header + f",{report}-C_D,{report}-C_L,{report}-C_S"
             f.writelines(out_header + "\n")
     else:
-        with open(str(out_file), "w") as f:
+        with open(str(out_file), "a") as f:
             f.writelines("#### Restarting the process ####\n")
 
 
