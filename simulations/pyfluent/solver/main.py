@@ -44,47 +44,42 @@ def main():
     def_surface_list = init.get_surface_list()
 
     # Start the automatic process
-    for config_name in config_names:
+    for config in config_names:
 
-        init.initialize_output_coefficients_file(config_name, def_surface_list)
+        init.initialize_output_coefficients_file(config, def_surface_list)
 
-        # Start Fluent solver
-        log.print_info(f"Starting pyfluent session.")
-        solver = Solver()
-        solver.get_output_coefficients_list(config_name)
+        for yaw in yaw_angles:
+            # Start Fluent solver
+            log.print_info(f"Starting pyfluent session, yaw={yaw}.")
+            solver = Solver()
+            solver.get_output_coefficients_list(config)
 
-        for yaw_angle in yaw_angles:
-            for pitch_angle in pitch_angles:
+            for pitch in pitch_angles:
                 try:
-                    # Load case file
-                    solver.load_case(config_name)
-                    solver.rotate_mesh(pitch_angle, yaw_angle)
+                    # Set up simulation
+                    solver.load_case(config)
+                    solver.rotate_mesh(pitch, yaw)
                     solver.set_boundary_conditions()
-                    # Initialize and solve the flow field
                     solver.initialize_solution()
-                    solver.run_calculation()
+                    # Run simulation
+                    solver.run_simulation()
                     # Post-process the solution
-                    # solver.plot_and_save_residuals(config_name, pitch_angle, yaw_angle)
-                    # solver.plot_and_save_contours(config_name, pitch_angle, yaw_angle)
-                    solver.compute_output_coefs(config_name, pitch_angle, yaw_angle)
-                    solver.export_surface_data(
-                        config_name, pitch_angle, yaw_angle, def_surface_list
-                    )
-
+                    solver.compute_output_coefs(config, pitch, yaw)
+                    solver.export_surface_data(config, pitch, yaw, def_surface_list)
                     # Print success message
-                    log.print_success(
-                        f"{config_name}, alpha={pitch_angle}, beta={yaw_angle}: Success!"
-                    )
+                    log.print_success(f"{config}, alpha={pitch}, beta={yaw}: Success!")
 
                 except Exception as error:
+                    log.cleanup_files_failed_sim(config, pitch, yaw)
                     log.print_err(
-                        f"{config_name}, alpha={pitch_angle}, beta={yaw_angle} failed: {error}"
+                        f"{config}, alpha={pitch}, beta={yaw} failed: {error}"
                     )
                     pass
 
-        # Close Fluent Solver Session
-        solver.close()
-        log.print_success(f"{config_name} iterations completed!")
+            # Close Fluent Solver Session
+            solver.close()
+            log.rename_log_file(config, yaw)
+            log.print_success(f"{config} iterations completed!")
 
     # Close the process
     log.print_success("Automatic CFD process completed successfully!")

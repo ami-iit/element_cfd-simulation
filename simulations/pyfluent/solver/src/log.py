@@ -40,20 +40,29 @@ def print_success(message):
         f.writelines(pref + message + "\n")
 
 
-def clean_files_except_ext(directory, allowed_ext):
-    if isinstance(allowed_ext, str):
-        allowed_ext = [allowed_ext]
-    dir_path = Path(directory)
-    for item in dir_path.glob("**/*"):
-        if item.is_file() and item.suffix not in allowed_ext:
-            try:
-                item.unlink()
-                print(f"Deleted file: {item}")
-            except Exception as e:
-                print(f"Failed to delete file: {item}: {e}")
-        elif item.is_dir():
-            try:
-                shutil.rmtree(item)
-                print(f"Deleted directory and its contents: {item}")
-            except Exception as e:
-                print(f"Failed to delete directory: {item}: {e}")
+def cleanup_files_failed_sim(config_name, pitch_angle, yaw_angle):
+    out_dirs = [
+        Const.residuals_dir,
+        Const.contours_dir,
+        Const.node_dtbs_dir,
+        Const.cell_dtbs_dir,
+    ]
+    for out_dir in out_dirs:
+        dtbs_file = f"{config_name}-{int(pitch_angle)}-{int(yaw_angle)}*.dtbs"
+        # Remove file if it exists
+        for file in out_dir.rglob(dtbs_file):
+            if file.is_file():
+                file.unlink()
+
+
+def rename_log_file(config, yaw_angle):
+    file_name = "nohup.out"
+    file_path = Const.log_dir / file_name
+    new_file_name = f"nohup-{config}-{int(yaw_angle)}.out"
+    new_file_path = Const.log_dir / new_file_name
+    # Rename file if it exists
+    if file_path.is_file():
+        shutil.move(str(file_path), str(new_file_path))
+        print_info(f"Log file renamed to {new_file_name}.")
+    else:
+        print_err(f"Log file {file_name} not found.")

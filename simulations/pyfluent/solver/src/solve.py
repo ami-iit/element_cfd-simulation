@@ -68,7 +68,7 @@ class Solver:
     def initialize_solution(self):
         self.solver.solution.initialization.hybrid_initialize()
 
-    def run_calculation(self):
+    def run_simulation(self):
         self.solver.solution.run_calculation.iterate(iter_count=Const.iterations)
 
     def plot_and_save_residuals(self, config_name, pitch_angle, yaw_angle):
