@@ -119,14 +119,20 @@ class Solver:
         cd_report = self.solver.solution.report_definitions.drag["ironcub-C_D"]
         surface_list = cd_report.zones.allowed_values()
         exp_vars = [
-            "pressure",
-            "x-wall-shear",
-            "y-wall-shear",
-            "z-wall-shear",
             "cell-id",
             "x-face-area",
             "y-face-area",
             "z-face-area",
+            "pressure",
+            "dx-velocity-dx",
+            "dy-velocity-dx",
+            "dz-velocity-dx",
+            "dx-velocity-dy",
+            "dy-velocity-dy",
+            "dz-velocity-dy",
+            "dx-velocity-dz",
+            "dy-velocity-dz",
+            "dz-velocity-dz",
         ]
         # Export database files for each single surface
         for rep_surf in def_surface_list:
