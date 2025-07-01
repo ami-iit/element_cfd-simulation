@@ -33,6 +33,10 @@ class Const:
         self.iterations = 1000
         # solver settings
         self.inlet_turbulence_intensity = 0.001
+        # export variables
+        self.export_pressure = True
+        self.export_wall_shear_stress = True
+        self.export_velocity_gradients = True
 
     def get_default_values(self):
         default_values = {}

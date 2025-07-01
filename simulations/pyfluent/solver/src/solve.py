@@ -123,17 +123,31 @@ class Solver:
             "x-face-area",
             "y-face-area",
             "z-face-area",
-            "pressure",
-            "dx-velocity-dx",
-            "dy-velocity-dx",
-            "dz-velocity-dx",
-            "dx-velocity-dy",
-            "dy-velocity-dy",
-            "dz-velocity-dy",
-            "dx-velocity-dz",
-            "dy-velocity-dz",
-            "dz-velocity-dz",
         ]
+        if Const.export_pressure:
+            exp_vars.append("pressure")
+        if Const.export_wall_shear_stress:
+            exp_vars.extend(
+                [
+                    "x-wall-shear",
+                    "y-wall-shear",
+                    "z-wall-shear",
+                ]
+            )
+        if Const.export_velocity_gradients:
+            exp_vars.extend(
+                [
+                    "dx-velocity-dx",
+                    "dy-velocity-dx",
+                    "dz-velocity-dx",
+                    "dx-velocity-dy",
+                    "dy-velocity-dy",
+                    "dz-velocity-dy",
+                    "dx-velocity-dz",
+                    "dy-velocity-dz",
+                    "dz-velocity-dz",
+                ]
+            )
         # Export database files for each single surface
         for rep_surf in def_surface_list:
             rep_surf_list = [rep_surf]
