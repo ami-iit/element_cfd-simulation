@@ -1,4 +1,4 @@
-name: pyfluent-env
+name: pyansys-env
 channels:
   - conda-forge
   - robotology
@@ -8,9 +8,10 @@ dependencies:
   - tabulate
   - pip
   - pip:
+    - ansys-geometry-core[all]==0.10.0
     - ansys-fluent-core==0.28.2
     - ansys-fluent-parametric
     - ansys-fluent-visualization
-    - vtk #==9.1.0
+    - vtk
 variables: # Change according to your installation
-  AWP_ROOT241: /usr/ansys_inc/v241
+  AWP_ROOT251: "C:\Program Files\ANSYS Inc\v251"
