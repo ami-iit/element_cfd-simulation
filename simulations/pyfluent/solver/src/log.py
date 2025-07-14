@@ -48,9 +48,9 @@ def cleanup_files_failed_sim(config_name, pitch_angle, yaw_angle):
         Const.cell_dtbs_dir,
     ]
     for out_dir in out_dirs:
-        dtbs_file = f"{config_name}-{int(pitch_angle)}-{int(yaw_angle)}*.dtbs"
+        file = f"{config_name}-{int(pitch_angle)}-{int(yaw_angle)}*"
         # Remove file if it exists
-        for file in out_dir.rglob(dtbs_file):
+        for file in out_dir.rglob(file):
             if file.is_file():
                 file.unlink()
 
@@ -58,7 +58,12 @@ def cleanup_files_failed_sim(config_name, pitch_angle, yaw_angle):
 def rename_log_file(config, yaw_angle):
     file_name = "nohup.out"
     file_path = Const.log_dir / file_name
-    new_file_name = f"nohup-{config}-{int(yaw_angle)}.out"
+    file_number = 0
+    # Check if the file already exists with a different name
+    new_file_name = f"nohup-{config}-{int(yaw_angle)}-{file_number}.out"
+    while (Const.log_dir / new_file_name).is_file():
+        file_number += 1
+        new_file_name = f"nohup-{config}-{int(yaw_angle)}-{file_number}.out"
     new_file_path = Const.log_dir / new_file_name
     # Rename file if it exists
     if file_path.is_file():

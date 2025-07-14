@@ -54,7 +54,10 @@ def main():
             solver = Solver()
             solver.get_output_coefficients_list(config)
 
-            for pitch in pitch_angles:
+            temp_pitch_angles = pitch_angles.copy()
+            while len(temp_pitch_angles) > 0:
+                pitch = temp_pitch_angles.pop(0)
+
                 try:
                     # Set up simulation
                     solver.load_case(config)
@@ -64,17 +67,25 @@ def main():
                     # Run simulation
                     solver.run_simulation()
                     # Post-process the solution
-                    solver.compute_output_coefs(config, pitch, yaw)
                     solver.export_surface_data(config, pitch, yaw, def_surface_list)
+                    solver.compute_output_coefs(config, pitch, yaw)
+
                     # Print success message
                     log.print_success(f"{config}, alpha={pitch}, beta={yaw}: Success!")
 
                 except Exception as error:
-                    log.cleanup_files_failed_sim(config, pitch, yaw)
                     log.print_err(
                         f"{config}, alpha={pitch}, beta={yaw} failed: {error}"
                     )
-                    pass
+                    log.cleanup_files_failed_sim(config, pitch, yaw)
+                    solver.close()
+                    log.rename_log_file(config, yaw)
+
+                    # Reinitialize the next iteration with the same pitch angle
+                    solver = Solver()
+                    solver.get_output_coefficients_list(config)
+                    temp_pitch_angles.insert(0, pitch)
+                    continue
 
             # Close Fluent Solver Session
             solver.close()
