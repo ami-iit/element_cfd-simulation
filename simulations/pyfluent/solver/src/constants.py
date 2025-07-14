@@ -28,6 +28,7 @@ class Const:
         self.log_file = None
         self.err_file = None
         # fluent settings
+        self.fluent_version = "24.1.0"
         self.core_num = 64
         self.use_gpu = False
         self.iterations = 1000

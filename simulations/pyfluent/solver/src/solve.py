@@ -17,7 +17,7 @@ class Solver:
         self.solver = pyfluent.launch_fluent(
             mode="solver",
             precision="double",
-            product_version="24.1.0",
+            product_version=Const.fluent_version,
             dimension=3,
             processor_count=Const.core_num,
             gpu=Const.use_gpu,
@@ -137,6 +137,7 @@ class Solver:
         if Const.export_velocity_gradients:
             exp_vars.extend(
                 [
+                    "viscosity-ratio",  # viscosity-turb / viscosity-lam
                     "dx-velocity-dx",
                     "dy-velocity-dx",
                     "dz-velocity-dx",
