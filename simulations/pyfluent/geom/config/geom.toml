@@ -1,0 +1,76 @@
+# iRonCub-Mk3 geometry configuration file
+
+[left_arm]
+links = [
+    "l-turbine",
+    "l-arm",
+    "l-arm-2",
+    "l-arm-3",
+    ]
+frames = [
+    "l-elbow-csys",
+    "l-shoulder-y-csys",
+    "l-shoulder-r-csys",
+    "l-shoulder-p-csys",
+    ]
+
+[right_arm]
+links = [
+    "r-turbine",
+    "r-arm",
+    "r-arm-2",
+    "r-arm-3",
+    ]
+frames = [
+    "r-elbow-csys",
+    "r-shoulder-y-csys",
+    "r-shoulder-r-csys",
+    "r-shoulder-p-csys",
+    ]
+
+[body]
+links = [
+    "head",
+    "torso",
+    "upper-jetpack",
+    "lower-jetpack",
+    "l-back-turbine",
+    "r-back-turbine",
+    "torso-2",
+    "torso-3",
+    ]
+frames = [
+    "torso-y-csys",
+    "torso-p-csys",
+    "torso-r-csys",
+    ]
+
+[left_leg]
+links = [
+    "l-foot",
+    "l-leg-low",
+    "l-leg-2",
+    "l-leg-up",
+    "l-leg-3",
+    ]
+frames = [
+    "l-knee-csys",
+    "l-hip-y-csys",
+    "l-hip-r-csys",
+    "l-hip-p-csys",
+    ]
+
+[right_leg]
+links = [
+    "r-foot",
+    "r-leg-low",
+    "r-leg-2",
+    "r-leg-up",
+    "r-leg-3",
+    ]
+frames = [
+    "r-knee-csys",
+    "r-hip-y-csys",
+    "r-hip-r-csys",
+    "r-hip-p-csys",
+    ]

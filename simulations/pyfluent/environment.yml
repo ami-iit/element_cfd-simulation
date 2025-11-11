@@ -4,6 +4,7 @@ channels:
   - robotology
 dependencies:
   - python==3.11.0
+  - toml
   - numpy
   - tabulate
   - pip
