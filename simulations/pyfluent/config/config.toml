@@ -1,0 +1,108 @@
+# iRonCub Meshing Configuration file
+[general]
+fluent_version = "25.1.0"
+core_num = 12
+use_gpu = false
+show_gui = false
+
+[geometry]
+la_links = [
+    "l_turbine",
+    "l_arm",
+    "l_arm_2",
+    "l_arm_3",
+    ]
+la_frames = [
+    "l_elbow_csys",
+    "l_shoulder_y_csys",
+    "l_shoulder_r_csys",
+    "l_shoulder_p_csys",
+    ]
+ra_links = [
+    "r_turbine",
+    "r_arm",
+    "r_arm_2",
+    "r_arm_3",
+    ]
+ra_frames = [
+    "r_elbow_csys",
+    "r_shoulder_y_csys",
+    "r_shoulder_r_csys",
+    "r_shoulder_p_csys",
+    ]
+b_links = [
+    "head",
+    "torso",
+    "jetpack_upper",
+    "jetpack_lower",
+    "l_back_turbine",
+    "r_back_turbine",
+    "torso_2",
+    "torso_3",
+    ]
+b_frames = [
+    "torso_y_csys",
+    "torso_p_csys",
+    "torso_r_csys",
+    ]
+ll_links = [
+    "l_foot",
+    "l_leg_lower",
+    "l_leg_2",
+    "l_leg_upper",
+    "l_leg_3",
+    ]
+ll_frames = [
+    "l_knee_csys",
+    "l_hip_y_csys",
+    "l_hip_r_csys",
+    "l_hip_p_csys",
+    ]
+rl_links = [
+    "r_foot",
+    "r_leg_lower",
+    "r_leg_2",
+    "r_leg_upper",
+    "r_leg_3",
+    ]
+rl_frames = [
+    "r_knee_csys",
+    "r_hip_y_csys",
+    "r_hip_r_csys",
+    "r_hip_p_csys",
+    ]
+
+[meshing]
+workflow = "Watertight Geometry"
+import_geometry_length_unit = "mm"
+robot_face_sizing_name = "ironcub-sizing"
+robot_face_sizing = 20
+boundary_face_sizing_name = "boundary-sizing"
+boundary_face_sizing = 2000
+surface_mesh_max_size = 4000
+surface_mesh_min_size = 5
+surface_mesh_size_function = "Curvature & Proximity"
+share_topology_gap_distance = 2.5
+share_topology_operation = "Join-Intersect"
+boundary_layer_layers = 5
+volume_mesh_type = "poly-hexcore"
+volume_mesh_max_hex_cell_length = 2560
+volume_mesh_min_hex_cell_length = 40
+volume_mesh_peel_layers = 2
+improve_mesh_quality_limit = 0.15
+improve_mesh_quality_method = "Orthogonal"
+improve_mesh_quality_iter = 5
+improve_mesh_quality_min_angle = 0
+
+[solver]
+viscous_model = "k-omega"
+viscous_model_type = "sst"
+in_vel = 17.0  # inlet velocity magnitude in m/s
+in_vel_dir = [0.0, 0.0, -1.0]  # inlet velocity direction vector
+in_turb_int = 0.001  # inlet turbulence intensity
+in_turb_visc_ratio = 0.01  # inlet turbulence viscosity ratio
+report_average_over = 100
+iterations = 10
+export_pressure = true
+export_wall_shear_stress = true
+export_velocity_gradients = false

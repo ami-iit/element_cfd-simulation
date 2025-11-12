@@ -5,53 +5,98 @@ Date: 2025-03-28
 
 import ansys.fluent.core as pyfluent
 import os
+from datetime import datetime
 
+# src modules
 from src import log
-from src.constants import Const
+
+
+def initialize_directories(root):
+    geom_dir = root / "output" / "geometry" / "geometries"
+    out_dir = root / "output" / "meshing"
+    msh_dir = out_dir / "msh"
+    msh_dir.mkdir(parents=True, exist_ok=True)
+    dlm_dir = out_dir / "dlm"
+    dlm_dir.mkdir(parents=True, exist_ok=True)
+    cas_dir = out_dir / "cas"
+    cas_dir.mkdir(parents=True, exist_ok=True)
+    log_dir = out_dir / "log"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    return geom_dir, msh_dir, dlm_dir, cas_dir, log_dir
+
+
+def initialize_log_files(log_dir):
+    datetime_str = datetime.now().strftime(r"%Y%m%d-%H%M%S")
+    log_file = log_dir / f"mesh-{datetime_str}.log"
+    log_file.touch(exist_ok=True)
+    err_file = log_dir / f"mesh-{datetime_str}.err"
+    err_file.touch(exist_ok=True)
+    return log_file, err_file
+
+
+def get_joint_config_names(joint_config_file):
+    with open(str(joint_config_file), "r") as f:
+        config_file = f.readlines()
+        config_names = []
+        for config_name in config_file:
+            temp = config_name.split(",")
+            config_names.append(temp[0])
+    return config_names
+
+
+def get_surface_list(config):
+    surface_list = []
+    for elem in config["geometry"].keys():
+        if "links" in elem:
+            surface_list += config["geometry"][elem]
+    return surface_list
 
 
 class Mesh:
-    def __init__(self):
+    def __init__(self, options, log_dir, log_file, err_file):
         mpi_option = "-mpi=openmpi" if os.name == "posix" else ""
         self.meshing = pyfluent.launch_fluent(
             mode="meshing",
             precision="double",
-            product_version="24.1.0",
+            product_version=options["general"]["fluent_version"],
             dimension=3,
-            processor_count=Const.core_num,
-            gpu=Const.use_gpu,
+            processor_count=options["general"]["core_num"],
+            gpu=options["general"]["use_gpu"],
             start_transcript=False,
-            cwd=str(Const.log_dir),
+            cwd=str(log_dir),
             additional_arguments=mpi_option,
         )
         self.wf = self.meshing.workflow
         self.tui = self.meshing.tui
+        self.surface_list = get_surface_list(options)
+        self.options = options["meshing"]
+        self.log_file = log_file
+        self.err_file = err_file
 
     def initialize_workflow(self):
-        self.wf.InitializeWorkflow(WorkflowType=Const.workflow)
+        self.wf.InitializeWorkflow(WorkflowType=self.options["workflow"])
 
-    def import_geometry(self, config_name):
-        geom_file = "Geom.scdoc.pmdb" if os.name == "posix" else "Geom.scdoc"
-        geom_path = Const.geom_dir / config_name / geom_file
+    def import_geometry(self, config_name, geometry_dir):
+        geom_path = geometry_dir / f"{config_name}" / "geometry.pmdb"
         if not geom_path.exists():
-            log.print_error(f"{geom_file} not found!")
+            log.print_err(f"{geom_path} not found!", self.log_file, self.err_file)
         import_geom = self.wf.TaskObject["Import Geometry"]
         import_geom.Arguments.set_state(
             {
                 "FileName": str(geom_path),
-                "LengthUnit": Const.ig_length_unit,
+                "LengthUnit": self.options["import_geometry_length_unit"],
             }
         )
         import_geom.Execute()
 
-    def add_robot_local_sizings(self, surface_list):
+    def add_robot_local_sizings(self):
         local_sizing = self.wf.TaskObject["Add Local Sizing"]
         local_sizing.Arguments.set_state(
             {
                 "AddChild": "yes",
-                "BOIControlName": Const.ls_robot_sizing_name,
-                "BOIFaceLabelList": surface_list,
-                "BOISize": Const.ls_robot_sizing,
+                "BOIControlName": self.options["robot_face_sizing_name"],
+                "BOIFaceLabelList": self.surface_list,
+                "BOISize": self.options["robot_face_sizing"],
                 "BOIExecution": "Face Size",
             }
         )
@@ -62,9 +107,9 @@ class Mesh:
         local_sizing.Arguments.set_state(
             {
                 "AddChild": "yes",
-                "BOIControlName": Const.ls_boundary_sizing_name,
+                "BOIControlName": self.options["boundary_face_sizing_name"],
                 "BOIFaceLabelList": ["inlet", "outlet"],
-                "BOISize": Const.ls_boundary_sizing,
+                "BOISize": self.options["boundary_face_sizing"],
                 "BOIExecution": "Face Size",
             }
         )
@@ -75,9 +120,9 @@ class Mesh:
         surface_mesh.Arguments.set_state(
             {
                 "CFDSurfaceMeshControls": {
-                    "MaxSize": Const.gsm_max_size,
-                    "MinSize": Const.gsm_min_size,
-                    "SizeFunctions": Const.gsm_size_function,
+                    "MaxSize": self.options["surface_mesh_max_size"],
+                    "MinSize": self.options["surface_mesh_min_size"],
+                    "SizeFunctions": self.options["surface_mesh_size_function"],
                 },
                 "ExecuteShareTopology": "Yes",
             }
@@ -99,8 +144,10 @@ class Mesh:
         share_topology = self.wf.TaskObject["Apply Share Topology"]
         share_topology.Arguments.set_state(
             {
-                "GapDistance": Const.st_gap_distance,
-                "ShareTopologyPreferences": {"Operation": Const.st_operation},
+                "GapDistance": self.options["share_topology_gap_distance"],
+                "ShareTopologyPreferences": {
+                    "Operation": self.options["share_topology_operation"]
+                },
             }
         )
         share_topology.Execute()
@@ -117,7 +164,7 @@ class Mesh:
                     "Continuous": "Stair Step",
                     "ShowLocalPrismPreferences": False,
                 },
-                "NumberOfLayers": Const.bl_layers,
+                "NumberOfLayers": self.options["boundary_layer_layers"],
             }
         )
         boundary_layer.AddChildAndUpdate()
@@ -128,11 +175,11 @@ class Mesh:
             {
                 "MeshSolidRegions": False,
                 "PrismPreferences": {"ShowPrismPreferences": False},
-                "VolumeFill": Const.gvm_mesh_type,
+                "VolumeFill": self.options["volume_mesh_type"],
                 "VolumeFillControls": {
-                    "HexMaxCellLength": Const.gvm_max_hex_cell_length,
-                    "HexMinCellLength": Const.gvm_min_hex_cell_length,
-                    "PeelLayers": Const.gvm_peel_layers,
+                    "HexMaxCellLength": self.options["volume_mesh_max_hex_cell_length"],
+                    "HexMinCellLength": self.options["volume_mesh_min_hex_cell_length"],
+                    "PeelLayers": self.options["volume_mesh_peel_layers"],
                 },
                 "VolumeMeshPreferences": {"ShowVolumeMeshPreferences": False},
             }
@@ -145,12 +192,12 @@ class Mesh:
         improve_volume_mesh = self.wf.TaskObject["Improve Volume Mesh"]
         improve_volume_mesh.Arguments.set_state(
             {
-                "CellQualityLimit": Const.ivm_quality_limit,
-                "QualityMethod": Const.ivm_quality_method,
+                "CellQualityLimit": self.options["improve_mesh_quality_limit"],
+                "QualityMethod": self.options["improve_mesh_quality_method"],
                 "VMImprovePreferences": {
                     "ShowVMImprovePreferences": True,
-                    "VIQualityIterations": Const.ivm_quality_iter,
-                    "VIQualityMinAngle": Const.ivm_quality_min_angle,
+                    "VIQualityIterations": self.options["improve_mesh_quality_iter"],
+                    "VIQualityMinAngle": self.options["improve_mesh_quality_min_angle"],
                     "VIgnoreFeature": "yes",
                 },
             }
@@ -160,19 +207,19 @@ class Mesh:
     def check_mesh(self):
         self.tui.mesh.check_mesh()
 
-    def write_mesh(self, config_name):
+    def write_mesh(self, config_name, msh_dir):
         msh_file_name = config_name + ".msh.h5"
-        msh_file_path = Const.msh_dir / msh_file_name
+        msh_file_path = msh_dir / msh_file_name
         self.tui.file.write_mesh(str(msh_file_path))
 
-    def read_mesh(self, config_name):
+    def read_mesh(self, config_name, msh_dir):
         msh_file_name = config_name + ".msh.h5"
-        msh_file_path = Const.msh_dir / msh_file_name
+        msh_file_path = msh_dir / msh_file_name
         self.tui.file.read_mesh(str(msh_file_path))
 
-    def export_boundary_mesh(self, surface_list, config_name):
-        for surface in surface_list:
-            filename = Const.msh_dir / f"{config_name}-{surface}.msh"
+    def export_boundary_mesh(self, config_name, msh_dir):
+        for surface in self.surface_list:
+            filename = msh_dir / f"{config_name}-{surface}.msh"
             self.tui.file.write_boundaries(str(filename), surface)
 
     def close(self):
