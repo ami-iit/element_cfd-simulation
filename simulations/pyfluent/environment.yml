@@ -6,10 +6,12 @@ dependencies:
   - python==3.11.0
   - toml
   - numpy
-  - tabulate
+  - idyntree
+  - trimesh
+  - pythonocc-core==7.9.0
   - pip
   - pip:
-    - ansys-geometry-core[all]==0.11.0
+    - ansys-geometry-core[all]==0.12.1
     - ansys-fluent-core==0.28.2
     - ansys-fluent-parametric
     - ansys-fluent-visualization
