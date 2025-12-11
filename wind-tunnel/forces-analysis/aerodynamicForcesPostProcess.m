@@ -53,19 +53,19 @@ else
 end
 
 %% CFD DATA 
-% 
-% simulationNames = {'flight30_2_953C','flight30_2_202C','flight30_2_050C','flight30_2_024C','flight30_2_011C'};
-% cfdPlotNames    = {'flight30-953C','flight30-202C','flight30-050C','flight30-024C','flight30-011C'};
-% 
-% cfdPath = '../../results/wind-tunnel-setup/global-results/';
-% opts    = detectImportOptions([cfdPath,'flight30_2_953C.txt']);
-% 
-% for i = 1:length(simulationNames)
-%     cfdData.(simulationNames{i}) = table2struct(readtable([cfdPath,simulationNames{i},'.txt']),"ToScalar",true);
-% end
 
-% variable = {'CdA_ke','CdA_kw','ClA_ke','ClA_kw','CsA_ke','CsA_kw', ...
-%             'CrAl_ke','CrAl_kw','CpAl_ke','CpAl_kw','CyAl_ke','CyAl_kw'};
+simulationNames = {'flight30_2_953C','flight30_2_202C','flight30_2_050C','flight30_2_024C','flight30_2_011C'};
+cfdPlotNames    = {'flight30-953C','flight30-202C','flight30-050C','flight30-024C','flight30-011C'};
+
+cfdPath = './wind-tunnel-setup/global-results/';
+opts    = detectImportOptions([cfdPath,'flight30_2_953C.txt']);
+
+for i = 1:length(simulationNames)
+    cfdData.(simulationNames{i}) = table2struct(readtable([cfdPath,simulationNames{i},'.txt']),"ToScalar",true);
+end
+
+variable = {'CdA_ke','CdA_kw','ClA_ke','ClA_kw','CsA_ke','CsA_kw', ...
+            'CrAl_ke','CrAl_kw','CpAl_ke','CpAl_kw','CyAl_ke','CyAl_kw'};
 
 %% PLOTS
 
@@ -75,17 +75,17 @@ tiledlayout(2,3);
 for varIndex = 1:length(yVariable)
     % figure(varIndex)
     % plot CFD data
-%     for i = 1 : length(simulationNames)
-%         if matches(xVariable,'betaMeas')
-%             cfdPlotAngle = 'beta';
-%         else
-%             cfdPlotAngle = 'alpha';
-%         end
-% %         plot(cfdData.(simulationNames{i}).(cfdPlotAngle),cfdData.(simulationNames{i}).(variable{varIndex*2-1}),'Color',colors{i*2-1},'LineStyle',lineStyles{i*2-1}, ...
-% %              'linewidth',2,'Marker','o','DisplayName',['CFD: ',cfdPlotNames{i},', Realizable $k-\varepsilon$']); hold on;
-%         plot(cfdData.(simulationNames{i}).(cfdPlotAngle),cfdData.(simulationNames{i}).(variable{varIndex*2}),'Color',colors{i*2},'LineStyle',lineStyles{i*2}, ...
-%              'linewidth',2,'Marker','o','DisplayName',['CFD: ',cfdPlotNames{i},', SST $k-\omega$']); hold on;
-%     end
+    for i = 1 : length(simulationNames)
+        if matches(xVariable,'betaMeas')
+            cfdPlotAngle = 'beta';
+        else
+            cfdPlotAngle = 'alpha';
+        end
+%         plot(cfdData.(simulationNames{i}).(cfdPlotAngle),cfdData.(simulationNames{i}).(variable{varIndex*2-1}),'Color',colors{i*2-1},'LineStyle',lineStyles{i*2-1}, ...
+%              'linewidth',2,'Marker','o','DisplayName',['CFD: ',cfdPlotNames{i},', Realizable $k-\varepsilon$']); hold on;
+        plot(cfdData.(simulationNames{i}).(cfdPlotAngle),cfdData.(simulationNames{i}).(variable{varIndex*2}),'Color',colors{i*2},'LineStyle',lineStyles{i*2}, ...
+             'linewidth',2,'Marker','o','DisplayName',['CFD: ',cfdPlotNames{i},', SST $k-\omega$']); hold on;
+    end
     
     nexttile
     % plot experimental data
@@ -98,7 +98,7 @@ for varIndex = 1:length(yVariable)
     grid on;
 
     ax.FontSize = 24;
-    xlim([25 65])
+    % xlim([25 65])
     ylabel(yLabel{varIndex},'Interpreter','latex','FontSize',24)
     xlabel(xLabel,'Interpreter','latex','FontSize',24)
     legend('Interpreter','latex','Location','best','FontSize',12)
