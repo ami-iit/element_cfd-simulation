@@ -26,9 +26,7 @@ def main():
     root = Path(__file__).parents[0]
 
     urdf_path = r"C:\Users\apaolino\code\ironcub-software-ws\src\component_ironcub\models\iRonCub-Mk3\iRonCub\robots\iRonCub-Mk3\model_stl.urdf"
-    stp_origin_dir = r"C:\Users\apaolino\code\element_cfd-simulation\simulations\pyfluent\input\iRonCub-Mk3\iRonCub\meshes\stp_original"
     stp_dir = r"C:\Users\apaolino\code\element_cfd-simulation\simulations\pyfluent\input\iRonCub-Mk3\iRonCub\meshes\stp"
-    Path(stp_dir).mkdir(parents=True, exist_ok=True)
 
     # load robot model
     model_loader = idyntree.ModelLoader()
@@ -55,7 +53,7 @@ def main():
         link_visual = visuals[link_id][0]
         if link_visual.isExternalMesh():
             mesh_path = link_visual.asExternalMesh().getFileLocationOnLocalFileSystem()
-            stp_path = Path(stp_origin_dir) / (Path(mesh_path).stem + ".stp")
+            stp_path = Path(stp_dir) / (Path(mesh_path).stem + ".stp")
             l_H_g = link_visual.getLink_H_geometry().asHomogeneousTransform().toNumPy()
             links[link_name] = {"stp_path": stp_path, "l_H_g": l_H_g}
 
